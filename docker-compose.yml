@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: naumen_hr_postgres
+    environment:
+      POSTGRES_DB: naumen_hr
+      POSTGRES_USER: naumen
+      POSTGRES_PASSWORD: naumen
+    ports:
+      - "5432:5432"
+    volumes:
+      - naumen_hr_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U naumen -d naumen_hr"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: naumen_hr_app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/naumen_hr
+      SPRING_DATASOURCE_USERNAME: naumen
+      SPRING_DATASOURCE_PASSWORD: naumen
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  naumen_hr_pgdata:
