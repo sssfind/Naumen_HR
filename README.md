@@ -6,6 +6,7 @@ Backend API (Spring Boot 3, Java 21) — аутентификация польз
 
 - JDK 21
 - Maven 3.9+
+- Node.js 20+ и npm (для фронтенда)
 - PostgreSQL 16 (локально или через Docker)
 
 ## Локальный запуск
@@ -36,12 +37,40 @@ API: http://localhost:8080
 Swagger UI: http://localhost:8080/swagger-ui.html  
 Health: http://localhost:8080/actuator/health
 
-## Запуск в Docker (app + postgres)
+## Фронтенд (React + Vite)
+
+Страницы входа и регистрации: **http://localhost:5173** (не открывайте `:8080` в браузере — там только API).
+
+### Локально (бэкенд + фронт)
+
+```bash
+# Терминал 1 — API
+docker compose up -d postgres app
+# или: mvn spring-boot:run
+
+# Терминал 2 — UI
+cd frontend
+npm install
+npm run dev
+```
+
+Откройте http://localhost:5173 — запросы `/api/*` проксируются на `http://localhost:8080`.
+
+### Всё в Docker (postgres + app + frontend)
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+UI: http://localhost:5173
+
+## Запуск в Docker (только API + postgres)
 
 ```bash
 cp .env.example .env
 # отредактируйте JWT_SECRET в .env
-docker compose up --build
+docker compose up --build postgres app
 ```
 
 ## Сборка JAR
