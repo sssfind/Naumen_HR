@@ -4,6 +4,15 @@ springdoc:
   swagger-ui:
     enabled: false
 
+app:
+  cors:
+    allowed-origins:
+      - https://jimmy-neutron.duckdns.org
+      - http://localhost:3000
+      - http://localhost:5173
+      - http://127.0.0.1:3000
+      - http://127.0.0.1:5173
+
 logging:
   level:
     root: INFO
