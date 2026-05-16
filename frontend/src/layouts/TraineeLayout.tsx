@@ -1,10 +1,11 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { BookOpen, Home, LogOut, User } from 'lucide-react'
+import { BookOpen, ClipboardList, Home, LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/dashboard/trainee', label: 'Главная', icon: Home, end: true },
+  { to: '/dashboard/trainee/feedback', label: 'Опрос', icon: ClipboardList },
   { to: '/dashboard/trainee/employees', label: 'Сотрудники', icon: BookOpen },
   { to: '/dashboard/trainee/profile', label: 'Мой профиль', icon: User },
 ]

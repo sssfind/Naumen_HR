@@ -1,5 +1,8 @@
-import { Building2, Briefcase, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Building2, Briefcase, ClipboardList, Sparkles } from 'lucide-react'
 import { ProgressBar } from '@/components/trainee/ProgressBar'
+import { Button } from '@/components/ui/button'
+import { useFeedbackStatus } from '@/hooks/useFeedback'
 import { useTraineeDashboard } from '@/hooks/useTrainee'
 import type { AcceptanceCheckType, TaskPriority } from '@/types/trainee'
 
@@ -22,6 +25,7 @@ const acceptanceLabels: Record<AcceptanceCheckType, string> = {
 
 export function TraineeDashboardPage() {
   const { data, isLoading, isError } = useTraineeDashboard()
+  const { data: feedbackStatus } = useFeedbackStatus()
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка…</p>
@@ -41,6 +45,21 @@ export function TraineeDashboardPage() {
       <p className="mt-1 text-sm text-gray-500">
         Прогресс по трём направлениям стажировки
       </p>
+
+      {feedbackStatus?.canSubmitThisWeek && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-orange-50 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <ClipboardList className="h-5 w-5 text-primary" />
+            <div>
+              <p className="font-semibold text-[#1A1A2E]">Еженедельный опрос</p>
+              <p className="text-sm text-gray-600">Займёт около минуты — помогите нам поддержать вас</p>
+            </div>
+          </div>
+          <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
+            <Link to="/dashboard/trainee/feedback">Заполнить опрос</Link>
+          </Button>
+        </div>
+      )}
 
       <div className="mt-6 flex items-center gap-4 rounded-2xl border border-orange-100 bg-orange-50/50 px-6 py-4">
         <div className="rounded-full bg-white px-4 py-2 text-2xl font-bold text-primary shadow-sm">

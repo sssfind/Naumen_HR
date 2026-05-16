@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { UserPlus } from 'lucide-react'
+import { CheckCircle2, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useEmployees } from '@/hooks/useEmployees'
@@ -83,7 +83,13 @@ export function EmployeesPage() {
                     <td className="px-6 py-4 text-gray-600">{roleLabels[emp.role] ?? emp.role}</td>
                     <td className="px-6 py-4 text-gray-600">{emp.hrFullName ?? '—'}</td>
                     <td className="px-6 py-4 text-right">
-                      {emp.role !== 'ROLE_HR' && (
+                      {emp.role !== 'ROLE_HR' && emp.hrId && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-primary">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Мой стажёр
+                        </span>
+                      )}
+                      {emp.role !== 'ROLE_HR' && !emp.hrId && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -92,7 +98,7 @@ export function EmployeesPage() {
                           disabled={assign.isPending}
                         >
                           <UserPlus className="h-3.5 w-3.5" />
-                          {emp.hrId ? 'Переназначить стажёра' : 'Добавить стажёра'}
+                          Добавить стажёра
                         </Button>
                       )}
                     </td>

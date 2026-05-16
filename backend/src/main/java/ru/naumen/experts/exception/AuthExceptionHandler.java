@@ -88,6 +88,12 @@ public class AuthExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(FeedbackAlreadySubmittedException.class)
+    public ResponseEntity<ErrorResponse> handleFeedbackAlreadySubmitted(FeedbackAlreadySubmittedException ex,
+                                                                        HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request);
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String error,
                                                           String message, HttpServletRequest request) {
         ErrorResponse body = ErrorResponse.builder()

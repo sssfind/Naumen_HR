@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { queryClient } from '@/lib/queryClient'
@@ -13,9 +13,11 @@ import { EmployeesPage } from '@/pages/hr/EmployeesPage'
 import { ProfilePage } from '@/pages/hr/ProfilePage'
 import { TraineeProfilePage as HrTraineeProfilePage } from '@/pages/hr/TraineeProfilePage'
 import { EditTraineePlanPage } from '@/pages/hr/EditTraineePlanPage'
+import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { TraineeDashboardPage } from '@/pages/trainee/DashboardPage'
 import { TraineeEmployeesPage } from '@/pages/trainee/EmployeesPage'
 import { TraineeProfilePage } from '@/pages/trainee/ProfilePage'
+import { TraineeFeedbackPage } from '@/pages/trainee/FeedbackPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -24,11 +26,32 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppShell() {
+  const stored = localStorage.getItem('user')
+  const user = stored ? JSON.parse(stored) : null
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] p-8">
       <div className="mx-auto max-w-lg rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-[#1A1A2E]">NAU-START</h1>
         <p className="mt-2 text-gray-500">Вы успешно вошли в систему.</p>
+        {user?.role === 'ROLE_EMPLOYEE' && (
+          <p className="mt-4 text-sm text-gray-600">
+            Это кабинет сотрудника без программы адаптации. Если вы стажёр, зарегистрируйтесь с ролью
+            «Стажёр» или попросите HR назначить вас стажёром и войдите снова.
+          </p>
+        )}
+        <div className="mt-6">
+          <Link
+            to="/"
+            className="text-sm font-medium text-primary hover:underline"
+            onClick={() => {
+              localStorage.removeItem('token')
+              localStorage.removeItem('user')
+            }}
+          >
+            Выйти и войти снова
+          </Link>
+        </div>
       </div>
     </div>
   )
@@ -64,6 +87,7 @@ export function App() {
             <Route path="trainees/:traineeId" element={<HrTraineeProfilePage />} />
             <Route path="trainees" element={<TraineesPage />} />
             <Route path="employees" element={<EmployeesPage />} />
+            <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/hr/profile" />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
           <Route
@@ -77,7 +101,9 @@ export function App() {
             }
           >
             <Route index element={<TraineeDashboardPage />} />
+            <Route path="feedback" element={<TraineeFeedbackPage />} />
             <Route path="employees" element={<TraineeEmployeesPage />} />
+            <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/trainee/profile" />} />
             <Route path="profile" element={<TraineeProfilePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

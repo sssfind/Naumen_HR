@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UserAlreadyExistsException(request.getEmail());
         }
 
-        UserRole role = request.getRole() != null ? request.getRole() : UserRole.ROLE_EMPLOYEE;
+        UserRole role = request.getRole() != null ? request.getRole() : UserRole.ROLE_TRAINEE;
 
         User user = User.builder()
                 .email(request.getEmail().toLowerCase())
