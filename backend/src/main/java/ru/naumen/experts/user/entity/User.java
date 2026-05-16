@@ -40,6 +40,28 @@ public class User {
     @Column
     private String position;
 
+    @Column(name = "photo_url")
+    private String photoUrl;
+
+    @Column
+    private String team;
+
+    @Column(name = "mood_level", nullable = false)
+    @Builder.Default
+    private Integer moodLevel = 3;
+
+    @Column(name = "progress_block_one", nullable = false)
+    @Builder.Default
+    private Integer progressBlockOne = 0;
+
+    @Column(name = "progress_block_two", nullable = false)
+    @Builder.Default
+    private Integer progressBlockTwo = 0;
+
+    @Column(name = "progress_block_three", nullable = false)
+    @Builder.Default
+    private Integer progressBlockThree = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     @Builder.Default

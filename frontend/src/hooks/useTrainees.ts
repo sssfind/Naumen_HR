@@ -1,13 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
-import type { Employee } from '@/types/user'
+import type { Employee, TraineeProfile } from '@/types/user'
 
 export function useMyTrainees() {
   return useQuery({
     queryKey: ['hr', 'trainees'],
     queryFn: async () => {
       const { data } = await api.get<Employee[]>('/hr/trainees')
+      return data
+    },
+  })
+}
+
+export function useTraineeProfile(traineeId?: number) {
+  return useQuery({
+    queryKey: ['hr', 'trainees', traineeId],
+    enabled: Boolean(traineeId),
+    queryFn: async () => {
+      const { data } = await api.get<TraineeProfile>(`/hr/trainees/${traineeId}`)
       return data
     },
   })

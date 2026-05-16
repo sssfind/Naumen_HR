@@ -9,6 +9,7 @@ import ru.naumen.experts.exception.UserNotFoundException;
 import ru.naumen.experts.notification.enums.NotificationType;
 import ru.naumen.experts.notification.service.NotificationService;
 import ru.naumen.experts.user.dto.EmployeeResponse;
+import ru.naumen.experts.user.dto.TraineeProfileResponse;
 import ru.naumen.experts.user.entity.User;
 import ru.naumen.experts.user.enums.UserRole;
 import ru.naumen.experts.user.mapper.UserMapper;
@@ -29,6 +30,18 @@ public class HrTraineeService {
                 .stream()
                 .map(UserMapper::toEmployeeResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TraineeProfileResponse getTraineeProfile(Long hrId, Long traineeId) {
+        User trainee = userRepository.findById(traineeId)
+                .orElseThrow(() -> new UserNotFoundException(traineeId));
+
+        if (trainee.getHr() == null || !trainee.getHr().getId().equals(hrId)) {
+            throw new ForbiddenException("Этот стажёр не закреплён за вами");
+        }
+
+        return UserMapper.toTraineeProfileResponse(trainee);
     }
 
     @Transactional

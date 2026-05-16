@@ -1,4 +1,5 @@
-import { UserMinus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { UserMinus, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useMyTrainees, useUnassignTrainee } from '@/hooks/useTrainees'
 
@@ -47,6 +48,12 @@ export function TraineesPage() {
                   <td className="px-6 py-4 text-gray-600">{t.department ?? '—'}</td>
                   <td className="px-6 py-4 text-gray-600">{roleLabels[t.role] ?? t.role}</td>
                   <td className="px-6 py-4 text-right">
+                    <Button asChild variant="ghost" size="sm" className="mr-2 gap-1">
+                      <Link to={`/dashboard/hr/trainees/${t.userId}`}>
+                        <UserRound className="h-3.5 w-3.5" />
+                        Профиль
+                      </Link>
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"

@@ -9,6 +9,8 @@ import { RegisterPage } from '@/pages/RegisterPage'
 import { TraineesPage } from '@/pages/hr/TraineesPage'
 import { EmployeesPage } from '@/pages/hr/EmployeesPage'
 import { ProfilePage } from '@/pages/hr/ProfilePage'
+import { TraineeProfilePage } from '@/pages/hr/TraineeProfilePage'
+import { EditTraineePlanPage } from '@/pages/hr/EditTraineePlanPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -54,6 +56,8 @@ export function App() {
           >
             <Route index element={<Navigate to="trainees" replace />} />
             <Route path="trainees" element={<TraineesPage />} />
+            <Route path="trainees/:traineeId" element={<TraineeProfilePage />} />
+            <Route path="trainees/:traineeId/plan" element={<EditTraineePlanPage />} />
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>

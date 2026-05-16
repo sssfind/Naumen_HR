@@ -92,7 +92,7 @@ export function EmployeesPage() {
                           disabled={assign.isPending}
                         >
                           <UserPlus className="h-3.5 w-3.5" />
-                          {emp.hrId ? 'Переназначить' : 'Взять стажёра'}
+                          {emp.hrId ? 'Переназначить стажёра' : 'Добавить стажёра'}
                         </Button>
                       )}
                     </td>

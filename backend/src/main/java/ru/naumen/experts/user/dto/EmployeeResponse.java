@@ -15,6 +15,10 @@ public class EmployeeResponse {
     private String department;
     private String phone;
     private String position;
+    private String photoUrl;
+    private String team;
+    private Integer totalProgress;
+    private Integer moodLevel;
     private Long hrId;
     private String hrFullName;
 }
