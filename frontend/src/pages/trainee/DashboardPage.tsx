@@ -1,17 +1,9 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Building2, Briefcase, ChevronRight, ClipboardList, Sparkles } from 'lucide-react'
-import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
 import { ProgressBar } from '@/components/trainee/ProgressBar'
 import { Button } from '@/components/ui/button'
 import { useFeedbackStatus } from '@/hooks/useFeedback'
-import {
-  useAddTraineeTaskComment,
-  useCompleteTraineeTask,
-  useStartTraineeTask,
-  useTraineeDashboard,
-} from '@/hooks/useTrainee'
-import type { TaskProgressBlock } from '@/types/trainee'
+import { useTraineeDashboard } from '@/hooks/useTrainee'
 import { cn } from '@/lib/utils'
 
 const blockIcons: Record<string, typeof Building2> = {
@@ -23,13 +15,6 @@ const blockIcons: Record<string, typeof Building2> = {
 export function TraineeDashboardPage() {
   const { data, isLoading, isError } = useTraineeDashboard()
   const { data: feedbackStatus } = useFeedbackStatus()
-  const startTask = useStartTraineeTask()
-  const completeTask = useCompleteTraineeTask()
-  const addComment = useAddTraineeTaskComment()
-
-  const [selectedBlock, setSelectedBlock] = useState<TaskProgressBlock | null>(null)
-  const [activeTaskId, setActiveTaskId] = useState<number | null>(null)
-  const [activeAction, setActiveAction] = useState<'start' | 'complete' | 'comment' | null>(null)
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка…</p>
@@ -43,52 +28,11 @@ export function TraineeDashboardPage() {
     )
   }
 
-  const handleStart = async (taskId: number) => {
-    setActiveTaskId(taskId)
-    setActiveAction('start')
-    try {
-      await startTask.mutateAsync(taskId)
-    } finally {
-      setActiveTaskId(null)
-      setActiveAction(null)
-    }
-  }
-
-  const handleComplete = async (taskId: number) => {
-    setActiveTaskId(taskId)
-    setActiveAction('complete')
-    try {
-      await completeTask.mutateAsync(taskId)
-    } finally {
-      setActiveTaskId(null)
-      setActiveAction(null)
-    }
-  }
-
-  const handleComment = async (taskId: number, text: string) => {
-    setActiveTaskId(taskId)
-    setActiveAction('comment')
-    try {
-      await addComment.mutateAsync({ taskId, text })
-    } finally {
-      setActiveTaskId(null)
-      setActiveAction(null)
-    }
-  }
-
-  const openBlock = (block: TaskProgressBlock) => {
-    const fresh = data.taskBlocks.find((item) => item.id === block.id) ?? block
-    setSelectedBlock(fresh)
-  }
-
-  const dialogBlock =
-    selectedBlock && data.taskBlocks.find((block) => block.id === selectedBlock.id)
-
   return (
     <div>
       <h1 className="text-2xl font-bold text-[#1A1A2E]">Мои задачи</h1>
       <p className="mt-1 text-sm text-gray-500">
-        Прогресс по трём направлениям стажировки. Нажмите на блок, чтобы открыть все задачи.
+        Прогресс по трём направлениям стажировки. Нажмите на блок, чтобы перейти к задачам.
       </p>
 
       {feedbackStatus?.canSubmitThisWeek && (
@@ -123,12 +67,11 @@ export function TraineeDashboardPage() {
           const inProgressCount = block.tasks.filter((task) => task.status === 'IN_PROGRESS').length
 
           return (
-            <button
+            <Link
               key={block.id}
-              type="button"
-              onClick={() => openBlock(block)}
+              to={`/dashboard/trainee/blocks/${block.id}`}
               className={cn(
-                'rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition-colors',
+                'block rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-colors',
                 'hover:border-primary/30 hover:bg-orange-50/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary'
               )}
             >
@@ -150,23 +93,10 @@ export function TraineeDashboardPage() {
               </div>
               <ProgressBar label="Прогресс" value={block.progress} />
               <p className="mt-4 text-sm font-medium text-primary">Открыть список задач</p>
-            </button>
+            </Link>
           )
         })}
       </div>
-
-      <TaskBlockDialog
-        block={dialogBlock ?? null}
-        open={Boolean(dialogBlock)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedBlock(null)
-        }}
-        onStart={handleStart}
-        onComplete={handleComplete}
-        onComment={handleComment}
-        activeTaskId={activeTaskId}
-        activeAction={activeAction}
-      />
     </div>
   )
 }

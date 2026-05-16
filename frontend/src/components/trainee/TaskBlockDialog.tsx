@@ -2,12 +2,10 @@ import {
   Dialog,
   DialogBody,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { PlanTaskCard } from '@/components/trainee/PlanTaskCard'
-import { ProgressBar } from '@/components/trainee/ProgressBar'
+import { TaskBlockTasksList } from '@/components/trainee/TaskBlockTasksList'
 import type { TaskProgressBlock } from '@/types/trainee'
 
 interface TaskBlockDialogProps {
@@ -35,42 +33,22 @@ export function TaskBlockDialog({
 }: TaskBlockDialogProps) {
   if (!block) return null
 
-  const completedCount = block.tasks.filter((task) => (task.status ?? 'NOT_STARTED') === 'COMPLETED').length
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onClose={() => onOpenChange(false)}>
         <DialogHeader>
           <DialogTitle>{block.title}</DialogTitle>
-          <DialogDescription>
-            {block.tasks.length === 0
-              ? 'В этом блоке пока нет задач'
-              : `Выполнено ${completedCount} из ${block.tasks.length} · прогресс ${block.progress}%`}
-          </DialogDescription>
-          <div className="mt-4">
-            <ProgressBar label="Прогресс блока" value={block.progress} />
-          </div>
         </DialogHeader>
-        <DialogBody className="space-y-3">
-          {block.tasks.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
-              Задачи появятся после того, как HR добавит их в ваш план.
-            </p>
-          ) : (
-            block.tasks.map((task) => (
-              <PlanTaskCard
-                key={task.id}
-                task={task}
-                readOnly={readOnly}
-                onStart={onStart}
-                onComplete={onComplete}
-                onComment={onComment}
-                isStarting={activeAction === 'start' && activeTaskId === task.id}
-                isCompleting={activeAction === 'complete' && activeTaskId === task.id}
-                isCommenting={activeAction === 'comment' && activeTaskId === task.id}
-              />
-            ))
-          )}
+        <DialogBody>
+          <TaskBlockTasksList
+            block={block}
+            readOnly={readOnly}
+            onStart={onStart}
+            onComplete={onComplete}
+            onComment={onComment}
+            activeTaskId={activeTaskId}
+            activeAction={activeAction}
+          />
         </DialogBody>
       </DialogContent>
     </Dialog>
