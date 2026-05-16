@@ -1,3 +1,5 @@
+import type { AdaptationPath } from '@/types/adaptationPath'
+
 export type TraineePlanBlockType = 'ONBOARDING' | 'SKILLS' | 'WORK'
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH'
 export type AcceptanceCheckType = 'MACHINE' | 'USER'
@@ -23,6 +25,7 @@ export interface TraineePlanTask {
   status: TaskStatus
   startedAt: string | null
   completedAt: string | null
+  milestone: boolean
   comments: TraineePlanTaskComment[]
 }
 
@@ -55,6 +58,7 @@ export interface TaskProgressBlock {
 export interface TraineeDashboard {
   taskBlocks: TaskProgressBlock[]
   totalProgress: number
+  adaptationPath: AdaptationPath | null
 }
 
 export interface TraineeEmployee {

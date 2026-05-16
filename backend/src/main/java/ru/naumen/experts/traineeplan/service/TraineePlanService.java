@@ -55,6 +55,7 @@ public class TraineePlanService {
                 .priority(request.getPriority())
                 .acceptanceCriteria(request.getAcceptanceCriteria().trim())
                 .acceptanceCheckType(request.getAcceptanceCheckType())
+                .milestone(Boolean.TRUE.equals(request.getMilestone()))
                 .build();
         return toTaskResponse(taskRepository.save(task));
     }
@@ -69,6 +70,9 @@ public class TraineePlanService {
         task.setPriority(request.getPriority());
         task.setAcceptanceCriteria(request.getAcceptanceCriteria().trim());
         task.setAcceptanceCheckType(request.getAcceptanceCheckType());
+        if (request.getMilestone() != null) {
+            task.setMilestone(request.getMilestone());
+        }
         return toTaskResponse(taskRepository.save(task));
     }
 

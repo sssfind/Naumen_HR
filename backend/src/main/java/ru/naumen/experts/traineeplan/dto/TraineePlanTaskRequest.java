@@ -29,4 +29,6 @@ public class TraineePlanTaskRequest {
 
     @NotNull
     private AcceptanceCheckType acceptanceCheckType;
+
+    private Boolean milestone;
 }

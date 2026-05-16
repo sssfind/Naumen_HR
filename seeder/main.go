@@ -452,16 +452,19 @@ func seedTasksForTrainee(ctx context.Context, pool *pgxpool.Pool, tr traineeReco
 			completedAt = &c
 		}
 
+		isMilestone := spec.DaysFromStart == 7 || spec.DaysFromStart == 21 || spec.DaysFromStart == 42 ||
+			spec.DaysFromStart == 63 || spec.DaysFromStart == 84
+
 		var taskID int64
 		err := pool.QueryRow(ctx, `
 			INSERT INTO trainee_plan_tasks (
 				trainee_id, block, description, deadline, priority,
-				acceptance_criteria, acceptance_check_type, status, started_at, completed_at
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+				acceptance_criteria, acceptance_check_type, status, started_at, completed_at, is_milestone
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 			RETURNING id`,
 			tr.ID, spec.Block, spec.Description, deadline.Format("2006-01-02"),
 			spec.Priority, spec.AcceptanceCriteria, spec.AcceptanceCheck,
-			spec.Status, startedAt, completedAt).Scan(&taskID)
+			spec.Status, startedAt, completedAt, isMilestone).Scan(&taskID)
 		if err != nil {
 			log.Fatalf("Ошибка вставки задачи для trainee%d: %v", tr.Index, err)
 		}
@@ -482,6 +485,14 @@ func seedTasksForTrainee(ctx context.Context, pool *pgxpool.Pool, tr traineeReco
 			}
 		}
 	}
+
+	_, err := pool.Exec(ctx, `
+		UPDATE users SET adaptation_start_date = $1 WHERE id = $2`,
+		start.Format("2006-01-02"), tr.ID)
+	if err != nil {
+		log.Fatalf("adaptation_start_date trainee%d: %v", tr.Index, err)
+	}
+
 	return count
 }
 

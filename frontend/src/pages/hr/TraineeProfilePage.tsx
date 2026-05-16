@@ -12,6 +12,7 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react'
+import { AdaptationPathTimeline } from '@/components/trainee/AdaptationPathTimeline'
 import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
 import { ProgressBar as TraineeProgressBar } from '@/components/trainee/ProgressBar'
 import { formatDateTime } from '@/components/trainee/planTaskLabels'
@@ -144,6 +145,14 @@ export function TraineeProfilePage() {
         </section>
 
         <div className="space-y-6">
+          {taskDashboard?.adaptationPath && (
+            <AdaptationPathTimeline
+              path={taskDashboard.adaptationPath}
+              blockLinkPrefix={`/dashboard/hr/trainees/${trainee.userId}/plan`}
+              compact
+            />
+          )}
+
           <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div>
               <h2 className="text-lg font-semibold text-[#1A1A2E]">Прогресс стажировки</h2>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Building2, Briefcase, ChevronRight, ClipboardList, Sparkles } from 'lucide-react'
+import { AdaptationPathTimeline } from '@/components/trainee/AdaptationPathTimeline'
 import { ProgressBar } from '@/components/trainee/ProgressBar'
 import { Button } from '@/components/ui/button'
 import { useFeedbackStatus } from '@/hooks/useFeedback'
@@ -32,8 +33,14 @@ export function TraineeDashboardPage() {
     <div>
       <h1 className="text-2xl font-bold text-[#1A1A2E]">Мои задачи</h1>
       <p className="mt-1 text-sm text-gray-500">
-        Прогресс по трём направлениям стажировки. Нажмите на блок, чтобы перейти к задачам.
+        Путь адаптации на испытательный срок и задачи по этапам. Нажмите на блок, чтобы открыть список.
       </p>
+
+      {data.adaptationPath && (
+        <div className="mt-6">
+          <AdaptationPathTimeline path={data.adaptationPath} />
+        </div>
+      )}
 
       {feedbackStatus?.canSubmitThisWeek && (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-orange-50 px-6 py-4">

@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.naumen.experts.user.enums.UserRole;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +83,9 @@ public class User {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    @Column(name = "adaptation_start_date")
+    private LocalDate adaptationStartDate;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -12,6 +12,7 @@ public class TraineeDashboardResponse {
 
     private List<TaskProgressBlock> taskBlocks;
     private Integer totalProgress;
+    private AdaptationPathResponse adaptationPath;
 
     @Data
     @Builder

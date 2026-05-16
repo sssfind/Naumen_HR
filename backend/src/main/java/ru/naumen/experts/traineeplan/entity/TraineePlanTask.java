@@ -64,6 +64,10 @@ public class TraineePlanTask {
     @Column(name = "completed_at")
     private OffsetDateTime completedAt;
 
+    @Column(name = "is_milestone", nullable = false)
+    @Builder.Default
+    private boolean milestone = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

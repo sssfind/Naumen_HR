@@ -25,6 +25,7 @@ public final class TraineePlanTaskMapper {
                 .status(task.getStatus())
                 .startedAt(task.getStartedAt())
                 .completedAt(task.getCompletedAt())
+                .milestone(task.isMilestone())
                 .comments(comments.stream().map(TraineePlanTaskMapper::toCommentResponse).toList())
                 .build();
     }

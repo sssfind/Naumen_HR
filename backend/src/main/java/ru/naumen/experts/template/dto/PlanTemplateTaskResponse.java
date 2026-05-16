@@ -19,4 +19,5 @@ public class PlanTemplateTaskResponse {
     private AcceptanceCheckType acceptanceCheckType;
     private Integer daysFromStart;
     private Integer sortOrder;
+    private boolean milestone;
 }

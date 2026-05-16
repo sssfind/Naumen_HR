@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, MessageSquare } from 'lucide-react'
+import { Flag, Loader2, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -48,7 +48,15 @@ export function PlanTaskCard({
   return (
     <article className="w-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
-        <p className="font-medium text-[#1A1A2E]">{task.description}</p>
+        <div className="min-w-0 flex-1">
+          {task.milestone && (
+            <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+              <Flag className="h-3 w-3" />
+              Контрольная точка
+            </span>
+          )}
+          <p className="font-medium text-[#1A1A2E]">{task.description}</p>
+        </div>
         <span
           className={cn(
             'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium',

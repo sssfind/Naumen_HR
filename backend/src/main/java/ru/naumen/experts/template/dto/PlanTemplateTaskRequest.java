@@ -32,4 +32,6 @@ public class PlanTemplateTaskRequest {
 
     @Min(0)
     private Integer sortOrder;
+
+    private Boolean milestone;
 }

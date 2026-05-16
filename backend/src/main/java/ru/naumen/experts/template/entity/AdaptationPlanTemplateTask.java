@@ -49,4 +49,8 @@ public class AdaptationPlanTemplateTask {
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private Integer sortOrder = 0;
+
+    @Column(name = "is_milestone", nullable = false)
+    @Builder.Default
+    private boolean milestone = false;
 }

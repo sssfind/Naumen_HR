@@ -14,6 +14,7 @@ import ru.naumen.experts.traineeplan.entity.TraineePlanTaskComment;
 import ru.naumen.experts.traineeplan.mapper.TraineePlanTaskMapper;
 import ru.naumen.experts.traineeplan.repository.TraineePlanTaskCommentRepository;
 import ru.naumen.experts.traineeplan.repository.TraineePlanTaskRepository;
+import ru.naumen.experts.traineeplan.service.AdaptationPathService;
 import ru.naumen.experts.user.dto.PagedTraineeEmployeesResponse;
 import ru.naumen.experts.user.dto.TraineeDashboardResponse;
 import ru.naumen.experts.user.dto.TraineeEmployeeResponse;
@@ -48,6 +49,7 @@ public class TraineeService {
     private final UserRepository userRepository;
     private final TraineePlanTaskRepository taskRepository;
     private final TraineePlanTaskCommentRepository commentRepository;
+    private final AdaptationPathService adaptationPathService;
 
     @Transactional(readOnly = true)
     public TraineeDashboardResponse getDashboard(Long traineeId) {
@@ -64,6 +66,7 @@ public class TraineeService {
                         blockWithProgress(TASK_BLOCKS.get(2), trainee.getProgressBlockThree(), tasksByBlock)
                 ))
                 .totalProgress(UserMapper.calculateTotalProgress(trainee))
+                .adaptationPath(adaptationPathService.build(trainee, tasks))
                 .build();
     }
 

@@ -26,5 +26,6 @@ public class TraineePlanTaskResponse {
     private TaskStatus status;
     private OffsetDateTime startedAt;
     private OffsetDateTime completedAt;
+    private boolean milestone;
     private List<TraineePlanTaskCommentResponse> comments;
 }

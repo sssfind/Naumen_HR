@@ -20,6 +20,7 @@ export interface PlanTemplateTask {
   acceptanceCheckType: AcceptanceCheckType
   daysFromStart: number
   sortOrder: number
+  milestone: boolean
 }
 
 export interface PlanTemplateBlock {

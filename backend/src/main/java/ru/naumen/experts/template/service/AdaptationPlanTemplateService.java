@@ -148,6 +148,9 @@ public class AdaptationPlanTemplateService {
                 ? request.getStartDate()
                 : LocalDate.now();
 
+        trainee.setAdaptationStartDate(startDate);
+        userRepository.save(trainee);
+
         for (AdaptationPlanTemplateTask templateTask : templateTasks) {
             TraineePlanTask task = TraineePlanTask.builder()
                     .trainee(trainee)
@@ -157,6 +160,7 @@ public class AdaptationPlanTemplateService {
                     .priority(templateTask.getPriority())
                     .acceptanceCriteria(templateTask.getAcceptanceCriteria())
                     .acceptanceCheckType(templateTask.getAcceptanceCheckType())
+                    .milestone(templateTask.isMilestone())
                     .build();
             traineeTaskRepository.save(task);
         }
@@ -191,6 +195,16 @@ public class AdaptationPlanTemplateService {
         if (request.getSortOrder() != null) {
             task.setSortOrder(request.getSortOrder());
         }
+        if (request.getMilestone() != null) {
+            task.setMilestone(request.getMilestone());
+        } else {
+            task.setMilestone(isDefaultMilestoneDay(request.getDaysFromStart()));
+        }
+    }
+
+    private static boolean isDefaultMilestoneDay(int daysFromStart) {
+        return daysFromStart == 7 || daysFromStart == 21 || daysFromStart == 42
+                || daysFromStart == 63 || daysFromStart == 84;
     }
 
     private AdaptationPlanTemplate requireTemplateForHr(Long hrId, Long templateId) {

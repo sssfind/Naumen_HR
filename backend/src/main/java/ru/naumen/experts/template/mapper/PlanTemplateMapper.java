@@ -62,6 +62,7 @@ public final class PlanTemplateMapper {
                 .acceptanceCheckType(task.getAcceptanceCheckType())
                 .daysFromStart(task.getDaysFromStart())
                 .sortOrder(task.getSortOrder())
+                .milestone(task.isMilestone())
                 .build();
     }
 }
