@@ -1,5 +1,8 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Award, Mail, Pencil, Phone, Trophy, Users } from 'lucide-react'
+import { Award, Mail, Pencil, Phone, Users } from 'lucide-react'
+import { AchievementBadgeRow } from '@/components/profile/AchievementBadgeRow'
+import { buildTraineeAchievements } from '@/components/profile/achievementItems'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/hooks/useProfile'
 
@@ -8,14 +11,6 @@ const progressBlocks = [
   { key: 'progressBlockTwo', label: 'Блок 2' },
   { key: 'progressBlockThree', label: 'Блок 3' },
 ] as const
-
-const achievements = [
-  { title: 'Первый день', description: 'Познакомился с командой' },
-  { title: 'В ритме', description: 'Выполняет задачи по плану' },
-  { title: 'Командный игрок', description: 'Нашёл коллег из своей команды' },
-  { title: 'Прокачка', description: 'Развивает рабочие навыки' },
-  { title: 'Финишер', description: 'Закрывает задачи стажировки' },
-]
 
 function ProgressBar({ label, value }: { label: string; value: number }) {
   return (
@@ -46,6 +41,7 @@ function initials(fullName: string) {
 
 export function TraineeProfilePage() {
   const { data: profile, isLoading } = useProfile()
+  const achievements = useMemo(() => buildTraineeAchievements(profile), [profile])
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка профиля…</p>
@@ -58,8 +54,8 @@ export function TraineeProfilePage() {
         <p className="mt-1 text-sm text-gray-500">Личные данные и прогресс стажировки</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,500px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]">
+        <section className="overflow-visible rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col items-center text-center">
             {profile?.photoUrl ? (
               <img
@@ -94,29 +90,12 @@ export function TraineeProfilePage() {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 overflow-visible">
             <div className="mb-3 flex items-center gap-2">
               <Award className="h-4 w-4 text-primary" />
               <h2 className="font-semibold text-[#1A1A2E]">Ачивки</h2>
             </div>
-            <div
-              className="max-h-52 space-y-3 overflow-y-auto pr-1"
-            >
-              {achievements.map((achievement) => (
-                <div
-                  key={achievement.title}
-                  className="flex min-h-24 w-full gap-3 rounded-lg border border-orange-100 bg-orange-50/60 px-3 py-3"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white">
-                    <Trophy className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[#1A1A2E]">{achievement.title}</p>
-                    <p className="mt-1 text-xs text-gray-500">{achievement.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <AchievementBadgeRow items={achievements} className="mt-1" />
           </div>
         </section>
 

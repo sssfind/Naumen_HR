@@ -8,22 +8,15 @@ import {
   Phone,
   Smile,
   TrendingUp,
-  Trophy,
   Users,
 } from 'lucide-react'
+import { buildHrAchievements } from '@/components/profile/achievementItems'
+import { AchievementBadgeRow } from '@/components/profile/AchievementBadgeRow'
 import { TraineeProgressChart } from '@/components/hr/TraineeProgressChart'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/hooks/useProfile'
 import { useHrTeamStats } from '@/hooks/useTrainees'
 import { cn } from '@/lib/utils'
-
-const hrAchievements = [
-  { title: 'HR-куратор', description: 'Сопровождает стажёров на стажировке' },
-  { title: 'Команда в деле', description: 'Следит за прогрессом своей группы' },
-  { title: 'Обратная связь', description: 'Анализирует еженедельные опросы' },
-  { title: 'Наставник', description: 'Помогает новичкам адаптироваться' },
-  { title: 'Организатор', description: 'Ведёт план и задачи стажёров' },
-]
 
 const moodLabels: Record<number, string> = {
   1: 'Низкое',
@@ -69,8 +62,8 @@ export function ProfilePage() {
         <p className="mt-1 text-sm text-gray-500">Личные данные и сводка по стажёрам</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,500px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]">
+        <section className="overflow-visible rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col items-center text-center">
             {profile?.photoUrl ? (
               <img
@@ -110,27 +103,12 @@ export function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 overflow-visible">
             <div className="mb-3 flex items-center gap-2">
               <Award className="h-4 w-4 text-primary" />
               <h2 className="font-semibold text-[#1A1A2E]">Ачивки</h2>
             </div>
-            <div className="max-h-64 space-y-3 overflow-y-auto pr-1">
-              {hrAchievements.map((achievement) => (
-                <div
-                  key={achievement.title}
-                  className="flex min-h-24 w-full gap-3 rounded-lg border border-orange-100 bg-orange-50/60 px-3 py-3"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white">
-                    <Trophy className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[#1A1A2E]">{achievement.title}</p>
-                    <p className="mt-1 text-xs text-gray-500">{achievement.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <AchievementBadgeRow items={buildHrAchievements()} className="mt-1" />
           </div>
         </section>
 

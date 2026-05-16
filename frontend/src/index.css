@@ -36,3 +36,15 @@
     min-height: 100vh;
   }
 }
+
+@layer components {
+  .achievement-row {
+    --achievement-size: clamp(88px, calc((100% - 1.5rem) / 3), 149px);
+  }
+
+  @media (min-width: 1920px) {
+    .achievement-row {
+      --achievement-size: 149px;
+    }
+  }
+}
