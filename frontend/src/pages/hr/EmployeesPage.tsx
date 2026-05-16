@@ -16,6 +16,8 @@ export function EmployeesPage() {
   const [department, setDepartment] = useState('')
   const [page, setPage] = useState(0)
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const storedUser = localStorage.getItem('user')
+  const currentHrId = storedUser ? Number(JSON.parse(storedUser).userId) : null
 
   const { data, isLoading, refetch } = useEmployees(debouncedSearch, department, page)
   const assign = useAssignTrainee()
@@ -83,7 +85,7 @@ export function EmployeesPage() {
                     <td className="px-6 py-4 text-gray-600">{roleLabels[emp.role] ?? emp.role}</td>
                     <td className="px-6 py-4 text-gray-600">{emp.hrFullName ?? '—'}</td>
                     <td className="px-6 py-4 text-right">
-                      {emp.role !== 'ROLE_HR' && emp.hrId && (
+                      {emp.role !== 'ROLE_HR' && emp.hrId === currentHrId && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-primary">
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           Мой стажёр

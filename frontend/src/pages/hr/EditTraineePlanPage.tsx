@@ -1,7 +1,9 @@
 import { Link, useParams } from 'react-router-dom'
 import { FormEvent, useState } from 'react'
 import { ArrowLeft, CalendarDays, Pencil, Plus, Trash2 } from 'lucide-react'
+import { statusBadgeClass, statusLabels } from '@/components/trainee/planTaskLabels'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import {
   useCreateTraineePlanTask,
@@ -252,7 +254,17 @@ function PlanBlockEditor({
             <article key={task.id} className="rounded-xl border border-gray-200 p-4">
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <p className="font-medium text-[#1A1A2E]">{task.description}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium text-[#1A1A2E]">{task.description}</p>
+                    <span
+                      className={cn(
+                        'rounded-full px-2 py-0.5 text-xs font-medium',
+                        statusBadgeClass[task.status ?? 'NOT_STARTED']
+                      )}
+                    >
+                      {statusLabels[task.status ?? 'NOT_STARTED']}
+                    </span>
+                  </div>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
                     <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1">
                       <CalendarDays className="h-3.5 w-3.5" />

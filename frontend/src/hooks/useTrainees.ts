@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
-import type { TraineePlan, TraineePlanTask, TraineePlanTaskRequest } from '@/types/trainee'
+import type {
+  TraineeDashboard,
+  TraineePlan,
+  TraineePlanTask,
+  TraineePlanTaskRequest,
+} from '@/types/trainee'
 import type { Employee, TraineeProfile } from '@/types/user'
 
 export function useMyTrainees() {
@@ -20,6 +25,17 @@ export function useTraineeProfile(traineeId?: number) {
     enabled: Boolean(traineeId),
     queryFn: async () => {
       const { data } = await api.get<TraineeProfile>(`/hr/trainees/${traineeId}`)
+      return data
+    },
+  })
+}
+
+export function useHrTraineeDashboard(traineeId?: number) {
+  return useQuery({
+    queryKey: ['hr', 'trainees', traineeId, 'dashboard'],
+    enabled: Boolean(traineeId),
+    queryFn: async () => {
+      const { data } = await api.get<TraineeDashboard>(`/hr/trainees/${traineeId}/dashboard`)
       return data
     },
   })
@@ -48,6 +64,7 @@ export function useCreateTraineePlanTask(traineeId?: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       toast.success('Задача добавлена')
     },
@@ -73,6 +90,7 @@ export function useUpdateTraineePlanTask(traineeId?: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       toast.success('Задача обновлена')
     },
@@ -88,6 +106,7 @@ export function useDeleteTraineePlanTask(traineeId?: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       toast.success('Задача удалена')
     },

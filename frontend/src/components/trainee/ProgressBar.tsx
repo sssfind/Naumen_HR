@@ -1,7 +1,7 @@
 export function ProgressBar({ label, value }: { label: string; value: number }) {
   const clamped = Math.max(0, Math.min(100, value))
   return (
-    <div>
+    <div className="w-full">
       <div className="mb-2 flex items-center justify-between text-sm">
         <span className="font-medium text-[#1A1A2E]">{label}</span>
         <span className="text-gray-500">{clamped}%</span>

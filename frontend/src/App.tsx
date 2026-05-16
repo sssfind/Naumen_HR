@@ -14,6 +14,7 @@ import { ProfilePage } from '@/pages/hr/ProfilePage'
 import { TraineeProfilePage as HrTraineeProfilePage } from '@/pages/hr/TraineeProfilePage'
 import { EditTraineePlanPage } from '@/pages/hr/EditTraineePlanPage'
 import { ProfileEditPage } from '@/pages/ProfileEditPage'
+import { TraineeBlockTasksPage } from '@/pages/trainee/BlockTasksPage'
 import { TraineeDashboardPage } from '@/pages/trainee/DashboardPage'
 import { TraineeEmployeesPage } from '@/pages/trainee/EmployeesPage'
 import { TraineeProfilePage } from '@/pages/trainee/ProfilePage'
@@ -101,6 +102,7 @@ export function App() {
             }
           >
             <Route index element={<TraineeDashboardPage />} />
+            <Route path="blocks/:blockId" element={<TraineeBlockTasksPage />} />
             <Route path="feedback" element={<TraineeFeedbackPage />} />
             <Route path="employees" element={<TraineeEmployeesPage />} />
             <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/trainee/profile" />} />
