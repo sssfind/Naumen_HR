@@ -1,8 +1,10 @@
 package ru.naumen.experts.user.mapper;
 
 import ru.naumen.experts.user.dto.EmployeeResponse;
+import ru.naumen.experts.user.dto.TraineeEmployeeResponse;
 import ru.naumen.experts.user.dto.TraineeProfileResponse;
 import ru.naumen.experts.user.dto.UserProfileResponse;
+import ru.naumen.experts.user.enums.UserRole;
 import ru.naumen.experts.user.entity.User;
 
 public final class UserMapper {
@@ -11,7 +13,31 @@ public final class UserMapper {
     }
 
     public static UserProfileResponse toProfileResponse(User user) {
-        return UserProfileResponse.builder()
+        UserProfileResponse.UserProfileResponseBuilder builder = UserProfileResponse.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .department(user.getDepartment())
+                .phone(user.getPhone())
+                .position(user.getPosition());
+
+        if (user.getRole() == UserRole.ROLE_TRAINEE) {
+            builder.team(user.getTeam() != null ? user.getTeam() : user.getDepartment())
+                    .photoUrl(user.getPhotoUrl())
+                    .moodLevel(user.getMoodLevel())
+                    .progressBlockOne(safeProgress(user.getProgressBlockOne()))
+                    .progressBlockTwo(safeProgress(user.getProgressBlockTwo()))
+                    .progressBlockThree(safeProgress(user.getProgressBlockThree()))
+                    .totalProgress(calculateTotalProgress(user))
+                    .mentorFullName(user.getHr() != null ? user.getHr().getFullName() : null);
+        }
+
+        return builder.build();
+    }
+
+    public static TraineeEmployeeResponse toTraineeEmployeeResponse(User user, String traineeTeam) {
+        return TraineeEmployeeResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
@@ -19,7 +45,20 @@ public final class UserMapper {
                 .department(user.getDepartment())
                 .phone(user.getPhone())
                 .position(user.getPosition())
+                .team(user.getTeam())
+                .inMyTeam(isSameTeam(traineeTeam, user.getTeam()))
                 .build();
+    }
+
+    public static Integer calculateTotalProgress(User user) {
+        int first = safeProgress(user.getProgressBlockOne());
+        int second = safeProgress(user.getProgressBlockTwo());
+        int third = safeProgress(user.getProgressBlockThree());
+        return Math.round((first + second + third) / 3.0f);
+    }
+
+    private static boolean isSameTeam(String traineeTeam, String otherTeam) {
+        return traineeTeam != null && otherTeam != null && traineeTeam.equals(otherTeam);
     }
 
     public static EmployeeResponse toEmployeeResponse(User user) {
@@ -62,13 +101,6 @@ public final class UserMapper {
                 .mentorPhone(mentor != null ? mentor.getPhone() : null)
                 .moodLevel(trainee.getMoodLevel())
                 .build();
-    }
-
-    private static Integer calculateTotalProgress(User user) {
-        int first = safeProgress(user.getProgressBlockOne());
-        int second = safeProgress(user.getProgressBlockTwo());
-        int third = safeProgress(user.getProgressBlockThree());
-        return Math.round((first + second + third) / 3.0f);
     }
 
     private static int safeProgress(Integer value) {

@@ -32,4 +32,22 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("search") String search,
             @Param("department") String department,
             Pageable pageable);
+
+    @Query("""
+            SELECT u FROM User u
+            WHERE u.isActive = true
+              AND u.id <> :excludeId
+              AND (:search IS NULL OR :search = ''
+                   OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))
+            ORDER BY
+              CASE WHEN :team IS NOT NULL AND :team <> '' AND u.team = :team THEN 0
+                   ELSE 1 END,
+              u.fullName ASC
+            """)
+    Page<User> searchActiveUsersForTrainee(
+            @Param("excludeId") Long excludeId,
+            @Param("team") String team,
+            @Param("search") String search,
+            Pageable pageable);
 }

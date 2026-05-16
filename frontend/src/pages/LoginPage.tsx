@@ -1,4 +1,4 @@
-import { Briefcase, User } from 'lucide-react'
+import { Briefcase, GraduationCap } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LoginForm } from '@/components/auth/LoginForm'
 import { RegisterSideBanner } from '@/components/auth/RegisterSideBanner'
@@ -20,15 +20,15 @@ export function LoginPage() {
               </p>
             </div>
 
-            <Tabs defaultValue="employee" className="w-full">
+            <Tabs defaultValue="trainee" className="w-full">
               <TabsList className="mb-6 h-auto min-h-12 w-full gap-1 rounded-lg bg-[#F5F5F5] p-1">
                 <TabsTrigger
-                  value="employee"
+                  value="trainee"
                   className="min-h-11 flex-1 touch-manipulation gap-2 text-gray-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#1A1A2E] data-[state=active]:shadow-sm"
                 >
-                  <User className="h-4 w-4 shrink-0" aria-hidden />
-                  <span className="hidden sm:inline">Сотрудник</span>
-                  <span className="sm:hidden">Сотр.</span>
+                  <GraduationCap className="h-4 w-4 shrink-0" aria-hidden />
+                  <span className="hidden sm:inline">Стажёр</span>
+                  <span className="sm:hidden">Стаж.</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="hr"
@@ -40,10 +40,10 @@ export function LoginPage() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="employee">
-                <div className="mb-4 px-3 py-2.5 bg-blue-50 rounded-lg border border-blue-100">
+              <TabsContent value="trainee">
+                <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2.5">
                   <p className="text-xs text-blue-600">
-                    <span className="font-semibold">Сотрудник:</span> просматривайте карту экспертизы и подтверждайте навыки коллег
+                    <span className="font-semibold">Стажёр:</span> отслеживайте задачи стажировки, редактируйте профиль и смотрите коллег
                   </p>
                 </div>
                 <LoginForm />

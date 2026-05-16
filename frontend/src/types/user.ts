@@ -8,6 +8,14 @@ export interface UserProfile {
   department: string | null
   phone: string | null
   position: string | null
+  team?: string | null
+  photoUrl?: string | null
+  moodLevel?: number
+  progressBlockOne?: number
+  progressBlockTwo?: number
+  progressBlockThree?: number
+  totalProgress?: number
+  mentorFullName?: string | null
 }
 
 export interface UpdateProfileRequest {
