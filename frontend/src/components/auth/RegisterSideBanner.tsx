@@ -1,5 +1,3 @@
-import topLeftLines from '@/assets/register-side/top-left-lines.png'
-import bottomRightRings from '@/assets/register-side/bottom-right-rings.png'
 import logo from '@/assets/register-side/logo.png'
 import { cn } from '@/lib/utils'
 
@@ -7,54 +5,36 @@ type RegisterSideBannerProps = {
   className?: string
 }
 
-/**
- * Левая панель регистрации: оранжевый баннер с декоративными PNG.
- * Картинки импортируются из `src/assets`, чтобы Vite всегда отдавал корректные URL
- * (в отличие от `<img src="*.svg">` с внешними `href="/file.png"`).
- */
+/** Текст левой панели — позиции Figma 1920×1080. */
 export function RegisterSideBanner({ className }: RegisterSideBannerProps) {
   return (
     <div
       className={cn(
-        'relative min-h-screen w-full overflow-hidden bg-[#FF6720] font-["Montserrat",system-ui,sans-serif] text-white',
-        className,
+        'auth-font-body relative z-10 h-full w-full bg-transparent text-white',
+        className
       )}
     >
-      <img
-        src={topLeftLines}
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute left-0 top-[-8%] z-[1] h-auto w-[min(760px,96vw)] max-w-none -translate-x-[3%] select-none"
-      />
+      <h1 className="auth-font-heading absolute left-[13.33%] top-[16.67%] max-w-[min(680px,75%)] text-[clamp(2.5rem,4.9vw,5.875rem)] uppercase leading-[1.12] tracking-wide">
+        NAU-SKILLS
+      </h1>
 
-      <div className="relative z-10 flex min-h-screen flex-col px-8 pb-10 pt-[clamp(2.5rem,18vh,10rem)] md:px-[min(3rem,5vw)] md:pb-12">
-        {/* Размер шрифта на обёртке — чтобы сдвиг колец считался в `em` от заголовка */}
-        <div className="relative text-[clamp(3rem,8vw,6rem)] leading-none">
-          <h1 className="relative z-20 font-extrabold uppercase tracking-wide">NAU-SKILLS</h1>
-          {/* ~0.48em ≈ половина высоты заглавной «S» в том же кегле */}
-          <img
-            src={bottomRightRings}
-            alt=""
-            aria-hidden
-            className="pointer-events-none absolute left-[46%] top-[0.04em] z-[1] h-auto w-[min(960px,155vw)] max-w-none translate-y-[0.48em] select-none md:left-[44%]"
-          />
-        </div>
+      <h2 className="absolute left-[13.33%] top-[33.89%] max-w-[420px] text-[clamp(1.65rem,2.6vw,3.125rem)] font-medium leading-[1.26]">
+        Карта
+        <br />
+        экспертизы
+      </h2>
 
-        <div className="relative z-10 mt-6 text-[clamp(1.75rem,4vw,3.5rem)] font-bold leading-tight md:mt-8">
-          <p>Карта</p>
-          <p>экспертизы</p>
-        </div>
-
-        <div className="relative z-10 mt-8 max-w-xl space-y-4 pb-6 text-lg font-medium leading-relaxed md:mt-10 md:pb-10 md:text-xl">
-          <p>Найдите нужного специалиста внутри компании</p>
-          <p>Подтвердите навыки коллег</p>
-          <p>Развивайте экспертизу вместе</p>
-        </div>
-
-        <div className="mt-auto pt-16">
-          <img src={logo} alt="NAUMEN" className="h-[28px] w-auto select-none" />
-        </div>
+      <div className="absolute left-[13.33%] top-[49.72%] max-w-[430px] space-y-[2.6vh] text-[clamp(0.95rem,1.35vw,1.625rem)] font-medium leading-[1.31]">
+        <p>Найдите нужного специалиста внутри компании</p>
+        <p>Подтвердите навыки коллег</p>
+        <p>Развивайте экспертизу вместе</p>
       </div>
+
+      <img
+        src={logo}
+        alt="NAUMEN"
+        className="absolute bottom-[6.1%] left-[2.7%] h-7 w-auto select-none md:left-[26px] md:h-9"
+      />
     </div>
   )
 }

@@ -1,21 +1,22 @@
-import { useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import type { AuthUiRole } from '@/components/auth/authRoles'
+import { authUiRoleToRegisterRole } from '@/components/auth/authRoles'
+import {
+  authFieldClass,
+  authFooterLinkClass,
+  authLabelClass,
+  authSubmitClass,
+} from '@/components/auth/authFieldStyles'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { useRegister } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
-import { Link } from 'react-router-dom'
 
 const registerSchema = z
   .object({
@@ -26,9 +27,7 @@ const registerSchema = z
       .email('Введите корректный email')
       .endsWith('@naumen.ru', 'Email должен заканчиваться на @naumen.ru'),
     department: z.string().min(2, 'Укажите отдел'),
-    role: z.enum(['ROLE_TRAINEE', 'ROLE_EMPLOYEE', 'ROLE_HR'], {
-      required_error: 'Выберите роль',
-    }),
+    role: z.enum(['ROLE_TRAINEE', 'ROLE_HR']),
     password: z.string().min(8, 'Пароль должен содержать минимум 8 символов'),
     confirmPassword: z.string().min(1, 'Подтвердите пароль'),
   })
@@ -39,7 +38,11 @@ const registerSchema = z
 
 type RegisterFormValues = z.infer<typeof registerSchema>
 
-export function RegisterForm() {
+type RegisterFormProps = {
+  uiRole: AuthUiRole
+}
+
+export function RegisterForm({ uiRole }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const { mutate: register_, isPending } = useRegister()
@@ -47,14 +50,18 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
-    control,
+    setValue,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      role: 'ROLE_TRAINEE',
+      role: authUiRoleToRegisterRole(uiRole),
     },
   })
+
+  useEffect(() => {
+    setValue('role', authUiRoleToRegisterRole(uiRole))
+  }, [uiRole, setValue])
 
   const onSubmit = (data: RegisterFormValues) => {
     const { confirmPassword: _confirmPassword, ...payload } = data
@@ -62,28 +69,25 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 animate-fade-in">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5">
+      <input type="hidden" {...register('role')} />
+
       <div className="space-y-2">
-        <Label htmlFor="fullName" className="text-gray-700 font-medium">
+        <Label htmlFor="fullName" className={authLabelClass}>
           ФИО
         </Label>
         <Input
           id="fullName"
           placeholder="Иванов Иван Иванович"
           autoComplete="name"
-          className={cn(
-            'h-11 border-gray-200 focus-visible:ring-[#F95700]',
-            errors.fullName && 'border-red-500'
-          )}
+          className={authFieldClass(Boolean(errors.fullName))}
           {...register('fullName')}
         />
-        {errors.fullName && (
-          <p className="text-xs text-red-500">{errors.fullName.message}</p>
-        )}
+        {errors.fullName && <p className="text-xs text-red-500">{errors.fullName.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="reg-email" className="text-gray-700 font-medium">
+        <Label htmlFor="reg-email" className={authLabelClass}>
           Email
         </Label>
         <Input
@@ -91,66 +95,28 @@ export function RegisterForm() {
           type="email"
           placeholder="ivanov@naumen.ru"
           autoComplete="email"
-          className={cn(
-            'h-11 border-gray-200 focus-visible:ring-[#F95700]',
-            errors.email && 'border-red-500'
-          )}
+          className={authFieldClass(Boolean(errors.email))}
           {...register('email')}
         />
-        {errors.email && (
-          <p className="text-xs text-red-500">{errors.email.message}</p>
-        )}
+        {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="department" className="text-gray-700 font-medium">
+        <Label htmlFor="department" className={authLabelClass}>
           Отдел
         </Label>
         <Input
           id="department"
           placeholder="Разработка / HR / Аналитика"
-          className={cn(
-            'h-11 border-gray-200 focus-visible:ring-[#F95700]',
-            errors.department && 'border-red-500'
-          )}
+          className={authFieldClass(Boolean(errors.department))}
           {...register('department')}
         />
-        {errors.department && (
-          <p className="text-xs text-red-500">{errors.department.message}</p>
-        )}
+        {errors.department && <p className="text-xs text-red-500">{errors.department.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-gray-700 font-medium">Роль</Label>
-        <Controller
-          name="role"
-          control={control}
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger
-                className={cn(
-                  'h-11 border-gray-200 focus:ring-[#F95700]',
-                  errors.role && 'border-red-500'
-                )}
-              >
-                <SelectValue placeholder="Выберите роль" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ROLE_TRAINEE">Стажёр</SelectItem>
-                <SelectItem value="ROLE_EMPLOYEE">Сотрудник</SelectItem>
-                <SelectItem value="ROLE_HR">HR / Рекрутер</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.role && (
-          <p className="text-xs text-red-500">{errors.role.message}</p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="reg-password" className="text-gray-700 font-medium">
+          <Label htmlFor="reg-password" className={authLabelClass}>
             Пароль
           </Label>
           <div className="relative">
@@ -159,28 +125,23 @@ export function RegisterForm() {
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               autoComplete="new-password"
-              className={cn(
-                'h-11 border-gray-200 focus-visible:ring-[#F95700] pr-11',
-                errors.password && 'border-red-500'
-              )}
+              className={cn(authFieldClass(Boolean(errors.password)), 'pr-11')}
               {...register('password')}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               tabIndex={-1}
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">
+          <Label htmlFor="confirmPassword" className={authLabelClass}>
             Подтверждение
           </Label>
           <div className="relative">
@@ -189,19 +150,16 @@ export function RegisterForm() {
               type={showConfirmPassword ? 'text' : 'password'}
               placeholder="••••••••"
               autoComplete="new-password"
-              className={cn(
-                'h-11 border-gray-200 focus-visible:ring-[#F95700] pr-11',
-                errors.confirmPassword && 'border-red-500'
-              )}
+              className={cn(authFieldClass(Boolean(errors.confirmPassword)), 'pr-11')}
               {...register('confirmPassword')}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               tabIndex={-1}
             >
-              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
           {errors.confirmPassword && (
@@ -210,14 +168,10 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <Button
-        type="submit"
-        disabled={isPending}
-        className="w-full h-11 bg-[#F95700] hover:bg-[#EA580C] text-white font-semibold transition-all duration-200 shadow-sm hover:shadow-md mt-2"
-      >
+      <Button type="submit" disabled={isPending} className={cn(authSubmitClass, 'mt-2')}>
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Регистрация...
           </>
         ) : (
@@ -225,12 +179,9 @@ export function RegisterForm() {
         )}
       </Button>
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-[rgba(37,37,37,0.7)] md:text-2xl md:leading-[30px]">
         Уже есть аккаунт?{' '}
-        <Link
-          to="/"
-          className="text-[#F95700] hover:text-[#EA580C] font-medium transition-colors hover:underline"
-        >
+        <Link to="/" className={authFooterLinkClass}>
           Войти
         </Link>
       </p>

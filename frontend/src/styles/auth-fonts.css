@@ -1,0 +1,13 @@
+/* Шрифты экрана авторизации (как в макете Figma) */
+
+@import url('https://fonts.cdnfonts.com/css/geometria');
+@import url('https://fonts.cdnfonts.com/css/mts-wide');
+
+.auth-font-body {
+  font-family: 'Geometria', system-ui, sans-serif;
+}
+
+.auth-font-heading {
+  font-family: 'MTS Wide', 'Geometria', system-ui, sans-serif;
+  font-weight: 700;
+}

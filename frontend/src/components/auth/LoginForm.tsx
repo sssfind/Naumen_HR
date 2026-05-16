@@ -3,12 +3,18 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import {
+  authFieldClass,
+  authFooterLinkClass,
+  authLabelClass,
+  authSubmitClass,
+} from '@/components/auth/authFieldStyles'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useLogin } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
-import { Link } from 'react-router-dom'
 
 const loginSchema = z.object({
   email: z
@@ -33,14 +39,10 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = (data: LoginFormValues) => {
-    login(data)
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 animate-fade-in">
+    <form onSubmit={handleSubmit((data) => login(data))} className="space-y-5 md:space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-gray-700 font-medium">
+        <Label htmlFor="email" className={authLabelClass}>
           Email
         </Label>
         <Input
@@ -48,19 +50,14 @@ export function LoginForm() {
           type="email"
           placeholder="ivanov@naumen.ru"
           autoComplete="email"
-          className={cn(
-            'h-11 border-gray-200 focus-visible:ring-[#C2410C] transition-all',
-            errors.email && 'border-red-500 focus-visible:ring-red-500'
-          )}
+          className={authFieldClass(Boolean(errors.email))}
           {...register('email')}
         />
-        {errors.email && (
-          <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
-        )}
+        {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-gray-700 font-medium">
+        <Label htmlFor="password" className={authLabelClass}>
           Пароль
         </Label>
         <div className="relative">
@@ -69,35 +66,26 @@ export function LoginForm() {
             type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
             autoComplete="current-password"
-            className={cn(
-              'h-11 border-gray-200 focus-visible:ring-[#C2410C] pr-11 transition-all',
-              errors.password && 'border-red-500 focus-visible:ring-red-500'
-            )}
+            className={cn(authFieldClass(Boolean(errors.password)), 'pr-11')}
             {...register('password')}
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
             tabIndex={-1}
             aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
           >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
-        {errors.password && (
-          <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
-        )}
+        {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
       </div>
 
-      <Button
-        type="submit"
-        disabled={isPending}
-        className="w-full h-11 bg-[#FF6720] hover:bg-[#EA580C] text-white font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
-      >
+      <Button type="submit" disabled={isPending} className={authSubmitClass}>
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Вход...
           </>
         ) : (
@@ -105,12 +93,9 @@ export function LoginForm() {
         )}
       </Button>
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-[rgba(37,37,37,0.7)] md:text-2xl md:leading-[30px]">
         Нет аккаунта?{' '}
-        <Link
-          to="/register"
-          className="text-[#FF6720] hover:text-[#EA580C] font-medium transition-colors hover:underline"
-        >
+        <Link to="/register" className={authFooterLinkClass}>
           Зарегистрироваться
         </Link>
       </p>
