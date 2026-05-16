@@ -26,7 +26,7 @@ const registerSchema = z
       .email('Введите корректный email')
       .endsWith('@naumen.ru', 'Email должен заканчиваться на @naumen.ru'),
     department: z.string().min(2, 'Укажите отдел'),
-    role: z.enum(['ROLE_EMPLOYEE', 'ROLE_HR'], {
+    role: z.enum(['ROLE_TRAINEE', 'ROLE_EMPLOYEE', 'ROLE_HR'], {
       required_error: 'Выберите роль',
     }),
     password: z.string().min(8, 'Пароль должен содержать минимум 8 символов'),
@@ -51,6 +51,9 @@ export function RegisterForm() {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: 'ROLE_TRAINEE',
+    },
   })
 
   const onSubmit = (data: RegisterFormValues) => {
@@ -133,6 +136,7 @@ export function RegisterForm() {
                 <SelectValue placeholder="Выберите роль" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="ROLE_TRAINEE">Стажёр</SelectItem>
                 <SelectItem value="ROLE_EMPLOYEE">Сотрудник</SelectItem>
                 <SelectItem value="ROLE_HR">HR / Рекрутер</SelectItem>
               </SelectContent>

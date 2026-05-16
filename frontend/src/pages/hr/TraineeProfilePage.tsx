@@ -1,6 +1,8 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Mail, Phone, Smile, Users } from 'lucide-react'
+import { FeedbackResponseCard } from '@/components/feedback/FeedbackResponseCard'
 import { Button } from '@/components/ui/button'
+import { useTraineeFeedback } from '@/hooks/useFeedback'
 import { useTraineeProfile } from '@/hooks/useTrainees'
 import { cn } from '@/lib/utils'
 
@@ -43,6 +45,8 @@ export function TraineeProfilePage() {
   const { traineeId } = useParams()
   const numericTraineeId = traineeId ? Number(traineeId) : undefined
   const { data: trainee, isLoading, isError } = useTraineeProfile(numericTraineeId)
+  const { data: feedbackHistory = [], isLoading: feedbackLoading } =
+    useTraineeFeedback(numericTraineeId)
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка профиля стажёра…</p>
@@ -159,6 +163,7 @@ export function TraineeProfilePage() {
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-[#1A1A2E]">Уровень настроения</h2>
+              <p className="mt-1 text-xs text-gray-500">По последнему еженедельному опросу</p>
               <div className="mt-4 flex items-center gap-3">
                 <div
                   className={cn(
@@ -175,6 +180,26 @@ export function TraineeProfilePage() {
                   </p>
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-[#1A1A2E]">Еженедельная обратная связь</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Настроение, понятность задач и доступы — по неделям
+            </p>
+            {feedbackLoading && (
+              <p className="mt-6 text-sm text-gray-500">Загрузка опросов…</p>
+            )}
+            {!feedbackLoading && feedbackHistory.length === 0 && (
+              <p className="mt-6 rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
+                Стажёр ещё не заполнял опросы
+              </p>
+            )}
+            <div className="mt-6 space-y-3">
+              {feedbackHistory.map((item) => (
+                <FeedbackResponseCard key={item.id} item={item} />
+              ))}
             </div>
           </section>
         </div>

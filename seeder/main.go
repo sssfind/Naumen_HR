@@ -131,7 +131,46 @@ func main() {
 		}
 	}
 	fmt.Println("Уведомления разосланы.")
+
+	weekStart := mondayOfWeek(time.Now())
+	for i, tID := range traineeIDs {
+		for w := 1; w <= 2; w++ {
+			if i >= 7 && w == 1 {
+				continue
+			}
+			pastWeek := weekStart.AddDate(0, 0, -7*w)
+			ratings := []string{"EXCELLENT", "GOOD", "OKAY_DIFFICULT", "STRESSED", "NEED_HELP"}
+			weekRating := ratings[rng.Intn(len(ratings))]
+			clarity := rng.Intn(3) + 3
+			mentor := rng.Intn(3) + 3
+			resources := "ALL_OK"
+			if rng.Intn(4) == 0 {
+				resources = "NO_FOLDER_ACCESS"
+			}
+			_, err := pool.Exec(ctx, `
+				INSERT INTO feedback_responses (
+					trainee_id, week_start, week_rating, tasks_clarity,
+					resource_issues, mentor_rating, week_comment
+				) VALUES ($1, $2, $3, $4, $5, $6, $7)
+				ON CONFLICT (trainee_id, week_start) DO NOTHING`,
+				tID, pastWeek.Format("2006-01-02"), weekRating, clarity, resources, mentor,
+				"Тестовый отзыв из seeder")
+			if err != nil {
+				log.Fatalf("Ошибка вставки feedback: %v", err)
+			}
+		}
+	}
+	fmt.Println("Добавлена история еженедельных опросов.")
 	fmt.Println("Готово. Пароль для hr*/emp*/trainee*@naumen.ru: 123123123")
+}
+
+func mondayOfWeek(t time.Time) time.Time {
+	wd := int(t.Weekday())
+	if wd == 0 {
+		wd = 7
+	}
+	start := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	return start.AddDate(0, 0, -(wd - 1))
 }
 
 func connectWithRetry(ctx context.Context, dbURL string) (*pgxpool.Pool, error) {
@@ -162,11 +201,11 @@ func waitForSchema(ctx context.Context, pool *pgxpool.Pool) error {
 		log.Printf("Ожидание миграций (%d/%d)...", i, attempts)
 		time.Sleep(2 * time.Second)
 	}
-	return errors.New("таблицы users/notifications не найдены — дождитесь запуска backend (Flyway)")
+	return errors.New("таблицы users/notifications/feedback_responses не найдены — дождитесь запуска backend (Flyway)")
 }
 
 func schemaReady(ctx context.Context, pool *pgxpool.Pool) bool {
-	for _, table := range []string{"users", "notifications"} {
+	for _, table := range []string{"users", "notifications", "feedback_responses"} {
 		var exists bool
 		err := pool.QueryRow(ctx, `
 			SELECT EXISTS (
@@ -182,6 +221,15 @@ func schemaReady(ctx context.Context, pool *pgxpool.Pool) bool {
 
 func clearSeedData(ctx context.Context, pool *pgxpool.Pool) error {
 	_, err := pool.Exec(ctx, `
+		DELETE FROM feedback_responses
+		WHERE trainee_id IN (
+			SELECT id FROM users
+			WHERE email ~ '^(hr|emp|trainee)[0-9]+@naumen\.ru$'
+		)`)
+	if err != nil {
+		return fmt.Errorf("feedback_responses: %w", err)
+	}
+	_, err = pool.Exec(ctx, `
 		DELETE FROM notifications
 		WHERE user_id IN (
 			SELECT id FROM users

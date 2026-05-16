@@ -4,5 +4,7 @@ public enum NotificationType {
     TRAINEE_ASSIGNED,
     TRAINEE_UNASSIGNED,
     PROFILE_UPDATED,
+    FEEDBACK_SUBMITTED,
+    FEEDBACK_RISK,
     SYSTEM
 }
