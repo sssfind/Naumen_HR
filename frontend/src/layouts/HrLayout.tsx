@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { BookOpen, BookTemplate, GraduationCap, LogOut, User } from 'lucide-react'
+import { Bot, BookOpen, BookTemplate, GraduationCap, LogOut, User } from 'lucide-react'
 import { NotificationPanel } from '@/components/hr/NotificationPanel'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/dashboard/hr/trainees', label: 'Мои стажёры', icon: GraduationCap },
   { to: '/dashboard/hr/plan-templates', label: 'Шаблоны адаптации', icon: BookTemplate },
   { to: '/dashboard/hr/employees', label: 'Справочник сотрудников', icon: BookOpen },
+  { to: '/dashboard/hr/chat', label: 'Чат-бот', icon: Bot },
   { to: '/dashboard/hr/profile', label: 'Мой профиль', icon: User },
 ]
 

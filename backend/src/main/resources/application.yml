@@ -29,6 +29,10 @@ app:
     cron: ${REMINDERS_CRON:0 0 9 * * *}
     due-soon-days: 1
     feedback-reminder-from-day: 4
+  open-router:
+    api-key: ${OPENROUTER_API_KEY:}
+    base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
+    model: ${OPENROUTER_MODEL:openai/gpt-4o-mini}
   security:
     allowed-email-domain: ${ALLOWED_EMAIL_DOMAIN:naumen.ru}
   jwt:

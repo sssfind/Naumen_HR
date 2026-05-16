@@ -8,6 +8,7 @@ import { HrLayout } from '@/layouts/HrLayout'
 import { TraineeLayout } from '@/layouts/TraineeLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import { ChatPage } from '@/pages/ChatPage'
 import { TraineesPage } from '@/pages/hr/TraineesPage'
 import { EmployeesPage } from '@/pages/hr/EmployeesPage'
 import { ProfilePage } from '@/pages/hr/ProfilePage'
@@ -92,6 +93,7 @@ export function App() {
             <Route path="trainees/:traineeId" element={<HrTraineeProfilePage />} />
             <Route path="trainees" element={<TraineesPage />} />
             <Route path="employees" element={<EmployeesPage />} />
+            <Route path="chat" element={<ChatPage />} />
             <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/hr/profile" />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
@@ -109,6 +111,7 @@ export function App() {
             <Route path="blocks/:blockId" element={<TraineeBlockTasksPage />} />
             <Route path="feedback" element={<TraineeFeedbackPage />} />
             <Route path="employees" element={<TraineeEmployeesPage />} />
+            <Route path="chat" element={<ChatPage />} />
             <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/trainee/profile" />} />
             <Route path="profile" element={<TraineeProfilePage />} />
           </Route>
