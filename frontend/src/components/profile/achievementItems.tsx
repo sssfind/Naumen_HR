@@ -1,12 +1,20 @@
 import type { AchievementItem } from '@/components/profile/AchievementBadgeRow'
 import type { UserProfile } from '@/types/user'
 
-const ACHIEVEMENT_IMAGES = {
+const TRAINEE_ACHIEVEMENT_IMAGES = {
   firstSteps: '/achievements/first-steps.png',
   stackMastered: '/achievements/stack-mastered.jpg',
   onTarget: '/achievements/on-target.png',
   amongOwn: '/achievements/among-own.png',
   scholar: '/achievements/scholar.png',
+} as const
+
+const HR_ACHIEVEMENT_IMAGES = {
+  rocketLaunch: '/achievements/hr-rocket-launch.png',
+  bullseye: '/achievements/hr-bullseye.png',
+  graduation: '/achievements/hr-graduation.png',
+  checklist: '/achievements/hr-checklist.png',
+  heart: '/achievements/hr-heart.png',
 } as const
 
 export function buildTraineeAchievements(profile: UserProfile | undefined): AchievementItem[] {
@@ -21,7 +29,7 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
       title: 'Первые шаги',
       description: 'Ты справился с первой задачей!',
       unlockHint: 'Выполни первую задачу в плане адаптации',
-      imageSrc: ACHIEVEMENT_IMAGES.firstSteps,
+      imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.firstSteps,
       earned: hasStarted,
     },
     {
@@ -29,7 +37,7 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
       title: 'Точно в цель!',
       description: 'Закрыл блок с рабочими задачами',
       unlockHint: 'Заверши все задачи блока «Рабочие задачи»',
-      imageSrc: ACHIEVEMENT_IMAGES.onTarget,
+      imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.onTarget,
       earned: blockThree >= 100,
     },
     {
@@ -37,7 +45,7 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
       title: 'Свой среди своих',
       description: 'Закрыл блок знакомства с командой',
       unlockHint: 'Заверши все задачи блока «Знакомство с компанией и командой»',
-      imageSrc: ACHIEVEMENT_IMAGES.amongOwn,
+      imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.amongOwn,
       earned: blockOne >= 100,
     },
     {
@@ -45,7 +53,7 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
       title: 'Грамотей',
       description: 'Закрыл блок со всеми задачами',
       unlockHint: 'Заверши все задачи во всех трёх блоках адаптации',
-      imageSrc: ACHIEVEMENT_IMAGES.scholar,
+      imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.scholar,
       earned: blockOne >= 100 && blockTwo >= 100 && blockThree >= 100,
     },
     {
@@ -53,53 +61,53 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
       title: 'Стек освоен',
       description: 'Закрыл блок прокачки скилов',
       unlockHint: 'Заверши все задачи блока «Прокачка скиллов»',
-      imageSrc: ACHIEVEMENT_IMAGES.stackMastered,
+      imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.stackMastered,
       earned: blockTwo >= 100,
     },
   ]
 }
 
-/** HR: те же визуалы достижений */
+/** HR: отдельный набор ачивок (названия временные, по картинкам) */
 export function buildHrAchievements(): AchievementItem[] {
   return [
     {
-      id: 'hr-curator',
-      title: 'HR-куратор',
-      description: 'Сопровождаете стажёров на стажировке',
-      unlockHint: 'Закрепите за собой хотя бы одного стажёра',
-      imageSrc: ACHIEVEMENT_IMAGES.firstSteps,
+      id: 'hr-rocket-launch',
+      title: 'Старт программы',
+      description: 'Запуск адаптации новых стажёров',
+      unlockHint: 'Назначьте первого стажёра и примените шаблон плана',
+      imageSrc: HR_ACHIEVEMENT_IMAGES.rocketLaunch,
       earned: true,
     },
     {
-      id: 'team-active',
-      title: 'Команда в деле',
-      description: 'Следите за прогрессом своей группы',
-      unlockHint: 'Откройте профили всех закреплённых стажёров',
-      imageSrc: ACHIEVEMENT_IMAGES.amongOwn,
+      id: 'hr-bullseye',
+      title: 'Точно в цель',
+      description: 'Команда достигает целей по адаптации',
+      unlockHint: 'Доведите средний прогресс стажёров до 80%',
+      imageSrc: HR_ACHIEVEMENT_IMAGES.bullseye,
       earned: true,
     },
     {
-      id: 'feedback',
-      title: 'Обратная связь',
-      description: 'Анализируете еженедельные опросы',
-      unlockHint: 'Просмотрите ответы стажёров за неделю',
-      imageSrc: ACHIEVEMENT_IMAGES.onTarget,
+      id: 'hr-graduation',
+      title: 'Выпускной',
+      description: 'Стажёры успешно завершают программу',
+      unlockHint: 'Завершите адаптацию хотя бы у одного стажёра',
+      imageSrc: HR_ACHIEVEMENT_IMAGES.graduation,
       earned: true,
     },
     {
-      id: 'mentor',
-      title: 'Наставник',
-      description: 'Помогаете новичкам адаптироваться',
-      unlockHint: 'Оставьте комментарий к задаче стажёра',
-      imageSrc: ACHIEVEMENT_IMAGES.stackMastered,
+      id: 'hr-checklist',
+      title: 'Всё по чек-листу',
+      description: 'Задачи стажёров под контролем',
+      unlockHint: 'Проверьте выполнение задач у всех стажёров за неделю',
+      imageSrc: HR_ACHIEVEMENT_IMAGES.checklist,
       earned: true,
     },
     {
-      id: 'organizer',
-      title: 'Организатор',
-      description: 'Ведёте план и задачи стажёров',
-      unlockHint: 'Примените шаблон адаптации к стажёру',
-      imageSrc: ACHIEVEMENT_IMAGES.scholar,
+      id: 'hr-heart',
+      title: 'С заботой',
+      description: 'Высокий индекс настроения в команде',
+      unlockHint: 'Средний индекс настроения стажёров — 4 и выше',
+      imageSrc: HR_ACHIEVEMENT_IMAGES.heart,
       earned: true,
     },
   ]
