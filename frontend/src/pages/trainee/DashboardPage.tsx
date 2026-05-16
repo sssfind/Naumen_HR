@@ -1,11 +1,23 @@
 import { Building2, Briefcase, Sparkles } from 'lucide-react'
 import { ProgressBar } from '@/components/trainee/ProgressBar'
 import { useTraineeDashboard } from '@/hooks/useTrainee'
+import type { AcceptanceCheckType, TaskPriority } from '@/types/trainee'
 
 const blockIcons: Record<string, typeof Building2> = {
   onboarding: Building2,
   skills: Sparkles,
   work: Briefcase,
+}
+
+const priorityLabels: Record<TaskPriority, string> = {
+  LOW: 'Низкий',
+  MEDIUM: 'Средний',
+  HIGH: 'Высокий',
+}
+
+const acceptanceLabels: Record<AcceptanceCheckType, string> = {
+  MACHINE: 'Проверяется машиной',
+  USER: 'Проверяется пользователем',
 }
 
 export function TraineeDashboardPage() {
@@ -58,6 +70,34 @@ export function TraineeDashboardPage() {
                 </div>
               </div>
               <ProgressBar label="Прогресс" value={block.progress} />
+              <div className="mt-5 space-y-3">
+                {block.tasks.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500">
+                    В этом блоке пока нет задач.
+                  </p>
+                ) : (
+                  block.tasks.map((task) => (
+                    <article key={task.id} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                      <p className="font-medium text-[#1A1A2E]">{task.description}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-500">
+                        <span className="rounded-full bg-white px-2 py-1">
+                          Дедлайн: {task.deadline}
+                        </span>
+                        <span className="rounded-full bg-white px-2 py-1">
+                          {priorityLabels[task.priority]}
+                        </span>
+                        <span className="rounded-full bg-white px-2 py-1">
+                          {acceptanceLabels[task.acceptanceCheckType]}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm text-gray-600">
+                        <span className="font-medium text-[#1A1A2E]">Критерии:</span>{' '}
+                        {task.acceptanceCriteria}
+                      </p>
+                    </article>
+                  ))
+                )}
+              </div>
             </section>
           )
         })}
