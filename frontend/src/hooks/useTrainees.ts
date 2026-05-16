@@ -76,6 +76,7 @@ export function useCreateTraineePlanTask(traineeId?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       toast.success('Задача добавлена')
     },
@@ -102,6 +103,7 @@ export function useUpdateTraineePlanTask(traineeId?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       toast.success('Задача обновлена')
     },
@@ -118,6 +120,7 @@ export function useDeleteTraineePlanTask(traineeId?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       toast.success('Задача удалена')
     },

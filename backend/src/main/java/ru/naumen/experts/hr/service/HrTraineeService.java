@@ -7,6 +7,7 @@ import ru.naumen.experts.exception.BadRequestException;
 import ru.naumen.experts.exception.ForbiddenException;
 import ru.naumen.experts.exception.UserNotFoundException;
 import ru.naumen.experts.hr.dto.HrTeamStatsResponse;
+import ru.naumen.experts.hr.dto.TraineeTaskProgressItem;
 import ru.naumen.experts.notification.enums.NotificationType;
 import ru.naumen.experts.notification.service.NotificationService;
 import ru.naumen.experts.trainee.service.TraineeService;
@@ -20,6 +21,7 @@ import ru.naumen.experts.user.enums.UserRole;
 import ru.naumen.experts.user.mapper.UserMapper;
 import ru.naumen.experts.user.repository.UserRepository;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -41,6 +43,7 @@ public class HrTraineeService {
                     .traineeCount(0)
                     .averageMoodLevel(null)
                     .averageTaskCompletionPercent(0)
+                    .traineeProgress(List.of())
                     .build();
         }
 
@@ -57,10 +60,30 @@ public class HrTraineeService {
                 ? 0
                 : (int) Math.round(completedTasks * 100.0 / totalTasks);
 
+        List<TraineeTaskProgressItem> traineeProgress = trainees.stream()
+                .map(this::toTraineeTaskProgressItem)
+                .sorted(Comparator.comparing(TraineeTaskProgressItem::getFullName))
+                .toList();
+
         return HrTeamStatsResponse.builder()
                 .traineeCount(traineeCount)
                 .averageMoodLevel(Math.round(averageMood * 10.0) / 10.0)
                 .averageTaskCompletionPercent(averageTaskCompletionPercent)
+                .traineeProgress(traineeProgress)
+                .build();
+    }
+
+    private TraineeTaskProgressItem toTraineeTaskProgressItem(User trainee) {
+        long total = traineePlanTaskRepository.countByTraineeId(trainee.getId());
+        long completed = traineePlanTaskRepository.countByTraineeIdAndStatus(
+                trainee.getId(), TaskStatus.COMPLETED);
+        int completionPercent = total == 0 ? 0 : (int) Math.round(completed * 100.0 / total);
+        return TraineeTaskProgressItem.builder()
+                .traineeId(trainee.getId())
+                .fullName(trainee.getFullName())
+                .totalTasks((int) total)
+                .completedTasks((int) completed)
+                .completionPercent(completionPercent)
                 .build();
     }
 

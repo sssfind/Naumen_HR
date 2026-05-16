@@ -23,6 +23,7 @@ export function useStartTraineeTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       toast.success('Задача взята в работу')
     },
     onError: () => toast.error('Не удалось взять задачу в работу'),
@@ -39,6 +40,7 @@ export function useCompleteTraineeTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       toast.success('Задача завершена')
     },
     onError: () => toast.error('Не удалось завершить задачу'),
@@ -54,6 +56,7 @@ export function useAddTraineeTaskComment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       toast.success('Комментарий отправлен')
     },
     onError: () => toast.error('Не удалось отправить комментарий'),

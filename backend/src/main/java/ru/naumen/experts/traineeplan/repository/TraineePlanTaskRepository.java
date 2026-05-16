@@ -19,4 +19,8 @@ public interface TraineePlanTaskRepository extends JpaRepository<TraineePlanTask
     long countByTraineeIdIn(Collection<Long> traineeIds);
 
     long countByTraineeIdInAndStatus(Collection<Long> traineeIds, TaskStatus status);
+
+    long countByTraineeId(Long traineeId);
+
+    long countByTraineeIdAndStatus(Long traineeId, TaskStatus status);
 }

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import {
+  Award,
   Briefcase,
   GraduationCap,
   Mail,
@@ -7,12 +8,22 @@ import {
   Phone,
   Smile,
   TrendingUp,
+  Trophy,
   Users,
 } from 'lucide-react'
+import { TraineeProgressChart } from '@/components/hr/TraineeProgressChart'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/hooks/useProfile'
 import { useHrTeamStats } from '@/hooks/useTrainees'
 import { cn } from '@/lib/utils'
+
+const hrAchievements = [
+  { title: 'HR-куратор', description: 'Сопровождает стажёров на стажировке' },
+  { title: 'Команда в деле', description: 'Следит за прогрессом своей группы' },
+  { title: 'Обратная связь', description: 'Анализирует еженедельные опросы' },
+  { title: 'Наставник', description: 'Помогает новичкам адаптироваться' },
+  { title: 'Организатор', description: 'Ведёт план и задачи стажёров' },
+]
 
 const moodLabels: Record<number, string> = {
   1: 'Низкое',
@@ -98,6 +109,29 @@ export function ProfilePage() {
               <span className="ml-auto font-medium text-[#1A1A2E]">{profile?.phone ?? '—'}</span>
             </div>
           </div>
+
+          <div className="mt-6">
+            <div className="mb-3 flex items-center gap-2">
+              <Award className="h-4 w-4 text-primary" />
+              <h2 className="font-semibold text-[#1A1A2E]">Ачивки</h2>
+            </div>
+            <div className="max-h-64 space-y-3 overflow-y-auto pr-1">
+              {hrAchievements.map((achievement) => (
+                <div
+                  key={achievement.title}
+                  className="flex min-h-24 w-full gap-3 rounded-lg border border-orange-100 bg-orange-50/60 px-3 py-3"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white">
+                    <Trophy className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-[#1A1A2E]">{achievement.title}</p>
+                    <p className="mt-1 text-xs text-gray-500">{achievement.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section className="space-y-4">
@@ -105,6 +139,7 @@ export function ProfilePage() {
           {statsLoading ? (
             <p className="text-sm text-gray-500">Загрузка показателей…</p>
           ) : (
+            <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
@@ -146,6 +181,17 @@ export function ProfilePage() {
                 </p>
                 <p className="mt-2 text-xs text-gray-500">Доля выполненных задач</p>
               </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+              <h3 className="text-lg font-semibold text-[#1A1A2E]">Выполнение задач стажёров</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Процент завершённых задач по каждому стажёру
+              </p>
+              <div className="mt-8 min-h-[360px] w-full">
+                <TraineeProgressChart items={stats?.traineeProgress ?? []} />
+              </div>
+            </div>
             </div>
           )}
         </section>
