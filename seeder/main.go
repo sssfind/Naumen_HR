@@ -13,28 +13,58 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	firstNames = []string{
-		"Алексей", "Иван", "Мария", "Анна", "Дмитрий", "Елена", "Сергей", "Ольга", "Михаил", "Екатерина",
-		"Александр", "Наталья", "Павел", "Дарья", "Максим", "Юлия", "Роман", "Татьяна", "Игорь", "Анастасия",
-		"Виктор", "Виктория", "Денис", "Ксения", "Артем", "Алиса", "Никита", "Светлана", "Евгений", "Полина",
-	}
-	lastNames = []string{
-		"Иванов", "Петров", "Смирнова", "Кузнецов", "Попова", "Соколов", "Лебедева", "Козлов", "Новикова", "Морозов",
-		"Волков", "Зайцева", "Павлов", "Семенова", "Голубев", "Виноградова", "Богданов", "Воробьева", "Федоров", "Михайлова",
-		"Белов", "Тарасова", "Макаров", "Ильина", "Сычев", "Гусева", "Титов", "Крылова", "Фролов", "Полякова",
-	}
-	depts = []string{
-		"Backend", "Frontend", "Аналитика", "Тестирование", "DevOps", "HR", "Бухгалтерия",
-		"Дизайн (UX/UI)", "Управление проектами", "Информационная безопасность", "Служба поддержки", "Маркетинг", "Data Science",
-	}
-	positions = []string{
-		"Junior Developer", "Middle Developer", "Senior Developer", "Team Lead", "Engineering Manager",
-		"QA Engineer", "Automation QA", "System Analyst", "Business Analyst", "Product Manager",
-		"Project Manager", "UX/UI Designer", "DevOps Engineer", "Site Reliability Engineer", "Data Scientist",
-		"Technical Writer", "HR Specialist", "IT Recruiter", "System Administrator", "Database Administrator",
-	}
-)
+type Character struct {
+	FullName string
+	Dept     string
+	Position string
+}
+
+var characters = []Character{
+	{"Ричард Хендрикс", "Backend", "Team Lead"},
+	{"Бертрам Гилфойл", "DevOps", "Site Reliability Engineer"},
+	{"Динеш Чугтай", "Frontend", "Senior Developer"},
+	{"Джаред Данн", "Управление проектами", "Business Analyst"},
+	{"Эрлих Бахман", "Маркетинг", "Product Manager"},
+
+	{"Эллиот Алдерсон", "Информационная безопасность", "Senior Developer"},
+	{"Дарлин Алдерсон", "Backend", "Middle Developer"},
+	{"Тайрелл Уэллик", "Управление проектами", "Engineering Manager"},
+
+	{"Майкл Скотт", "Управление проектами", "Project Manager"},
+	{"Дуайт Шрут", "Аналитика", "Business Analyst"},
+	{"Джим Халперт", "Маркетинг", "Product Manager"},
+	{"Пэм Бизли", "Дизайн (UX/UI)", "UX/UI Designer"},
+	{"Тоби Флендерсон", "HR", "HR Specialist"},
+
+	{"Морис Мосс", "Служба поддержки", "System Administrator"},
+	{"Рой Треннеман", "Служба поддержки", "Junior Developer"},
+	{"Джен Барбер", "Управление проектами", "Project Manager"},
+	{"Ричмонд Авенал", "DevOps", "Database Administrator"},
+
+	{"Гордон Фримен", "Аналитика", "System Analyst"},
+	{"Глэдос", "Информационная безопасность", "System Administrator"},
+	{"Томас Андерсон", "Backend", "Middle Developer"},
+	{"Тринити", "DevOps", "Site Reliability Engineer"},
+	{"Макото Кусанаги", "Информационная безопасность", "Team Lead"},
+	{"Лэйн Ивакура", "DevOps", "Database Administrator"},
+	{"Стивен Стрэндж", "Data Science", "Data Scientist"},
+	{"Тони Старк", "Backend", "Senior Developer"},
+	{"Брюс Уэйн", "Аналитика", "Business Analyst"},
+	{"Кларк Кент", "Служба поддержки", "Technical Writer"},
+	{"Питер Паркер", "Frontend", "Junior Developer"},
+	{"Уолтер Уайт", "Data Science", "Data Scientist"},
+	{"Джесси Пинкман", "Тестирование", "QA Engineer"},
+	{"Сол Гудман", "HR", "IT Recruiter"},
+	{"Геральт из Ривии", "Тестирование", "Automation QA"},
+	{"Йеннифэр из Венгерберга", "Дизайн (UX/UI)", "UX/UI Designer"},
+	{"Лютик", "Служба поддержки", "Technical Writer"},
+	{"Шерлок Холмс", "Аналитика", "System Analyst"},
+	{"Джон Уотсон", "HR", "HR Specialist"},
+	{"Сара Коннор", "Информационная безопасность", "QA Engineer"},
+	{"Т-800", "Backend", "Junior Developer"},
+	{"Люк Скайуокер", "Frontend", "Junior Developer"},
+	{"Дарт Вейдер", "Управление проектами", "Engineering Manager"},
+}
 
 func main() {
 	dbURL := os.Getenv("DATABASE_URL")
@@ -68,16 +98,30 @@ func main() {
 
 	fmt.Println("Начинаем генерацию данных...")
 
+	shuffledChars := make([]Character, len(characters))
+	copy(shuffledChars, characters)
+	rng.Shuffle(len(shuffledChars), func(i, j int) {
+		shuffledChars[i], shuffledChars[j] = shuffledChars[j], shuffledChars[i]
+	})
+
+	charIndex := 0
+	nextChar := func() Character {
+		c := shuffledChars[charIndex%len(shuffledChars)]
+		charIndex++
+		return c
+	}
+
 	hrIDs := make([]int64, 0, 3)
 	for i := 1; i <= 3; i++ {
 		var id int64
 		email := fmt.Sprintf("hr%d@naumen.ru", i)
-		name := randomName(rng)
+		c := nextChar()
+		
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (email, password_hash, full_name, department, role, phone, position)
 			VALUES ($1, $2, $3, $4, 'ROLE_HR', '+79990000001', 'HR Business Partner')
 			RETURNING id`,
-			email, defaultHash, name, "HR").Scan(&id)
+			email, defaultHash, c.FullName, "HR").Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки HR: %v", err)
 		}
@@ -87,10 +131,12 @@ func main() {
 
 	for i := 1; i <= 20; i++ {
 		email := fmt.Sprintf("emp%d@naumen.ru", i)
+		c := nextChar()
+
 		_, err := pool.Exec(ctx, `
 			INSERT INTO users (email, password_hash, full_name, department, role, position)
 			VALUES ($1, $2, $3, $4, 'ROLE_EMPLOYEE', $5)`,
-			email, defaultHash, randomName(rng), randomDept(rng), randomPosition(rng))
+			email, defaultHash, c.FullName, c.Dept, c.Position)
 		if err != nil {
 			log.Fatalf("Ошибка вставки сотрудника %s: %v", email, err)
 		}
@@ -102,7 +148,7 @@ func main() {
 		var id int64
 		email := fmt.Sprintf("trainee%d@naumen.ru", i)
 		hrID := hrIDs[rng.Intn(len(hrIDs))]
-		dept := randomDept(rng)
+		c := nextChar()
 
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (
@@ -112,7 +158,7 @@ func main() {
 			)
 			VALUES ($1, $2, $3, $4, 'ROLE_TRAINEE', $5, $6, $7, $8, $9, $10)
 			RETURNING id`,
-			email, defaultHash, randomName(rng), dept, hrID, dept,
+			email, defaultHash, c.FullName, c.Dept, hrID, c.Dept,
 			rng.Intn(5)+1, rng.Intn(101), rng.Intn(101), rng.Intn(101)).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки стажера %s: %v", email, err)
@@ -246,16 +292,4 @@ func clearSeedData(ctx context.Context, pool *pgxpool.Pool) error {
 	}
 	fmt.Printf("Удалено тестовых пользователей: %d\n", tag.RowsAffected())
 	return nil
-}
-
-func randomName(rng *rand.Rand) string {
-	return firstNames[rng.Intn(len(firstNames))] + " " + lastNames[rng.Intn(len(lastNames))]
-}
-
-func randomDept(rng *rand.Rand) string {
-	return depts[rng.Intn(len(depts))]
-}
-
-func randomPosition(rng *rand.Rand) string {
-	return positions[rng.Intn(len(positions))]
 }
