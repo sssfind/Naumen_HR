@@ -14,7 +14,7 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Naumen HR API")
+                        .title("Naumen  API")
                         .description("Backend API — аутентификация и пользователи")
                         .version("0.0.1"))
                 .components(new Components()

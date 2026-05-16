@@ -40,5 +40,21 @@ services:
     depends_on:
       - backend
 
+  seeder:
+    image: golang:1.23-alpine
+    container_name: naumen_hr_seeder
+    restart: "no"
+    volumes:
+      - ./seeder:/app
+    working_dir: /app
+    environment:
+      DATABASE_URL: postgres://naumen:naumen@postgres:5432/naumen_hr?sslmode=disable
+    command: sh -c "go mod download && go run ."
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
 volumes:
   naumen_hr_pgdata:

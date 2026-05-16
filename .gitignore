@@ -18,6 +18,9 @@ frontend/dist/
 *.class
 *.log
 
+# Seeder
+seeder/seeder.exe
+
 # Env
 .env
 .env.local
