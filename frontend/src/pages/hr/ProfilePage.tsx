@@ -1,7 +1,26 @@
 import { Link } from 'react-router-dom'
-import { Briefcase, Mail, Pencil, Phone, Users } from 'lucide-react'
+import {
+  Briefcase,
+  GraduationCap,
+  Mail,
+  Pencil,
+  Phone,
+  Smile,
+  TrendingUp,
+  Users,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/hooks/useProfile'
+import { useHrTeamStats } from '@/hooks/useTrainees'
+import { cn } from '@/lib/utils'
+
+const moodLabels: Record<number, string> = {
+  1: 'Низкое',
+  2: 'Ниже среднего',
+  3: 'Нормальное',
+  4: 'Хорошее',
+  5: 'Отличное',
+}
 
 function initials(fullName: string) {
   return fullName
@@ -13,18 +32,30 @@ function initials(fullName: string) {
     .toUpperCase() || 'HR'
 }
 
+function moodLabelForAverage(value: number | null | undefined) {
+  if (value == null) return 'Нет данных'
+  const rounded = Math.round(value)
+  return moodLabels[rounded] ?? 'Нет данных'
+}
+
 export function ProfilePage() {
   const { data: profile, isLoading } = useProfile()
+  const { data: stats, isLoading: statsLoading } = useHrTeamStats()
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка профиля…</p>
   }
 
+  const moodRounded =
+    stats?.averageMoodLevel != null
+      ? Math.round(stats.averageMoodLevel * 10) / 10
+      : null
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#1A1A2E]">Мой профиль</h1>
-        <p className="mt-1 text-sm text-gray-500">Личные данные и рабочая информация</p>
+        <p className="mt-1 text-sm text-gray-500">Личные данные и сводка по стажёрам</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
@@ -68,6 +99,56 @@ export function ProfilePage() {
             </div>
           </div>
         </section>
+
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-[#1A1A2E]">Мои стажёры</h2>
+          {statsLoading ? (
+            <p className="text-sm text-gray-500">Загрузка показателей…</p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                </div>
+                <p className="mt-4 text-sm text-gray-500">Всего стажёров</p>
+                <p className="mt-1 text-3xl font-bold text-[#1A1A2E]">{stats?.traineeCount ?? 0}</p>
+                <p className="mt-2 text-xs text-gray-500">Закреплены за вами</p>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-lg',
+                    moodRounded != null && moodRounded >= 4 ? 'bg-green-50' : 'bg-orange-50'
+                  )}
+                >
+                  <Smile
+                    className={cn(
+                      'h-5 w-5',
+                      moodRounded != null && moodRounded >= 4 ? 'text-green-600' : 'text-primary'
+                    )}
+                  />
+                </div>
+                <p className="mt-4 text-sm text-gray-500">Индекс настроения</p>
+                <p className="mt-1 text-3xl font-bold text-[#1A1A2E]">
+                  {moodRounded != null ? `${moodRounded}/5` : '—'}
+                </p>
+                <p className="mt-2 text-xs text-gray-500">{moodLabelForAverage(moodRounded)}</p>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                </div>
+                <p className="mt-4 text-sm text-gray-500">Средний прогресс</p>
+                <p className="mt-1 text-3xl font-bold text-[#1A1A2E]">
+                  {stats?.averageTaskCompletionPercent ?? 0}%
+                </p>
+                <p className="mt-2 text-xs text-gray-500">Доля выполненных задач</p>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
 
       <div className="mt-6 flex justify-end">
@@ -81,4 +162,3 @@ export function ProfilePage() {
     </div>
   )
 }
-

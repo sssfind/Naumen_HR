@@ -7,7 +7,18 @@ import type {
   TraineePlanTask,
   TraineePlanTaskRequest,
 } from '@/types/trainee'
+import type { HrTeamStats } from '@/types/hr'
 import type { Employee, TraineeProfile } from '@/types/user'
+
+export function useHrTeamStats() {
+  return useQuery({
+    queryKey: ['hr', 'stats'],
+    queryFn: async () => {
+      const { data } = await api.get<HrTeamStats>('/hr/stats')
+      return data
+    },
+  })
+}
 
 export function useMyTrainees() {
   return useQuery({
@@ -123,6 +134,7 @@ export function useAssignTrainee() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       queryClient.invalidateQueries({ queryKey: ['employees'] })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       toast.success('Стажёр назначен')
@@ -140,6 +152,7 @@ export function useUnassignTrainee() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       queryClient.invalidateQueries({ queryKey: ['employees'] })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       toast.success('Стажёр снят')

@@ -6,9 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.naumen.experts.exception.BadRequestException;
 import ru.naumen.experts.exception.ForbiddenException;
 import ru.naumen.experts.exception.UserNotFoundException;
+import ru.naumen.experts.hr.dto.HrTeamStatsResponse;
 import ru.naumen.experts.notification.enums.NotificationType;
 import ru.naumen.experts.notification.service.NotificationService;
 import ru.naumen.experts.trainee.service.TraineeService;
+import ru.naumen.experts.traineeplan.enums.TaskStatus;
+import ru.naumen.experts.traineeplan.repository.TraineePlanTaskRepository;
 import ru.naumen.experts.user.dto.EmployeeResponse;
 import ru.naumen.experts.user.dto.TraineeDashboardResponse;
 import ru.naumen.experts.user.dto.TraineeProfileResponse;
@@ -26,6 +29,40 @@ public class HrTraineeService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final TraineeService traineeService;
+    private final TraineePlanTaskRepository traineePlanTaskRepository;
+
+    @Transactional(readOnly = true)
+    public HrTeamStatsResponse getTeamStats(Long hrId) {
+        List<User> trainees = userRepository.findByHrIdAndRoleAndIsActiveTrue(hrId, UserRole.ROLE_TRAINEE);
+        int traineeCount = trainees.size();
+
+        if (traineeCount == 0) {
+            return HrTeamStatsResponse.builder()
+                    .traineeCount(0)
+                    .averageMoodLevel(null)
+                    .averageTaskCompletionPercent(0)
+                    .build();
+        }
+
+        double averageMood = trainees.stream()
+                .mapToInt(user -> user.getMoodLevel() != null ? user.getMoodLevel() : 3)
+                .average()
+                .orElse(0);
+
+        List<Long> traineeIds = trainees.stream().map(User::getId).toList();
+        long totalTasks = traineePlanTaskRepository.countByTraineeIdIn(traineeIds);
+        long completedTasks = traineePlanTaskRepository.countByTraineeIdInAndStatus(
+                traineeIds, TaskStatus.COMPLETED);
+        int averageTaskCompletionPercent = totalTasks == 0
+                ? 0
+                : (int) Math.round(completedTasks * 100.0 / totalTasks);
+
+        return HrTeamStatsResponse.builder()
+                .traineeCount(traineeCount)
+                .averageMoodLevel(Math.round(averageMood * 10.0) / 10.0)
+                .averageTaskCompletionPercent(averageTaskCompletionPercent)
+                .build();
+    }
 
     @Transactional(readOnly = true)
     public List<EmployeeResponse> getMyTrainees(Long hrId) {

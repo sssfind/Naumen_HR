@@ -5,6 +5,7 @@ import ru.naumen.experts.traineeplan.entity.TraineePlanTask;
 import ru.naumen.experts.traineeplan.enums.TaskStatus;
 import ru.naumen.experts.traineeplan.enums.TraineePlanBlock;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface TraineePlanTaskRepository extends JpaRepository<TraineePlanTask, Long> {
@@ -14,4 +15,8 @@ public interface TraineePlanTaskRepository extends JpaRepository<TraineePlanTask
     long countByTraineeIdAndBlock(Long traineeId, TraineePlanBlock block);
 
     long countByTraineeIdAndBlockAndStatus(Long traineeId, TraineePlanBlock block, TaskStatus status);
+
+    long countByTraineeIdIn(Collection<Long> traineeIds);
+
+    long countByTraineeIdInAndStatus(Collection<Long> traineeIds, TaskStatus status);
 }
