@@ -1,10 +1,18 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2, Briefcase, ClipboardList, Sparkles } from 'lucide-react'
+import { Building2, Briefcase, ChevronRight, ClipboardList, Sparkles } from 'lucide-react'
+import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
 import { ProgressBar } from '@/components/trainee/ProgressBar'
 import { Button } from '@/components/ui/button'
 import { useFeedbackStatus } from '@/hooks/useFeedback'
-import { useTraineeDashboard } from '@/hooks/useTrainee'
-import type { AcceptanceCheckType, TaskPriority } from '@/types/trainee'
+import {
+  useAddTraineeTaskComment,
+  useCompleteTraineeTask,
+  useStartTraineeTask,
+  useTraineeDashboard,
+} from '@/hooks/useTrainee'
+import type { TaskProgressBlock } from '@/types/trainee'
+import { cn } from '@/lib/utils'
 
 const blockIcons: Record<string, typeof Building2> = {
   onboarding: Building2,
@@ -12,20 +20,16 @@ const blockIcons: Record<string, typeof Building2> = {
   work: Briefcase,
 }
 
-const priorityLabels: Record<TaskPriority, string> = {
-  LOW: 'Низкий',
-  MEDIUM: 'Средний',
-  HIGH: 'Высокий',
-}
-
-const acceptanceLabels: Record<AcceptanceCheckType, string> = {
-  MACHINE: 'Проверяется машиной',
-  USER: 'Проверяется пользователем',
-}
-
 export function TraineeDashboardPage() {
   const { data, isLoading, isError } = useTraineeDashboard()
   const { data: feedbackStatus } = useFeedbackStatus()
+  const startTask = useStartTraineeTask()
+  const completeTask = useCompleteTraineeTask()
+  const addComment = useAddTraineeTaskComment()
+
+  const [selectedBlock, setSelectedBlock] = useState<TaskProgressBlock | null>(null)
+  const [activeTaskId, setActiveTaskId] = useState<number | null>(null)
+  const [activeAction, setActiveAction] = useState<'start' | 'complete' | 'comment' | null>(null)
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка…</p>
@@ -39,11 +43,52 @@ export function TraineeDashboardPage() {
     )
   }
 
+  const handleStart = async (taskId: number) => {
+    setActiveTaskId(taskId)
+    setActiveAction('start')
+    try {
+      await startTask.mutateAsync(taskId)
+    } finally {
+      setActiveTaskId(null)
+      setActiveAction(null)
+    }
+  }
+
+  const handleComplete = async (taskId: number) => {
+    setActiveTaskId(taskId)
+    setActiveAction('complete')
+    try {
+      await completeTask.mutateAsync(taskId)
+    } finally {
+      setActiveTaskId(null)
+      setActiveAction(null)
+    }
+  }
+
+  const handleComment = async (taskId: number, text: string) => {
+    setActiveTaskId(taskId)
+    setActiveAction('comment')
+    try {
+      await addComment.mutateAsync({ taskId, text })
+    } finally {
+      setActiveTaskId(null)
+      setActiveAction(null)
+    }
+  }
+
+  const openBlock = (block: TaskProgressBlock) => {
+    const fresh = data.taskBlocks.find((item) => item.id === block.id) ?? block
+    setSelectedBlock(fresh)
+  }
+
+  const dialogBlock =
+    selectedBlock && data.taskBlocks.find((block) => block.id === selectedBlock.id)
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-[#1A1A2E]">Мои задачи</h1>
       <p className="mt-1 text-sm text-gray-500">
-        Прогресс по трём направлениям стажировки
+        Прогресс по трём направлениям стажировки. Нажмите на блок, чтобы открыть все задачи.
       </p>
 
       {feedbackStatus?.canSubmitThisWeek && (
@@ -74,53 +119,54 @@ export function TraineeDashboardPage() {
       <div className="mt-8 grid gap-6 md:grid-cols-1 lg:grid-cols-3">
         {data.taskBlocks.map((block) => {
           const Icon = blockIcons[block.id] ?? Building2
+          const completedCount = block.tasks.filter((task) => task.status === 'COMPLETED').length
+          const inProgressCount = block.tasks.filter((task) => task.status === 'IN_PROGRESS').length
+
           return (
-            <section
+            <button
               key={block.id}
-              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+              type="button"
+              onClick={() => openBlock(block)}
+              className={cn(
+                'rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition-colors',
+                'hover:border-primary/30 hover:bg-orange-50/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary'
+              )}
             >
               <div className="mb-5 flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-50">
                   <Icon className="h-5 w-5 text-primary" />
                 </div>
-                <div>
-                  <h2 className="font-semibold text-[#1A1A2E]">{block.title}</h2>
-                  <p className="mt-0.5 text-xs text-gray-500">Выполнено {block.progress}%</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="font-semibold text-[#1A1A2E]">{block.title}</h2>
+                    <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-500">
+                    {block.tasks.length === 0
+                      ? 'Нет задач'
+                      : `${completedCount} завершено · ${inProgressCount} в работе · ${block.tasks.length} всего`}
+                  </p>
                 </div>
               </div>
               <ProgressBar label="Прогресс" value={block.progress} />
-              <div className="mt-5 space-y-3">
-                {block.tasks.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500">
-                    В этом блоке пока нет задач.
-                  </p>
-                ) : (
-                  block.tasks.map((task) => (
-                    <article key={task.id} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-                      <p className="font-medium text-[#1A1A2E]">{task.description}</p>
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-500">
-                        <span className="rounded-full bg-white px-2 py-1">
-                          Дедлайн: {task.deadline}
-                        </span>
-                        <span className="rounded-full bg-white px-2 py-1">
-                          {priorityLabels[task.priority]}
-                        </span>
-                        <span className="rounded-full bg-white px-2 py-1">
-                          {acceptanceLabels[task.acceptanceCheckType]}
-                        </span>
-                      </div>
-                      <p className="mt-3 text-sm text-gray-600">
-                        <span className="font-medium text-[#1A1A2E]">Критерии:</span>{' '}
-                        {task.acceptanceCriteria}
-                      </p>
-                    </article>
-                  ))
-                )}
-              </div>
-            </section>
+              <p className="mt-4 text-sm font-medium text-primary">Открыть список задач</p>
+            </button>
           )
         })}
       </div>
+
+      <TaskBlockDialog
+        block={dialogBlock ?? null}
+        open={Boolean(dialogBlock)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedBlock(null)
+        }}
+        onStart={handleStart}
+        onComplete={handleComplete}
+        onComment={handleComment}
+        activeTaskId={activeTaskId}
+        activeAction={activeAction}
+      />
     </div>
   )
 }

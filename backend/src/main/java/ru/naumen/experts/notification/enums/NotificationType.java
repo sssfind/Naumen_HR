@@ -6,5 +6,8 @@ public enum NotificationType {
     PROFILE_UPDATED,
     FEEDBACK_SUBMITTED,
     FEEDBACK_RISK,
+    TASK_STARTED,
+    TASK_COMPLETED,
+    TASK_COMMENT,
     SYSTEM
 }

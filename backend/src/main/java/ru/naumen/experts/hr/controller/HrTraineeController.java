@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.naumen.experts.auth.jwt.JwtAuthenticationPrincipal;
 import ru.naumen.experts.hr.service.HrTraineeService;
 import ru.naumen.experts.user.dto.EmployeeResponse;
+import ru.naumen.experts.user.dto.TraineeDashboardResponse;
 import ru.naumen.experts.user.dto.TraineeProfileResponse;
 
 import java.util.List;
@@ -38,6 +39,14 @@ public class HrTraineeController {
             @AuthenticationPrincipal JwtAuthenticationPrincipal principal,
             @PathVariable Long traineeId) {
         return ResponseEntity.ok(hrTraineeService.getTraineeProfile(principal.getUserId(), traineeId));
+    }
+
+    @Operation(summary = "Задачи и прогресс стажёра")
+    @GetMapping("/{traineeId}/dashboard")
+    public ResponseEntity<TraineeDashboardResponse> getTraineeDashboard(
+            @AuthenticationPrincipal JwtAuthenticationPrincipal principal,
+            @PathVariable Long traineeId) {
+        return ResponseEntity.ok(hrTraineeService.getTraineeDashboard(principal.getUserId(), traineeId));
     }
 
     @Operation(summary = "Назначить стажёра себе")

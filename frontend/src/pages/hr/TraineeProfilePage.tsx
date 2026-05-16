@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone, Smile, Users } from 'lucide-react'
+import { ArrowLeft, Building2, Briefcase, ChevronRight, Mail, Phone, Smile, Sparkles, Users } from 'lucide-react'
+import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
+import { ProgressBar as TraineeProgressBar } from '@/components/trainee/ProgressBar'
 import { FeedbackResponseCard } from '@/components/feedback/FeedbackResponseCard'
 import { Button } from '@/components/ui/button'
 import { useTraineeFeedback } from '@/hooks/useFeedback'
-import { useTraineeProfile } from '@/hooks/useTrainees'
+import { useHrTraineeDashboard, useTraineeProfile } from '@/hooks/useTrainees'
+import type { TaskProgressBlock } from '@/types/trainee'
 import { cn } from '@/lib/utils'
 
 const moodLabels: Record<number, string> = {
@@ -12,6 +16,12 @@ const moodLabels: Record<number, string> = {
   3: 'Нормальное',
   4: 'Хорошее',
   5: 'Отличное',
+}
+
+const blockIcons: Record<string, typeof Building2> = {
+  onboarding: Building2,
+  skills: Sparkles,
+  work: Briefcase,
 }
 
 const progressBlocks = [
@@ -47,6 +57,8 @@ export function TraineeProfilePage() {
   const { data: trainee, isLoading, isError } = useTraineeProfile(numericTraineeId)
   const { data: feedbackHistory = [], isLoading: feedbackLoading } =
     useTraineeFeedback(numericTraineeId)
+  const { data: taskDashboard, isLoading: tasksLoading } = useHrTraineeDashboard(numericTraineeId)
+  const [selectedBlock, setSelectedBlock] = useState<TaskProgressBlock | null>(null)
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка профиля стажёра…</p>
@@ -182,6 +194,65 @@ export function TraineeProfilePage() {
               </div>
             </div>
           </section>
+
+          <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-[#1A1A2E]">Задачи стажёра</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Статусы, прогресс и комментарии по каждому блоку плана
+            </p>
+            {tasksLoading && <p className="mt-6 text-sm text-gray-500">Загрузка задач…</p>}
+            {!tasksLoading && taskDashboard && (
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {taskDashboard.taskBlocks.map((block) => {
+                  const Icon = blockIcons[block.id] ?? Building2
+                  const completedCount = block.tasks.filter((t) => t.status === 'COMPLETED').length
+                  const inProgressCount = block.tasks.filter((t) => t.status === 'IN_PROGRESS').length
+                  return (
+                    <button
+                      key={block.id}
+                      type="button"
+                      onClick={() => setSelectedBlock(block)}
+                      className={cn(
+                        'rounded-xl border border-gray-200 p-4 text-left transition-colors',
+                        'hover:border-primary/30 hover:bg-orange-50/30'
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <Icon className="h-5 w-5 text-primary" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-medium text-[#1A1A2E]">{block.title}</p>
+                            <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {block.tasks.length === 0
+                              ? 'Нет задач'
+                              : `${completedCount} завершено · ${inProgressCount} в работе`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <TraineeProgressBar label="Прогресс" value={block.progress} />
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          <TaskBlockDialog
+            block={
+              selectedBlock && taskDashboard
+                ? taskDashboard.taskBlocks.find((b) => b.id === selectedBlock.id) ?? selectedBlock
+                : null
+            }
+            open={Boolean(selectedBlock)}
+            onOpenChange={(open) => {
+              if (!open) setSelectedBlock(null)
+            }}
+            readOnly
+          />
 
           <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#1A1A2E]">Еженедельная обратная связь</h2>

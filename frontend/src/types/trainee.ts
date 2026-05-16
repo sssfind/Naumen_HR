@@ -1,6 +1,15 @@
 export type TraineePlanBlockType = 'ONBOARDING' | 'SKILLS' | 'WORK'
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH'
 export type AcceptanceCheckType = 'MACHINE' | 'USER'
+export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED'
+
+export interface TraineePlanTaskComment {
+  id: number
+  authorFullName: string
+  authorRole: string
+  text: string
+  createdAt: string
+}
 
 export interface TraineePlanTask {
   id: number
@@ -11,6 +20,10 @@ export interface TraineePlanTask {
   priority: TaskPriority
   acceptanceCriteria: string
   acceptanceCheckType: AcceptanceCheckType
+  status: TaskStatus
+  startedAt: string | null
+  completedAt: string | null
+  comments: TraineePlanTaskComment[]
 }
 
 export interface TraineePlanTaskRequest {

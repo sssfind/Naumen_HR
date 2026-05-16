@@ -10,7 +10,10 @@ import ru.naumen.experts.traineeplan.dto.TraineePlanResponse;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskRequest;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskResponse;
 import ru.naumen.experts.traineeplan.entity.TraineePlanTask;
+import ru.naumen.experts.traineeplan.entity.TraineePlanTaskComment;
 import ru.naumen.experts.traineeplan.enums.TraineePlanBlock;
+import ru.naumen.experts.traineeplan.mapper.TraineePlanTaskMapper;
+import ru.naumen.experts.traineeplan.repository.TraineePlanTaskCommentRepository;
 import ru.naumen.experts.traineeplan.repository.TraineePlanTaskRepository;
 import ru.naumen.experts.user.entity.User;
 import ru.naumen.experts.user.enums.UserRole;
@@ -27,6 +30,7 @@ public class TraineePlanService {
 
     private final UserRepository userRepository;
     private final TraineePlanTaskRepository taskRepository;
+    private final TraineePlanTaskCommentRepository commentRepository;
 
     @Transactional(readOnly = true)
     public TraineePlanResponse getPlanForHr(Long hrId, Long traineeId) {
@@ -76,10 +80,9 @@ public class TraineePlanService {
     }
 
     private TraineePlanResponse buildPlan(Long traineeId) {
-        Map<TraineePlanBlock, List<TraineePlanTaskResponse>> tasksByBlock = taskRepository
-                .findByTraineeIdOrderByDeadlineAscIdAsc(traineeId)
+        List<TraineePlanTask> tasks = taskRepository.findByTraineeIdOrderByDeadlineAscIdAsc(traineeId);
+        Map<TraineePlanBlock, List<TraineePlanTaskResponse>> tasksByBlock = mapTasksWithComments(tasks)
                 .stream()
-                .map(this::toTaskResponse)
                 .collect(Collectors.groupingBy(TraineePlanTaskResponse::getBlock));
 
         return TraineePlanResponse.builder()
@@ -120,15 +123,23 @@ public class TraineePlanService {
     }
 
     private TraineePlanTaskResponse toTaskResponse(TraineePlanTask task) {
-        return TraineePlanTaskResponse.builder()
-                .id(task.getId())
-                .block(task.getBlock())
-                .blockId(task.getBlock().getId())
-                .description(task.getDescription())
-                .deadline(task.getDeadline())
-                .priority(task.getPriority())
-                .acceptanceCriteria(task.getAcceptanceCriteria())
-                .acceptanceCheckType(task.getAcceptanceCheckType())
-                .build();
+        List<TraineePlanTaskComment> comments = commentRepository.findByTaskIdOrderByCreatedAtAsc(task.getId());
+        return TraineePlanTaskMapper.toResponse(task, comments);
+    }
+
+    private List<TraineePlanTaskResponse> mapTasksWithComments(List<TraineePlanTask> tasks) {
+        if (tasks.isEmpty()) {
+            return List.of();
+        }
+        List<Long> taskIds = tasks.stream().map(TraineePlanTask::getId).toList();
+        Map<Long, List<TraineePlanTaskComment>> commentsByTask = commentRepository
+                .findByTaskIdInOrderByCreatedAtAsc(taskIds)
+                .stream()
+                .collect(Collectors.groupingBy(c -> c.getTask().getId()));
+        return tasks.stream()
+                .map(task -> TraineePlanTaskMapper.toResponse(
+                        task,
+                        commentsByTask.getOrDefault(task.getId(), List.of())))
+                .toList();
     }
 }

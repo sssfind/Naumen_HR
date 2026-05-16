@@ -10,7 +10,9 @@ import ru.naumen.experts.exception.ForbiddenException;
 import ru.naumen.experts.exception.UserNotFoundException;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskResponse;
 import ru.naumen.experts.traineeplan.entity.TraineePlanTask;
-import ru.naumen.experts.traineeplan.enums.TraineePlanBlock;
+import ru.naumen.experts.traineeplan.entity.TraineePlanTaskComment;
+import ru.naumen.experts.traineeplan.mapper.TraineePlanTaskMapper;
+import ru.naumen.experts.traineeplan.repository.TraineePlanTaskCommentRepository;
 import ru.naumen.experts.traineeplan.repository.TraineePlanTaskRepository;
 import ru.naumen.experts.user.dto.PagedTraineeEmployeesResponse;
 import ru.naumen.experts.user.dto.TraineeDashboardResponse;
@@ -45,14 +47,14 @@ public class TraineeService {
 
     private final UserRepository userRepository;
     private final TraineePlanTaskRepository taskRepository;
+    private final TraineePlanTaskCommentRepository commentRepository;
 
     @Transactional(readOnly = true)
     public TraineeDashboardResponse getDashboard(Long traineeId) {
         User trainee = requireTrainee(traineeId);
-        Map<String, List<TraineePlanTaskResponse>> tasksByBlock = taskRepository
-                .findByTraineeIdOrderByDeadlineAscIdAsc(traineeId)
+        List<TraineePlanTask> tasks = taskRepository.findByTraineeIdOrderByDeadlineAscIdAsc(traineeId);
+        Map<String, List<TraineePlanTaskResponse>> tasksByBlock = mapTasksWithComments(tasks)
                 .stream()
-                .map(this::toTaskResponse)
                 .collect(Collectors.groupingBy(TraineePlanTaskResponse::getBlockId));
 
         return TraineeDashboardResponse.builder()
@@ -112,18 +114,20 @@ public class TraineeService {
                 .build();
     }
 
-    private TraineePlanTaskResponse toTaskResponse(TraineePlanTask task) {
-        TraineePlanBlock block = task.getBlock();
-        return TraineePlanTaskResponse.builder()
-                .id(task.getId())
-                .block(block)
-                .blockId(block.getId())
-                .description(task.getDescription())
-                .deadline(task.getDeadline())
-                .priority(task.getPriority())
-                .acceptanceCriteria(task.getAcceptanceCriteria())
-                .acceptanceCheckType(task.getAcceptanceCheckType())
-                .build();
+    private List<TraineePlanTaskResponse> mapTasksWithComments(List<TraineePlanTask> tasks) {
+        if (tasks.isEmpty()) {
+            return List.of();
+        }
+        List<Long> taskIds = tasks.stream().map(TraineePlanTask::getId).toList();
+        Map<Long, List<TraineePlanTaskComment>> commentsByTask = commentRepository
+                .findByTaskIdInOrderByCreatedAtAsc(taskIds)
+                .stream()
+                .collect(Collectors.groupingBy(c -> c.getTask().getId()));
+        return tasks.stream()
+                .map(task -> TraineePlanTaskMapper.toResponse(
+                        task,
+                        commentsByTask.getOrDefault(task.getId(), List.of())))
+                .toList();
     }
 
     private int safeProgress(Integer value) {

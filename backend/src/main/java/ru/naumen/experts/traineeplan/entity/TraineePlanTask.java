@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import ru.naumen.experts.traineeplan.enums.AcceptanceCheckType;
 import ru.naumen.experts.traineeplan.enums.TaskPriority;
+import ru.naumen.experts.traineeplan.enums.TaskStatus;
 import ru.naumen.experts.traineeplan.enums.TraineePlanBlock;
 import ru.naumen.experts.user.entity.User;
 
@@ -51,6 +52,17 @@ public class TraineePlanTask {
     @Enumerated(EnumType.STRING)
     @Column(name = "acceptance_check_type", nullable = false, length = 32)
     private AcceptanceCheckType acceptanceCheckType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 32)
+    @Builder.Default
+    private TaskStatus status = TaskStatus.NOT_STARTED;
+
+    @Column(name = "started_at")
+    private OffsetDateTime startedAt;
+
+    @Column(name = "completed_at")
+    private OffsetDateTime completedAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
