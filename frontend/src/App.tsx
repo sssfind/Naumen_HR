@@ -2,8 +2,13 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { queryClient } from '@/lib/queryClient'
+import { HrRoute } from '@/components/HrRoute'
+import { HrLayout } from '@/layouts/HrLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
+import { TraineesPage } from '@/pages/hr/TraineesPage'
+import { EmployeesPage } from '@/pages/hr/EmployeesPage'
+import { ProfilePage } from '@/pages/hr/ProfilePage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -37,6 +42,21 @@ export function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/dashboard/hr"
+            element={
+              <ProtectedRoute>
+                <HrRoute>
+                  <HrLayout />
+                </HrRoute>
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="trainees" replace />} />
+            <Route path="trainees" element={<TraineesPage />} />
+            <Route path="employees" element={<EmployeesPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
@@ -44,3 +64,4 @@ export function App() {
     </QueryClientProvider>
   )
 }
+

@@ -1,111 +1,64 @@
 # Naumen HR
 
-Backend API (Spring Boot 3, Java 21) — аутентификация пользователей с JWT и ролями `ROLE_EMPLOYEE` / `ROLE_HR`.
+Монорепозиторий: **backend** (Spring Boot API) и **frontend** (React + Vite).
 
-## Требования
-
-- JDK 21
-- Maven 3.9+
-- Node.js 20+ и npm (для фронтенда)
-- PostgreSQL 16 (локально или через Docker)
-
-## Локальный запуск
-
-### 1. База данных
-
-```bash
-docker compose up -d postgres
+```
+Naumen_HR/
+├── backend/          # Java 21, Maven, PostgreSQL
+├── frontend/         # React 18, TypeScript, Vite, Tailwind
+├── docker-compose.yml
+└── .env              # переменные для Docker (скопировать из .env.example)
 ```
 
-### 2. Переменные окружения
-
-Скопируйте пример и при необходимости измените секрет:
+## Быстрый старт (Docker)
 
 ```bash
 cp .env.example .env
+# задайте JWT_SECRET в .env
+docker compose up --build
 ```
 
-Для локального запуска без Docker достаточно задать `JWT_SECRET` (≥ 32 символов).
+| Сервис   | URL                        |
+|----------|----------------------------|
+| Frontend | http://localhost:3000      |
+| Backend  | http://localhost:8080      |
+| Swagger  | http://localhost:8080/swagger-ui.html |
 
-### 3. Приложение
+## Локальная разработка
+
+### Backend
 
 ```bash
+cd backend
 mvn spring-boot:run
 ```
 
-API: http://localhost:8080  
-Swagger UI: http://localhost:8080/swagger-ui.html  
-Health: http://localhost:8080/actuator/health
+Нужны: JDK 21, Maven 3.9+, PostgreSQL (`docker compose up -d postgres`).
 
-## Фронтенд (React + Vite)
-
-Страницы входа и регистрации: **http://localhost:5173** (не открывайте `:8080` в браузере — там только API).
-
-### Локально (бэкенд + фронт)
+### Frontend
 
 ```bash
-# Терминал 1 — API
-docker compose up -d postgres app
-# или: mvn spring-boot:run
-
-# Терминал 2 — UI
 cd frontend
 npm install
 npm run dev
 ```
 
-Откройте http://localhost:5173 — запросы `/api/*` проксируются на `http://localhost:8080`.
+UI: http://localhost:5173 — запросы `/api` проксируются на backend (см. `frontend/vite.config.ts`).
 
-### Всё в Docker (postgres + app + frontend)
-
-```bash
-cp .env.example .env
-docker compose up --build
-```
-
-UI: http://localhost:5173
-
-## Запуск в Docker (только API + postgres)
+## Сборка
 
 ```bash
-cp .env.example .env
-# отредактируйте JWT_SECRET в .env
-docker compose up --build postgres app
+cd backend && mvn -DskipTests package
+cd frontend && npm run build
 ```
-
-## Сборка JAR
-
-```bash
-mvn -DskipTests package
-java -jar target/naumen-hr-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
-```
-
-## API
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| POST | `/api/v1/auth/register` | Регистрация |
-| POST | `/api/v1/auth/login` | Вход, выдача JWT |
-| GET | `/api/v1/auth/me` | Текущий пользователь (Bearer JWT) |
-| POST | `/api/v1/auth/logout` | Выход (удалить токен на клиенте) |
-
-Регистрация и вход допускают только email с доменом из `ALLOWED_EMAIL_DOMAIN` (по умолчанию `naumen.ru`).
 
 ## Конфигурация
 
+Корневой `.env` — для `docker compose` (backend).  
+`frontend/.env.example` — для локального Vite (опционально).
+
 | Переменная | Описание |
 |------------|----------|
-| `SPRING_DATASOURCE_URL` | JDBC URL PostgreSQL |
-| `SPRING_DATASOURCE_USERNAME` | Пользователь БД |
-| `SPRING_DATASOURCE_PASSWORD` | Пароль БД |
-| `JWT_SECRET` | Секрет подписи JWT (обязательно сменить в prod) |
-| `JWT_EXPIRATION_MS` | Срок жизни токена, мс (по умолчанию 86400000) |
-| `ALLOWED_EMAIL_DOMAIN` | Домен корпоративной почты |
-| `SERVER_PORT` | Порт HTTP (по умолчанию 8080) |
-| `SPRING_PROFILES_ACTIVE` | `prod` отключает Swagger UI |
-
-## Тесты
-
-```bash
-mvn test
-```
+| `JWT_SECRET` | Секрет JWT (≥ 32 символов) |
+| `SPRING_DATASOURCE_*` | Подключение к PostgreSQL |
+| `ALLOWED_EMAIL_DOMAIN` | Домен почты (по умолчанию `naumen.ru`) |
