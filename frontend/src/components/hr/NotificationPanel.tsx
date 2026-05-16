@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bell, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -7,7 +8,13 @@ import {
   useNotifications,
   useUnreadCount,
 } from '@/hooks/useNotifications'
+import { traineeNotificationLink } from '@/lib/notificationLinks'
+import type { Notification, NotificationType } from '@/types/notification'
 import { cn } from '@/lib/utils'
+
+interface NotificationPanelProps {
+  resolveLink?: (type: NotificationType) => string | null
+}
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleString('ru-RU', {
@@ -18,13 +25,23 @@ function formatTime(iso: string) {
   })
 }
 
-export function NotificationPanel() {
+export function NotificationPanel({ resolveLink }: NotificationPanelProps) {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const { data: notifications = [], isLoading } = useNotifications()
   const { data: unreadCount = 0 } = useUnreadCount()
   const markRead = useMarkNotificationRead()
   const markAllRead = useMarkAllNotificationsRead()
+
+  function handleNotificationClick(n: Notification) {
+    if (!n.read) markRead.mutate(n.id)
+    const link = resolveLink?.(n.type) ?? traineeNotificationLink(n.type)
+    if (link) {
+      setOpen(false)
+      navigate(link)
+    }
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -86,9 +103,7 @@ export function NotificationPanel() {
                   'w-full border-b border-gray-50 px-4 py-3 text-left transition-colors hover:bg-gray-50',
                   !n.read && 'bg-orange-50/50'
                 )}
-                onClick={() => {
-                  if (!n.read) markRead.mutate(n.id)
-                }}
+                onClick={() => handleNotificationClick(n)}
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-medium text-[#1A1A2E]">{n.title}</p>

@@ -9,5 +9,9 @@ public enum NotificationType {
     TASK_STARTED,
     TASK_COMPLETED,
     TASK_COMMENT,
+    TASK_DUE_SOON,
+    TASK_OVERDUE,
+    FEEDBACK_DUE,
+    NEXT_STEP_REMINDER,
     SYSTEM
 }

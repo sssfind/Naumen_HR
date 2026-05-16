@@ -1,6 +1,9 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { BookOpen, ClipboardList, Home, LogOut, User } from 'lucide-react'
+import { NotificationPanel } from '@/components/hr/NotificationPanel'
 import { Button } from '@/components/ui/button'
+import { useSyncTraineeReminders } from '@/hooks/useTraineeReminders'
+import { traineeNotificationLink } from '@/lib/notificationLinks'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -14,6 +17,7 @@ export function TraineeLayout() {
   const navigate = useNavigate()
   const stored = localStorage.getItem('user')
   const user = stored ? JSON.parse(stored) : null
+  useSyncTraineeReminders()
 
   function handleLogout() {
     localStorage.removeItem('token')
@@ -57,9 +61,12 @@ export function TraineeLayout() {
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="border-b border-gray-200 bg-white px-8 py-4">
-          <p className="text-sm text-gray-500">Добро пожаловать</p>
-          <p className="font-semibold text-[#1A1A2E]">{user?.fullName ?? 'Стажёр'}</p>
+        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-8 py-4">
+          <div>
+            <p className="text-sm text-gray-500">Добро пожаловать</p>
+            <p className="font-semibold text-[#1A1A2E]">{user?.fullName ?? 'Стажёр'}</p>
+          </div>
+          <NotificationPanel resolveLink={traineeNotificationLink} />
         </header>
         <main className="flex-1 p-8">
           <Outlet />

@@ -51,6 +51,12 @@ public class NotificationService {
 
     @Transactional
     public void createNotification(Long userId, String title, String message, NotificationType type) {
+        createNotification(userId, title, message, type, null);
+    }
+
+    @Transactional
+    public void createNotification(
+            Long userId, String title, String message, NotificationType type, String dedupKey) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -60,9 +66,23 @@ public class NotificationService {
                 .message(message)
                 .type(type)
                 .isRead(false)
+                .dedupKey(dedupKey)
                 .build();
 
         notificationRepository.save(notification);
+    }
+
+    /**
+     * @return true if a new notification was created
+     */
+    @Transactional
+    public boolean createNotificationIfAbsent(
+            Long userId, String title, String message, NotificationType type, String dedupKey) {
+        if (dedupKey != null && notificationRepository.existsByUserIdAndDedupKey(userId, dedupKey)) {
+            return false;
+        }
+        createNotification(userId, title, message, type, dedupKey);
+        return true;
     }
 
     private NotificationResponse toResponse(Notification notification) {

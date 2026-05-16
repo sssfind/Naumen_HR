@@ -24,6 +24,11 @@ server:
   forward-headers-strategy: framework
 
 app:
+  reminders:
+    enabled: ${REMINDERS_ENABLED:true}
+    cron: ${REMINDERS_CRON:0 0 9 * * *}
+    due-soon-days: 1
+    feedback-reminder-from-day: 4
   security:
     allowed-email-domain: ${ALLOWED_EMAIL_DOMAIN:naumen.ru}
   jwt:
