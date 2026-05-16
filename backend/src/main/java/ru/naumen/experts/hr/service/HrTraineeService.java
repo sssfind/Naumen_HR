@@ -117,13 +117,6 @@ public class HrTraineeService {
         trainee.setHr(hr);
         User saved = userRepository.save(trainee);
 
-        notificationService.createNotification(
-                hrId,
-                "Стажёр назначен",
-                "Вам назначен стажёр: " + saved.getFullName(),
-                NotificationType.TRAINEE_ASSIGNED
-        );
-
         if (!hrId.equals(traineeId)) {
             notificationService.createNotification(
                     trainee.getId(),
@@ -147,13 +140,6 @@ public class HrTraineeService {
 
         trainee.setHr(null);
         User saved = userRepository.save(trainee);
-
-        notificationService.createNotification(
-                hrId,
-                "Стажёр снят",
-                "Стажёр " + saved.getFullName() + " больше не закреплён за вами",
-                NotificationType.TRAINEE_UNASSIGNED
-        );
 
         return UserMapper.toEmployeeResponse(saved);
     }
