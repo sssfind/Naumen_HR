@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
@@ -16,22 +15,11 @@ import {
 import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
 import { ProgressBar as TraineeProgressBar } from '@/components/trainee/ProgressBar'
 import { formatDateTime } from '@/components/trainee/planTaskLabels'
-=======
-import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, Briefcase, ChevronRight, Mail, Phone, Smile, Sparkles, Users } from 'lucide-react'
-import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
-import { ProgressBar as TraineeProgressBar } from '@/components/trainee/ProgressBar'
->>>>>>> ff10bd43abb68d97dc06009e9d77c2cd9b055409
 import { FeedbackResponseCard } from '@/components/feedback/FeedbackResponseCard'
 import { Button } from '@/components/ui/button'
 import { useTraineeFeedback } from '@/hooks/useFeedback'
 import { useHrTraineeDashboard, useTraineeProfile } from '@/hooks/useTrainees'
-<<<<<<< HEAD
 import type { TaskProgressBlock, TraineePlanTask } from '@/types/trainee'
-=======
-import type { TaskProgressBlock } from '@/types/trainee'
->>>>>>> ff10bd43abb68d97dc06009e9d77c2cd9b055409
 import { cn } from '@/lib/utils'
 
 const RECENT_COMPLETED_TASKS_LIMIT = 5
@@ -48,32 +36,6 @@ const blockIcons: Record<string, typeof Building2> = {
   onboarding: Building2,
   skills: Sparkles,
   work: Briefcase,
-<<<<<<< HEAD
-=======
-}
-
-const progressBlocks = [
-  { key: 'progressBlockOne', label: 'Блок 1' },
-  { key: 'progressBlockTwo', label: 'Блок 2' },
-  { key: 'progressBlockThree', label: 'Блок 3' },
-] as const
-
-function ProgressBar({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="font-medium text-[#1A1A2E]">{label}</span>
-        <span className="text-gray-500">{value}%</span>
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
-        />
-      </div>
-    </div>
-  )
->>>>>>> ff10bd43abb68d97dc06009e9d77c2cd9b055409
 }
 
 type CompletedTaskWithBlock = TraineePlanTask & { blockTitle: string }
@@ -90,7 +52,6 @@ export function TraineeProfilePage() {
     useTraineeFeedback(numericTraineeId)
   const { data: taskDashboard, isLoading: tasksLoading } = useHrTraineeDashboard(numericTraineeId)
   const [selectedBlock, setSelectedBlock] = useState<TaskProgressBlock | null>(null)
-<<<<<<< HEAD
 
   const recentCompletedTasks = useMemo((): CompletedTaskWithBlock[] => {
     if (!taskDashboard) return []
@@ -106,8 +67,6 @@ export function TraineeProfilePage() {
       )
       .slice(0, RECENT_COMPLETED_TASKS_LIMIT)
   }, [taskDashboard])
-=======
->>>>>>> ff10bd43abb68d97dc06009e9d77c2cd9b055409
 
   if (isLoading) {
     return <p className="text-gray-500">Загрузка профиля стажёра…</p>
