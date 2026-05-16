@@ -9,6 +9,21 @@ export interface AdaptationPathPhase {
   status: PhaseStatus
 }
 
+export type TaskSliceStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED'
+
+export interface AdaptationPathWeekSlice {
+  taskId: number
+  blockId: string
+  blockTitle: string
+  status: TaskSliceStatus
+  overdue: boolean
+}
+
+export interface AdaptationPathWeek {
+  weekNumber: number
+  slices: AdaptationPathWeekSlice[]
+}
+
 export interface AdaptationPathMilestone {
   taskId: number
   title: string
@@ -28,4 +43,5 @@ export interface AdaptationPath {
   currentPhaseId: string
   phases: AdaptationPathPhase[]
   milestones: AdaptationPathMilestone[]
+  weeks: AdaptationPathWeek[]
 }

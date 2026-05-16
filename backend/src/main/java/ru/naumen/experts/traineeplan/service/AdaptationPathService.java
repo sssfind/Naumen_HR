@@ -7,6 +7,8 @@ import ru.naumen.experts.traineeplan.enums.TraineePlanBlock;
 import ru.naumen.experts.user.dto.AdaptationPathResponse;
 import ru.naumen.experts.user.dto.AdaptationPathResponse.AdaptationPathMilestoneDto;
 import ru.naumen.experts.user.dto.AdaptationPathResponse.AdaptationPathPhaseDto;
+import ru.naumen.experts.user.dto.AdaptationPathResponse.AdaptationPathWeekDto;
+import ru.naumen.experts.user.dto.AdaptationPathResponse.AdaptationPathWeekSliceDto;
 import ru.naumen.experts.user.entity.User;
 
 import java.time.LocalDate;
@@ -53,6 +55,8 @@ public class AdaptationPathService {
                 .map(task -> toMilestone(task, startDate))
                 .toList();
 
+        List<AdaptationPathWeekDto> weeks = buildWeeks(startDate, totalWeeks, tasks);
+
         return AdaptationPathResponse.builder()
                 .startDate(startDate)
                 .endDate(endDate)
@@ -61,6 +65,42 @@ public class AdaptationPathService {
                 .currentPhaseId(currentPhaseId)
                 .phases(phases)
                 .milestones(milestones)
+                .weeks(weeks)
+                .build();
+    }
+
+    private List<AdaptationPathWeekDto> buildWeeks(LocalDate startDate, int totalWeeks, List<TraineePlanTask> tasks) {
+        LocalDate today = LocalDate.now();
+        Map<Integer, List<TraineePlanTask>> tasksByWeek = tasks.stream()
+                .collect(Collectors.groupingBy(
+                        t -> weekIndex(startDate, t.getDeadline()),
+                        () -> new java.util.TreeMap<>(),
+                        Collectors.toList()));
+
+        List<AdaptationPathWeekDto> weeks = new ArrayList<>();
+        for (int week = 1; week <= totalWeeks; week++) {
+            List<TraineePlanTask> weekTasks = tasksByWeek.getOrDefault(week, List.of());
+            List<AdaptationPathWeekSliceDto> slices = weekTasks.stream()
+                    .sorted(Comparator.comparing(TraineePlanTask::getDeadline).thenComparing(TraineePlanTask::getId))
+                    .map(task -> toWeekSlice(task, today))
+                    .toList();
+            weeks.add(AdaptationPathWeekDto.builder()
+                    .weekNumber(week)
+                    .slices(slices)
+                    .build());
+        }
+        return weeks;
+    }
+
+    private AdaptationPathWeekSliceDto toWeekSlice(TraineePlanTask task, LocalDate today) {
+        TaskStatus status = task.getStatus() != null ? task.getStatus() : TaskStatus.NOT_STARTED;
+        boolean overdue = status != TaskStatus.COMPLETED && task.getDeadline().isBefore(today);
+        return AdaptationPathWeekSliceDto.builder()
+                .taskId(task.getId())
+                .blockId(task.getBlock().getId())
+                .blockTitle(task.getBlock().getTitle())
+                .status(status.name())
+                .overdue(overdue)
                 .build();
     }
 

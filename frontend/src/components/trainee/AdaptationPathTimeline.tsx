@@ -1,12 +1,47 @@
 import { Link } from 'react-router-dom'
 import { CheckCircle2, Circle, Flag, MapPin, PlayCircle } from 'lucide-react'
-import type { AdaptationPath, AdaptationPathMilestone } from '@/types/adaptationPath'
+import type {
+  AdaptationPath,
+  AdaptationPathMilestone,
+  AdaptationPathWeekSlice,
+} from '@/types/adaptationPath'
 import { cn } from '@/lib/utils'
 
-const phaseColors: Record<string, { bar: string }> = {
-  onboarding: { bar: 'bg-sky-500' },
-  skills: { bar: 'bg-violet-500' },
-  work: { bar: 'bg-emerald-500' },
+const blockBarColors: Record<
+  string,
+  { completed: string; inProgress: string; pending: string }
+> = {
+  onboarding: {
+    completed: 'bg-sky-500',
+    inProgress: 'bg-sky-300',
+    pending: 'bg-sky-100',
+  },
+  skills: {
+    completed: 'bg-violet-500',
+    inProgress: 'bg-violet-300',
+    pending: 'bg-violet-100',
+  },
+  work: {
+    completed: 'bg-emerald-500',
+    inProgress: 'bg-emerald-300',
+    pending: 'bg-emerald-100',
+  },
+}
+
+const defaultBlockColors = blockBarColors.onboarding
+
+function sliceColor(slice: AdaptationPathWeekSlice) {
+  const palette = blockBarColors[slice.blockId] ?? defaultBlockColors
+  if (slice.status === 'COMPLETED') {
+    return palette.completed
+  }
+  if (slice.overdue) {
+    return 'bg-red-400'
+  }
+  if (slice.status === 'IN_PROGRESS') {
+    return palette.inProgress
+  }
+  return palette.pending
 }
 
 function formatDate(iso: string) {
@@ -53,7 +88,14 @@ export function AdaptationPathTimeline({
   blockLinkPrefix = '/dashboard/trainee/blocks',
   compact = false,
 }: AdaptationPathTimelineProps) {
-  const { totalWeeks, currentWeek, phases, milestones, startDate, endDate } = path
+  const { totalWeeks, currentWeek, phases, milestones, startDate, endDate, weeks } = path
+  const weekSegments = weeks?.length === totalWeeks ? weeks : buildFallbackWeeks(totalWeeks, phases)
+
+  const completedSlices = weekSegments.reduce(
+    (n, w) => n + w.slices.filter((s) => s.status === 'COMPLETED').length,
+    0
+  )
+  const totalSlices = weekSegments.reduce((n, w) => n + w.slices.length, 0)
 
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -64,6 +106,12 @@ export function AdaptationPathTimeline({
           </h2>
           <p className="mt-0.5 text-sm text-gray-500">
             {formatDate(startDate)} — {formatDate(endDate)} · {totalWeeks} нед.
+            {totalSlices > 0 && (
+              <span className="text-gray-400">
+                {' '}
+                · выполнено {completedSlices} из {totalSlices} задач на шкале
+              </span>
+            )}
           </p>
         </div>
         <div className="rounded-xl bg-orange-50 px-4 py-2 text-center">
@@ -75,44 +123,83 @@ export function AdaptationPathTimeline({
         </div>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-gray-600">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-6 rounded-sm bg-sky-500" />
+          Знакомство — сделано
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-6 rounded-sm bg-violet-500" />
+          Навыки — сделано
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-6 rounded-sm bg-emerald-500" />
+          Работа — сделано
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-6 rounded-sm bg-sky-100 ring-1 ring-sky-200" />
+          Запланировано
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-6 rounded-sm bg-red-400" />
+          Просрочено
+        </span>
+      </div>
+
       <div className="mt-6 flex flex-wrap gap-4 text-xs">
         {phases.map((phase) => {
-          const colors = phaseColors[phase.id] ?? phaseColors.onboarding
+          const colors = blockBarColors[phase.id] ?? defaultBlockColors
           return (
             <div key={phase.id} className="flex items-center gap-2">
-              <span className={cn('h-2.5 w-2.5 rounded-full', colors.bar)} />
+              <span className={cn('h-2.5 w-2.5 rounded-full', colors.completed)} />
               <span className="text-gray-600">
                 {phase.title}
-                <span className="text-gray-400">
-                  {' '}
-                  (нед. {phase.weekFrom}–{phase.weekTo}, {phase.progress}%)
-                </span>
+                <span className="text-gray-400"> ({phase.progress}% этапа)</span>
               </span>
             </div>
           )
         })}
       </div>
 
-      <div className="mt-6 overflow-x-auto pb-2">
+      <div className="mt-4 overflow-x-auto pb-2">
         <div className="relative min-w-[640px]">
-          <div className="flex h-3 overflow-hidden rounded-full bg-gray-100">
-            {phases.map((phase) => {
-              const widthPercent = ((phase.weekTo - phase.weekFrom + 1) / totalWeeks) * 100
-              const colors = phaseColors[phase.id] ?? phaseColors.onboarding
-              return (
-                <div
-                  key={phase.id}
-                  title={`${phase.title}: ${phase.progress}%`}
-                  className={cn(
-                    colors.bar,
-                    'h-full opacity-90',
-                    phase.status === 'UPCOMING' && 'opacity-40',
-                    phase.status === 'CURRENT' && 'ring-2 ring-primary/30 ring-offset-1'
-                  )}
-                  style={{ width: `${widthPercent}%` }}
-                />
-              )
-            })}
+          <div className="flex h-4 gap-0.5 overflow-hidden rounded-full bg-gray-100 p-0.5">
+            {weekSegments.map((week) => (
+              <div
+                key={week.weekNumber}
+                className={cn(
+                  'flex min-w-0 flex-1 gap-px',
+                  week.weekNumber === currentWeek && 'ring-2 ring-primary/40 ring-offset-1 rounded-sm'
+                )}
+                title={`Неделя ${week.weekNumber}`}
+              >
+                {week.slices.length === 0 ? (
+                  <div
+                    className="h-full w-full rounded-sm bg-gray-200/80"
+                    title={`Неделя ${week.weekNumber}: нет задач`}
+                  />
+                ) : (
+                  week.slices.map((slice) => (
+                    <div
+                      key={slice.taskId}
+                      className={cn(
+                        'h-full min-w-[3px] flex-1 rounded-sm transition-colors duration-300',
+                        sliceColor(slice)
+                      )}
+                      title={`${slice.blockTitle}: ${
+                        slice.status === 'COMPLETED'
+                          ? 'выполнено'
+                          : slice.overdue
+                            ? 'просрочено'
+                            : slice.status === 'IN_PROGRESS'
+                              ? 'в работе'
+                              : 'запланировано'
+                      }`}
+                    />
+                  ))
+                )}
+              </div>
+            ))}
           </div>
 
           <div
@@ -124,20 +211,26 @@ export function AdaptationPathTimeline({
           />
 
           <div className="mt-3 flex justify-between text-[10px] font-medium text-gray-400">
-            {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => {
-              const hasMilestone = milestones.some((m) => m.weekNumber === week)
+            {weekSegments.map((week) => {
+              const hasMilestone = milestones.some((m) => m.weekNumber === week.weekNumber)
+              const anyCompleted = week.slices.some((s) => s.status === 'COMPLETED')
               return (
                 <span
-                  key={week}
+                  key={week.weekNumber}
                   className={cn(
                     'flex flex-col items-center gap-0.5',
-                    week === currentWeek && 'font-bold text-primary',
-                    hasMilestone && week !== currentWeek && 'text-amber-600'
+                    week.weekNumber === currentWeek && 'font-bold text-primary',
+                    hasMilestone && week.weekNumber !== currentWeek && 'text-amber-600',
+                    anyCompleted && week.weekNumber !== currentWeek && !hasMilestone && 'text-gray-600'
                   )}
-                  title={hasMilestone ? 'Контрольная точка' : undefined}
+                  title={
+                    week.slices.length
+                      ? `Неделя ${week.weekNumber}: ${week.slices.filter((s) => s.status === 'COMPLETED').length}/${week.slices.length} задач`
+                      : undefined
+                  }
                 >
                   {hasMilestone && <MapPin className="h-2.5 w-2.5" />}
-                  {week}
+                  {week.weekNumber}
                 </span>
               )
             })}
@@ -208,4 +301,29 @@ export function AdaptationPathTimeline({
       )}
     </section>
   )
+}
+
+function buildFallbackWeeks(
+  totalWeeks: number,
+  phases: AdaptationPath['phases']
+): AdaptationPath['weeks'] {
+  return Array.from({ length: totalWeeks }, (_, i) => {
+    const weekNumber = i + 1
+    const phase = phases.find((p) => weekNumber >= p.weekFrom && weekNumber <= p.weekTo)
+    if (!phase || phase.progress === 0) {
+      return { weekNumber, slices: [] }
+    }
+    return {
+      weekNumber,
+      slices: [
+        {
+          taskId: -weekNumber,
+          blockId: phase.id,
+          blockTitle: phase.title,
+          status: phase.progress >= 100 ? 'COMPLETED' : 'NOT_STARTED',
+          overdue: false,
+        } as AdaptationPathWeekSlice,
+      ],
+    }
+  })
 }

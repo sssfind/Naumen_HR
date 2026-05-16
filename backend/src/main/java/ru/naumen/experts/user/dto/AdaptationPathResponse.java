@@ -17,6 +17,26 @@ public class AdaptationPathResponse {
     private String currentPhaseId;
     private List<AdaptationPathPhaseDto> phases;
     private List<AdaptationPathMilestoneDto> milestones;
+    /** Понедельные сегменты шкалы: цвет зависит от выполненных задач */
+    private List<AdaptationPathWeekDto> weeks;
+
+    @Data
+    @Builder
+    public static class AdaptationPathWeekDto {
+        private int weekNumber;
+        private List<AdaptationPathWeekSliceDto> slices;
+    }
+
+    @Data
+    @Builder
+    public static class AdaptationPathWeekSliceDto {
+        private Long taskId;
+        private String blockId;
+        private String blockTitle;
+        /** NOT_STARTED | IN_PROGRESS | COMPLETED */
+        private String status;
+        private boolean overdue;
+    }
 
     @Data
     @Builder

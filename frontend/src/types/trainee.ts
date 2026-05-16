@@ -58,7 +58,7 @@ export interface TaskProgressBlock {
 export interface TraineeDashboard {
   taskBlocks: TaskProgressBlock[]
   totalProgress: number
-  adaptationPath: AdaptationPath | null
+  adaptationPath?: AdaptationPath | null
 }
 
 export interface TraineeEmployee {
