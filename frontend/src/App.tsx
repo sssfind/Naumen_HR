@@ -13,6 +13,8 @@ import { EmployeesPage } from '@/pages/hr/EmployeesPage'
 import { ProfilePage } from '@/pages/hr/ProfilePage'
 import { TraineeProfilePage as HrTraineeProfilePage } from '@/pages/hr/TraineeProfilePage'
 import { EditTraineePlanPage } from '@/pages/hr/EditTraineePlanPage'
+import { PlanTemplateDetailPage } from '@/pages/hr/PlanTemplateDetailPage'
+import { PlanTemplatesPage } from '@/pages/hr/PlanTemplatesPage'
 import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { TraineeBlockTasksPage } from '@/pages/trainee/BlockTasksPage'
 import { TraineeDashboardPage } from '@/pages/trainee/DashboardPage'
@@ -84,6 +86,8 @@ export function App() {
             }
           >
             <Route index element={<Navigate to="trainees" replace />} />
+            <Route path="plan-templates/:templateId" element={<PlanTemplateDetailPage />} />
+            <Route path="plan-templates" element={<PlanTemplatesPage />} />
             <Route path="trainees/:traineeId/plan" element={<EditTraineePlanPage />} />
             <Route path="trainees/:traineeId" element={<HrTraineeProfilePage />} />
             <Route path="trainees" element={<TraineesPage />} />

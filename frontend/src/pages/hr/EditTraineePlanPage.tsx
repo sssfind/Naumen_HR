@@ -5,6 +5,7 @@ import { statusBadgeClass, statusLabels } from '@/components/trainee/planTaskLab
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
+import { ApplyPlanTemplatePanel } from '@/components/hr/ApplyPlanTemplatePanel'
 import {
   useCreateTraineePlanTask,
   useDeleteTraineePlanTask,
@@ -76,6 +77,10 @@ export function EditTraineePlanPage() {
         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
           Не удалось загрузить план стажёра
         </div>
+      )}
+
+      {numericTraineeId && !isError && (
+        <ApplyPlanTemplatePanel traineeId={numericTraineeId} />
       )}
 
       {data && (

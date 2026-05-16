@@ -13,6 +13,9 @@ import ru.naumen.experts.auth.jwt.JwtAuthenticationPrincipal;
 import ru.naumen.experts.traineeplan.dto.TraineePlanResponse;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskRequest;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskResponse;
+import ru.naumen.experts.template.dto.ApplyPlanTemplateRequest;
+import ru.naumen.experts.template.dto.ApplyPlanTemplateResponse;
+import ru.naumen.experts.template.service.AdaptationPlanTemplateService;
 import ru.naumen.experts.traineeplan.service.TraineePlanService;
 
 @RestController
@@ -24,6 +27,7 @@ import ru.naumen.experts.traineeplan.service.TraineePlanService;
 public class HrTraineePlanController {
 
     private final TraineePlanService traineePlanService;
+    private final AdaptationPlanTemplateService adaptationPlanTemplateService;
 
     @Operation(summary = "План стажёра")
     @GetMapping
@@ -60,5 +64,17 @@ public class HrTraineePlanController {
             @PathVariable Long taskId) {
         traineePlanService.deleteTask(principal.getUserId(), traineeId, taskId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Применить шаблон плана к стажёру")
+    @PostMapping("/apply-template/{templateId}")
+    public ResponseEntity<ApplyPlanTemplateResponse> applyTemplate(
+            @AuthenticationPrincipal JwtAuthenticationPrincipal principal,
+            @PathVariable Long traineeId,
+            @PathVariable Long templateId,
+            @RequestBody(required = false) ApplyPlanTemplateRequest request) {
+        ApplyPlanTemplateRequest body = request != null ? request : new ApplyPlanTemplateRequest();
+        return ResponseEntity.ok(adaptationPlanTemplateService.applyToTrainee(
+                principal.getUserId(), traineeId, templateId, body));
     }
 }

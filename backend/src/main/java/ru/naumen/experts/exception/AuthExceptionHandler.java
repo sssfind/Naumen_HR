@@ -64,6 +64,12 @@ public class AuthExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(TemplateNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTemplateNotFound(TemplateNotFoundException ex,
+                                                                HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex,
                                                                HttpServletRequest request) {

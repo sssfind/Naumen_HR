@@ -96,6 +96,10 @@ public class TraineePlanService {
                 .build();
     }
 
+    public User requireAssignedTraineeForApply(Long hrId, Long traineeId) {
+        return requireAssignedTrainee(hrId, traineeId);
+    }
+
     private User requireAssignedTrainee(Long hrId, Long traineeId) {
         User trainee = requireTrainee(traineeId);
         if (trainee.getHr() == null || !trainee.getHr().getId().equals(hrId)) {
