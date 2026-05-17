@@ -3,6 +3,7 @@ package ru.naumen.experts.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import ru.naumen.experts.department.entity.Department;
 import ru.naumen.experts.user.enums.UserRole;
 
 import java.time.LocalDate;
@@ -34,6 +35,15 @@ public class User {
 
     @Column
     private String department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Department orgDepartment;
+
+    @Column(name = "responsibility_zone", length = 500)
+    private String responsibilityZone;
 
     @Column
     private String phone;

@@ -253,16 +253,39 @@ func buildPersonas(rng *rand.Rand) []traineePersona {
 	return personas
 }
 
+func lookupDepartmentID(ctx context.Context, pool *pgxpool.Pool, deptName string) interface{} {
+	var id int64
+	err := pool.QueryRow(ctx, `
+		SELECT id FROM departments WHERE name = $1 AND parent_id IS NOT NULL LIMIT 1`,
+		deptName).Scan(&id)
+	if err != nil {
+		return nil
+	}
+	return id
+}
+
+func responsibilityZone(position, dept string) string {
+	if position == "" {
+		return fmt.Sprintf("Сотрудник направления «%s»", dept)
+	}
+	return fmt.Sprintf("%s · направление «%s»", position, dept)
+}
+
 func seedHR(ctx context.Context, pool *pgxpool.Pool, passwordHash string) []int64 {
 	ids := make([]int64, 0, 3)
 	for i, c := range hrCharacters {
 		var id int64
 		phone := fmt.Sprintf("+7991%07d", 1000000+i*137)
+		hrDeptID := lookupDepartmentID(ctx, pool, "HR")
+		zone := responsibilityZone(c.Position, "HR")
 		err := pool.QueryRow(ctx, `
-			INSERT INTO users (email, password_hash, full_name, department, role, phone, position, team)
-			VALUES ($1, $2, $3, 'HR', 'ROLE_HR', $4, $5, 'HR Operations')
+			INSERT INTO users (
+				email, password_hash, full_name, department, department_id, role,
+				phone, position, team, responsibility_zone
+			)
+			VALUES ($1, $2, $3, 'HR', $4, 'ROLE_HR', $5, $6, 'HR Operations', $7)
 			RETURNING id`,
-			fmt.Sprintf("hr%d@naumen.ru", i+1), passwordHash, c.FullName, phone, c.Position).Scan(&id)
+			fmt.Sprintf("hr%d@naumen.ru", i+1), passwordHash, c.FullName, hrDeptID, phone, c.Position, zone).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки HR: %v", err)
 		}
@@ -293,10 +316,15 @@ func seedEmployees(ctx context.Context, pool *pgxpool.Pool, passwordHash string,
 			team = t
 		}
 		phone := fmt.Sprintf("+7992%07d", 2000000+i*97)
+		deptID := lookupDepartmentID(ctx, pool, c.Dept)
+		zone := responsibilityZone(c.Position, c.Dept)
 		_, err := pool.Exec(ctx, `
-			INSERT INTO users (email, password_hash, full_name, department, role, position, phone, team)
-			VALUES ($1, $2, $3, $4, 'ROLE_EMPLOYEE', $5, $6, $7)`,
-			fmt.Sprintf("emp%d@naumen.ru", i), passwordHash, c.FullName, c.Dept, c.Position, phone, team)
+			INSERT INTO users (
+				email, password_hash, full_name, department, department_id, role,
+				position, phone, team, responsibility_zone
+			)
+			VALUES ($1, $2, $3, $4, $5, 'ROLE_EMPLOYEE', $6, $7, $8, $9)`,
+			fmt.Sprintf("emp%d@naumen.ru", i), passwordHash, c.FullName, c.Dept, deptID, c.Position, phone, team, zone)
 		if err != nil {
 			log.Fatalf("Ошибка вставки сотрудника %d: %v", i, err)
 		}
@@ -317,16 +345,18 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 		hrID := hrIDs[p.HrIndex]
 		phone := fmt.Sprintf("+7993%07d", 3000000+p.Index*211)
 		var id int64
+		deptID := lookupDepartmentID(ctx, pool, c.Dept)
+		zone := responsibilityZone(c.Position, c.Dept)
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (
-				email, password_hash, full_name, department, role,
-				hr_id, team, phone, position, mood_level,
+				email, password_hash, full_name, department, department_id, role,
+				hr_id, team, phone, position, responsibility_zone, mood_level,
 				progress_block_one, progress_block_two, progress_block_three
 			)
-			VALUES ($1, $2, $3, $4, 'ROLE_TRAINEE', $5, $6, $7, $8, 3, 0, 0, 0)
+			VALUES ($1, $2, $3, $4, $5, 'ROLE_TRAINEE', $6, $7, $8, $9, $10, 3, 0, 0, 0)
 			RETURNING id`,
-			fmt.Sprintf("trainee%d@naumen.ru", p.Index), passwordHash, c.FullName, c.Dept,
-			hrID, p.Team, phone, c.Position).Scan(&id)
+			fmt.Sprintf("trainee%d@naumen.ru", p.Index), passwordHash, c.FullName, c.Dept, deptID,
+			hrID, p.Team, phone, c.Position, zone).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки стажера %d: %v", p.Index, err)
 		}
@@ -694,7 +724,7 @@ func waitForSchema(ctx context.Context, pool *pgxpool.Pool) error {
 
 func schemaReady(ctx context.Context, pool *pgxpool.Pool) bool {
 	tables := []string{
-		"users", "notifications", "feedback_responses",
+		"users", "departments", "notifications", "feedback_responses",
 		"trainee_plan_tasks", "trainee_plan_task_comments",
 	}
 	for _, table := range tables {

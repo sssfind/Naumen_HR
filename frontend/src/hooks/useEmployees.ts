@@ -1,17 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { PagedEmployees } from '@/types/user'
+import type { PagedDirectoryEmployees } from '@/types/employee'
 
-export function useEmployees(search: string, department: string, page: number) {
+export function useEmployees(search: string, departmentId: number | null, page: number) {
   return useQuery({
-    queryKey: ['employees', search, department, page],
+    queryKey: ['employees', search, departmentId, page],
     queryFn: async () => {
-      const { data } = await api.get<PagedEmployees>('/employees', {
+      const { data } = await api.get<PagedDirectoryEmployees>('/employees', {
         params: {
           search: search || undefined,
-          department: department || undefined,
+          departmentId: departmentId ?? undefined,
           page,
-          size: 20,
+          size: 12,
         },
       })
       return data

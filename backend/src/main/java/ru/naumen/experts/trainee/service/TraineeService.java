@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.naumen.experts.department.service.DepartmentService;
 import ru.naumen.experts.exception.ForbiddenException;
 import ru.naumen.experts.exception.UserNotFoundException;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskResponse;
@@ -50,6 +51,7 @@ public class TraineeService {
     private final TraineePlanTaskRepository taskRepository;
     private final TraineePlanTaskCommentRepository commentRepository;
     private final AdaptationPathService adaptationPathService;
+    private final DepartmentService departmentService;
 
     @Transactional(readOnly = true)
     public TraineeDashboardResponse getDashboard(Long traineeId) {
@@ -71,15 +73,18 @@ public class TraineeService {
     }
 
     @Transactional(readOnly = true)
-    public PagedTraineeEmployeesResponse searchEmployees(Long traineeId, String search, int page, int size) {
+    public PagedTraineeEmployeesResponse searchEmployees(
+            Long traineeId, String search, Long departmentId, int page, int size) {
         User trainee = requireTrainee(traineeId);
         String team = normalizeTeam(trainee.getTeam());
+        List<Long> departmentIds = departmentService.resolveFilterDepartmentIds(departmentId);
 
         Pageable pageable = PageRequest.of(page, size);
         Page<User> result = userRepository.searchActiveUsersForTrainee(
                 traineeId,
                 team,
                 normalize(search),
+                departmentIds,
                 pageable
         );
 
