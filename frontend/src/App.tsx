@@ -19,6 +19,7 @@ import { EditTraineePlanPage } from '@/pages/hr/EditTraineePlanPage'
 import { PlanTemplateDetailPage } from '@/pages/hr/PlanTemplateDetailPage'
 import { AdaptationAnalyticsPage } from '@/pages/hr/AdaptationAnalyticsPage'
 import { PlanTemplatesPage } from '@/pages/hr/PlanTemplatesPage'
+import { TraineeTasksReviewPage } from '@/pages/hr/TraineeTasksReviewPage'
 import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { TraineeBlockTasksPage } from '@/pages/trainee/BlockTasksPage'
 import { TraineeCalendarPage } from '@/pages/trainee/CalendarPage'
@@ -97,6 +98,7 @@ export function App() {
             <Route path="trainees/:traineeId/plan" element={<EditTraineePlanPage />} />
             <Route path="trainees/:traineeId" element={<HrTraineeProfilePage />} />
             <Route path="trainees" element={<TraineesPage />} />
+            <Route path="trainee-tasks" element={<TraineeTasksReviewPage />} />
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/hr/profile" />} />
@@ -119,6 +121,7 @@ export function App() {
             <Route path="trainees/:traineeId/plan" element={<EditTraineePlanPage />} />
             <Route path="trainees/:traineeId" element={<HrTraineeProfilePage />} />
             <Route path="trainees" element={<TraineesPage />} />
+            <Route path="trainee-tasks" element={<TraineeTasksReviewPage />} />
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/mentor/profile" />} />

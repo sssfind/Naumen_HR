@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import type {
+  PendingReviewTask,
   TraineeDashboard,
   TraineePlan,
   TraineePlanTask,
@@ -195,9 +196,20 @@ function invalidateTraineeTaskQueries(
   queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
   queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
   queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId] })
+  queryClient.invalidateQueries({ queryKey: ['hr', 'tasks', 'pending-review'] })
   queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
   queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
   queryClient.invalidateQueries({ queryKey: ['notifications'] })
+}
+
+export function usePendingReviewTasks() {
+  return useQuery({
+    queryKey: ['hr', 'tasks', 'pending-review'],
+    queryFn: async () => {
+      const { data } = await api.get<PendingReviewTask[]>('/hr/tasks/pending-review')
+      return data
+    },
+  })
 }
 
 export function useApproveTraineeTask(traineeId?: number) {
@@ -220,10 +232,10 @@ export function useApproveTraineeTask(traineeId?: number) {
 export function useRejectTraineeTask(traineeId?: number) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ taskId, comment }: { taskId: number; comment?: string }) => {
+    mutationFn: async ({ taskId, comment }: { taskId: number; comment: string }) => {
       const { data } = await api.post<TraineePlanTask>(
         `/hr/trainees/${traineeId}/tasks/${taskId}/reject`,
-        { comment: comment?.trim() || undefined }
+        { comment: comment.trim() }
       )
       return data
     },

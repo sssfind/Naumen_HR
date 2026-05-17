@@ -1,12 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { BarChart3, Bot, BookOpen, BookTemplate, GraduationCap, User } from 'lucide-react'
 import { DashboardLogoutButton } from '@/components/layout/DashboardLogoutButton'
+import { TraineeTasksNavLink } from '@/components/hr/TraineeTasksNavLink'
 import { NotificationPanel } from '@/components/hr/NotificationPanel'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/dashboard/mentor/analytics', label: 'Аналитика адаптации', icon: BarChart3 },
   { to: '/dashboard/mentor/trainees', label: 'Стажёры', icon: GraduationCap },
+  { to: '/dashboard/mentor/trainee-tasks', kind: 'trainee-tasks' as const },
   { to: '/dashboard/mentor/plan-templates', label: 'Шаблоны адаптации', icon: BookTemplate },
   { to: '/dashboard/mentor/employees', label: 'Справочник сотрудников', icon: BookOpen },
   { to: '/dashboard/mentor/chat', label: 'Чат-бот', icon: Bot },
@@ -25,23 +27,29 @@ export function MentorLayout() {
           <p className="mt-1 text-xs text-gray-500">Кабинет наставника</p>
         </div>
         <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-4 pb-20">
-          {navItems.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-orange-50 text-primary'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-[#1A1A2E]'
-                )
-              }
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            if ('kind' in item && item.kind === 'trainee-tasks') {
+              return <TraineeTasksNavLink key={item.to} to={item.to} />
+            }
+            const { to, label, icon: Icon } = item
+            return (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-orange-50 text-primary'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-[#1A1A2E]'
+                  )
+                }
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </NavLink>
+            )
+          })}
         </nav>
       </aside>
 

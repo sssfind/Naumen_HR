@@ -20,7 +20,7 @@ interface PlanTaskCardProps {
   onComplete?: (taskId: number) => Promise<unknown>
   onComment?: (taskId: number, text: string) => Promise<unknown>
   onApprove?: (taskId: number) => Promise<unknown>
-  onReject?: (taskId: number, comment?: string) => Promise<unknown>
+  onReject?: (taskId: number, comment: string) => Promise<unknown>
   isStarting?: boolean
   isCompleting?: boolean
   isCommenting?: boolean
@@ -51,6 +51,7 @@ export function PlanTaskCard({
   const [showCommentForm, setShowCommentForm] = useState(false)
   const [rejectComment, setRejectComment] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
+  const [rejectCommentError, setRejectCommentError] = useState<string | null>(null)
 
   const needsUserReview = task.acceptanceCheckType === 'USER'
   const completeLabel = needsUserReview ? 'Отправить на проверку' : 'Завершить задачу'
@@ -64,7 +65,13 @@ export function PlanTaskCard({
 
   const handleReject = async () => {
     if (!onReject) return
-    await onReject(task.id, rejectComment.trim() || undefined)
+    const trimmed = rejectComment.trim()
+    if (!trimmed) {
+      setRejectCommentError('Укажите комментарий для стажёра')
+      return
+    }
+    setRejectCommentError(null)
+    await onReject(task.id, trimmed)
     setRejectComment('')
     setShowRejectForm(false)
   }
@@ -144,7 +151,10 @@ export function PlanTaskCard({
               size="sm"
               className="gap-1 text-red-700 hover:text-red-800"
               disabled={isApproving || isRejecting}
-              onClick={() => setShowRejectForm((v) => !v)}
+              onClick={() => {
+                setShowRejectForm((v) => !v)
+                setRejectCommentError(null)
+              }}
             >
               <X className="h-4 w-4" />
               Отклонить
@@ -152,19 +162,28 @@ export function PlanTaskCard({
           </div>
           {showRejectForm && (
             <div className="space-y-2 rounded-lg border border-red-100 bg-red-50/50 p-3">
+              <label className="text-xs font-medium text-red-900">
+                Комментарий для стажёра <span className="text-red-600">*</span>
+              </label>
               <textarea
                 value={rejectComment}
-                onChange={(e) => setRejectComment(e.target.value)}
-                placeholder="Комментарий для стажёра (необязательно)"
-                rows={2}
+                onChange={(e) => {
+                  setRejectComment(e.target.value)
+                  if (rejectCommentError) setRejectCommentError(null)
+                }}
+                placeholder="Опишите, что нужно доработать"
+                rows={3}
                 maxLength={2000}
                 className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               />
+              {rejectCommentError && (
+                <p className="text-xs text-red-700">{rejectCommentError}</p>
+              )}
               <Button
                 type="button"
                 size="sm"
                 variant="destructive"
-                disabled={isRejecting}
+                disabled={isRejecting || !rejectComment.trim()}
                 onClick={handleReject}
               >
                 {isRejecting && <Loader2 className="h-4 w-4 animate-spin" />}

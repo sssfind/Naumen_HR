@@ -6,8 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.naumen.experts.exception.BadRequestException;
 import ru.naumen.experts.exception.TaskNotFoundException;
 import ru.naumen.experts.exception.UserNotFoundException;
+import ru.naumen.experts.hr.service.HrTraineeService;
 import ru.naumen.experts.notification.enums.NotificationType;
 import ru.naumen.experts.notification.service.NotificationService;
+import ru.naumen.experts.traineeplan.dto.PendingReviewTaskResponse;
 import ru.naumen.experts.traineeplan.dto.RejectTaskRequest;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskResponse;
 import ru.naumen.experts.traineeplan.entity.TraineePlanTask;
@@ -19,6 +21,7 @@ import ru.naumen.experts.user.repository.UserRepository;
 import ru.naumen.experts.user.service.StaffAccessService;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,24 @@ public class StaffTraineeTaskService {
     private final TraineeTaskService traineeTaskService;
     private final NotificationService notificationService;
     private final StaffAccessService staffAccessService;
+    private final HrTraineeService hrTraineeService;
+
+    @Transactional(readOnly = true)
+    public List<PendingReviewTaskResponse> listPendingReviewTasks(Long staffId) {
+        List<User> trainees = hrTraineeService.listTraineesForStaff(staffId);
+        if (trainees.isEmpty()) {
+            return List.of();
+        }
+        List<Long> traineeIds = trainees.stream().map(User::getId).toList();
+        return taskRepository.findPendingReviewByTraineeIds(traineeIds).stream()
+                .map(task -> PendingReviewTaskResponse.builder()
+                        .traineeId(task.getTrainee().getId())
+                        .traineeFullName(task.getTrainee().getFullName())
+                        .traineeTeam(task.getTrainee().getTeam())
+                        .task(traineeTaskService.toResponseWithComments(task))
+                        .build())
+                .toList();
+    }
 
     @Transactional
     public TraineePlanTaskResponse approveTask(Long staffId, Long traineeId, Long taskId) {
@@ -62,8 +83,8 @@ public class StaffTraineeTaskService {
         String comment = request != null && request.getComment() != null
                 ? request.getComment().trim()
                 : null;
-        if (comment != null && comment.isEmpty()) {
-            comment = null;
+        if (comment == null || comment.isEmpty()) {
+            throw new BadRequestException("Укажите комментарий при отклонении задачи");
         }
 
         task.setStatus(TaskStatus.REJECTED);

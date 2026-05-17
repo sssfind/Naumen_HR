@@ -40,7 +40,7 @@ public class HrTraineeTaskController {
             @AuthenticationPrincipal JwtAuthenticationPrincipal principal,
             @PathVariable Long traineeId,
             @PathVariable Long taskId,
-            @RequestBody(required = false) @Valid RejectTaskRequest request) {
+            @Valid @RequestBody RejectTaskRequest request) {
         return ResponseEntity.ok(staffTraineeTaskService.rejectTask(
                 principal.getUserId(), traineeId, taskId, request));
     }

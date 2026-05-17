@@ -82,7 +82,7 @@ export function TraineeProfilePage() {
     }
   }
 
-  async function handleReject(taskId: number, comment?: string) {
+  async function handleReject(taskId: number, comment: string) {
     setActiveTaskId(taskId)
     setActiveAction('reject')
     try {
