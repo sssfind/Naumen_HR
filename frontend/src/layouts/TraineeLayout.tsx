@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Bot, BookOpen, ClipboardList, Home, LogOut, User } from 'lucide-react'
+import { Bot, BookOpen, CalendarDays, ClipboardList, Home, LogOut, User } from 'lucide-react'
 import { NotificationPanel } from '@/components/hr/NotificationPanel'
 import { Button } from '@/components/ui/button'
 import { useSyncTraineeReminders } from '@/hooks/useTraineeReminders'
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/dashboard/trainee', label: 'Главная', icon: Home, end: true },
+  { to: '/dashboard/trainee/calendar', label: 'Календарь задач', icon: CalendarDays },
   { to: '/dashboard/trainee/feedback', label: 'Опрос', icon: ClipboardList },
   { to: '/dashboard/trainee/employees', label: 'Справочник сотрудников', icon: BookOpen },
   { to: '/dashboard/trainee/chat', label: 'Чат-бот', icon: Bot },

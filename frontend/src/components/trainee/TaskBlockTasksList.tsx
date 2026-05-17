@@ -10,6 +10,7 @@ interface TaskBlockTasksListProps {
   onComment?: (taskId: number, text: string) => Promise<unknown>
   activeTaskId?: number | null
   activeAction?: 'start' | 'complete' | 'comment' | null
+  highlightedTaskId?: number | null
 }
 
 export function TaskBlockTasksList({
@@ -20,6 +21,7 @@ export function TaskBlockTasksList({
   onComment,
   activeTaskId,
   activeAction,
+  highlightedTaskId,
 }: TaskBlockTasksListProps) {
   const completedCount = block.tasks.filter(
     (task) => (task.status ?? 'NOT_STARTED') === 'COMPLETED'
@@ -52,6 +54,7 @@ export function TaskBlockTasksList({
               isStarting={activeAction === 'start' && activeTaskId === task.id}
               isCompleting={activeAction === 'complete' && activeTaskId === task.id}
               isCommenting={activeAction === 'comment' && activeTaskId === task.id}
+              isHighlighted={highlightedTaskId === task.id}
             />
           ))
         )}

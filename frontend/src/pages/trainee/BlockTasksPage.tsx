@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Building2, Briefcase, Sparkles } from 'lucide-react'
 import { TaskBlockTasksList } from '@/components/trainee/TaskBlockTasksList'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,7 @@ const validBlockIds = new Set(['onboarding', 'skills', 'work'])
 
 export function TraineeBlockTasksPage() {
   const { blockId } = useParams<{ blockId: string }>()
+  const [searchParams] = useSearchParams()
   const { data, isLoading, isError } = useTraineeDashboard()
   const startTask = useStartTraineeTask()
   const completeTask = useCompleteTraineeTask()
@@ -27,6 +28,24 @@ export function TraineeBlockTasksPage() {
 
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null)
   const [activeAction, setActiveAction] = useState<'start' | 'complete' | 'comment' | null>(null)
+  const highlightedTaskId = useMemo(() => {
+    const rawTaskId = searchParams.get('taskId')
+    if (!rawTaskId) return null
+    const parsed = Number(rawTaskId)
+    return Number.isFinite(parsed) ? parsed : null
+  }, [searchParams])
+
+  useEffect(() => {
+    if (isLoading || highlightedTaskId == null) return
+
+    const scrollTimer = window.setTimeout(() => {
+      document
+        .getElementById(`task-${highlightedTaskId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 100)
+
+    return () => window.clearTimeout(scrollTimer)
+  }, [highlightedTaskId, isLoading])
 
   if (!blockId || !validBlockIds.has(blockId)) {
     return <Navigate to="/dashboard/trainee" replace />
@@ -119,6 +138,7 @@ export function TraineeBlockTasksPage() {
           onComment={handleComment}
           activeTaskId={activeTaskId}
           activeAction={activeAction}
+          highlightedTaskId={highlightedTaskId}
         />
       </div>
     </div>

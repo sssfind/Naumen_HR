@@ -21,6 +21,7 @@ interface PlanTaskCardProps {
   isStarting?: boolean
   isCompleting?: boolean
   isCommenting?: boolean
+  isHighlighted?: boolean
 }
 
 export function PlanTaskCard({
@@ -32,6 +33,7 @@ export function PlanTaskCard({
   isStarting,
   isCompleting,
   isCommenting,
+  isHighlighted,
 }: PlanTaskCardProps) {
   const status = task.status ?? 'NOT_STARTED'
   const comments = task.comments ?? []
@@ -46,7 +48,13 @@ export function PlanTaskCard({
   }
 
   return (
-    <article className="w-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <article
+      id={`task-${task.id}`}
+      className={cn(
+        'w-full scroll-mt-24 rounded-xl border bg-white p-5 shadow-sm transition-colors',
+        isHighlighted ? 'border-primary bg-orange-50/50 ring-2 ring-primary/30' : 'border-gray-100'
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {task.milestone && (

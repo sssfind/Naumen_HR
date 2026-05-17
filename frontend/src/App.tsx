@@ -20,6 +20,7 @@ import { PlanTemplateDetailPage } from '@/pages/hr/PlanTemplateDetailPage'
 import { PlanTemplatesPage } from '@/pages/hr/PlanTemplatesPage'
 import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { TraineeBlockTasksPage } from '@/pages/trainee/BlockTasksPage'
+import { TraineeCalendarPage } from '@/pages/trainee/CalendarPage'
 import { TraineeDashboardPage } from '@/pages/trainee/DashboardPage'
 import { TraineeEmployeesPage } from '@/pages/trainee/EmployeesPage'
 import { TraineeProfilePage } from '@/pages/trainee/ProfilePage'
@@ -130,6 +131,7 @@ export function App() {
             }
           >
             <Route index element={<TraineeDashboardPage />} />
+            <Route path="calendar" element={<TraineeCalendarPage />} />
             <Route path="blocks/:blockId" element={<TraineeBlockTasksPage />} />
             <Route path="feedback" element={<TraineeFeedbackPage />} />
             <Route path="employees" element={<TraineeEmployeesPage />} />
