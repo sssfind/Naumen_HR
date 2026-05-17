@@ -67,46 +67,50 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
   ]
 }
 
-/** HR: отдельный набор ачивок (названия временные, по картинкам) */
+/** HR: набор ачивок (порядок отображения фиксирован) */
 export function buildHrAchievements(): AchievementItem[] {
   return [
     {
       id: 'hr-rocket-launch',
-      title: 'Старт программы',
-      description: 'Запуск адаптации новых стажёров',
-      unlockHint: 'Назначьте первого стажёра и примените шаблон плана',
+      title: 'Первый пошёл',
+      description: 'Выдаётся за первого стажёра',
+      unlockHint: 'Выдаётся за первого стажёра',
       imageSrc: HR_ACHIEVEMENT_IMAGES.rocketLaunch,
       earned: true,
     },
     {
       id: 'hr-bullseye',
-      title: 'Точно в цель',
-      description: 'Команда достигает целей по адаптации',
-      unlockHint: 'Доведите средний прогресс стажёров до 80%',
+      title: '100% match',
+      description:
+        'Ваш стажёр закрыл абсолютно все задачи по трём блокам точно к дедлайну',
+      unlockHint:
+        'Ваш стажёр закрыл абсолютно все задачи по трём блокам точно к дедлайну',
       imageSrc: HR_ACHIEVEMENT_IMAGES.bullseye,
       earned: true,
     },
     {
-      id: 'hr-graduation',
-      title: 'Выпускной',
-      description: 'Стажёры успешно завершают программу',
-      unlockHint: 'Завершите адаптацию хотя бы у одного стажёра',
-      imageSrc: HR_ACHIEVEMENT_IMAGES.graduation,
-      earned: true,
-    },
-    {
       id: 'hr-checklist',
-      title: 'Всё по чек-листу',
-      description: 'Задачи стажёров под контролем',
-      unlockHint: 'Проверьте выполнение задач у всех стажёров за неделю',
+      title: 'Архитектор траекторий',
+      description: 'Выдаётся за сборку своего первого шаблона',
+      unlockHint: 'Выдаётся за сборку своего первого шаблона',
       imageSrc: HR_ACHIEVEMENT_IMAGES.checklist,
       earned: true,
     },
     {
+      id: 'hr-graduation',
+      title: 'Выпускной класс',
+      description:
+        'За первые 5 стажёров, успешно прошедших программу испытательного срока под вашим кураторством',
+      unlockHint:
+        'За первые 5 стажёров, успешно прошедших программу испытательного срока под вашим кураторством',
+      imageSrc: HR_ACHIEVEMENT_IMAGES.graduation,
+      earned: true,
+    },
+    {
       id: 'hr-heart',
-      title: 'С заботой',
-      description: 'Высокий индекс настроения в команде',
-      unlockHint: 'Средний индекс настроения стажёров — 4 и выше',
+      title: 'Главный эмпат',
+      description: 'Выдаётся, если у ваших стажёров средняя оценка настроения выше 4.5',
+      unlockHint: 'Выдаётся, если у ваших стажёров средняя оценка настроения выше 4.5',
       imageSrc: HR_ACHIEVEMENT_IMAGES.heart,
       earned: true,
     },
