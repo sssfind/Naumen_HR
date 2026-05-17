@@ -45,7 +45,7 @@ public class HrTraineeService {
 
     @Transactional(readOnly = true)
     public HrTeamStatsResponse getTeamStats(Long staffId) {
-        List<User> trainees = traineesVisibleTo(staffId);
+        List<User> trainees = listTraineesForStaff(staffId);
         int traineeCount = trainees.size();
 
         if (traineeCount == 0) {
@@ -99,16 +99,24 @@ public class HrTraineeService {
 
     @Transactional(readOnly = true)
     public List<EmployeeResponse> getMyTrainees(Long staffId) {
-        return traineesVisibleTo(staffId)
+        return listTraineesForStaff(staffId)
                 .stream()
                 .map(UserMapper::toEmployeeResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<User> listTraineesForStaff(Long staffId) {
+        return traineesVisibleTo(staffId);
+    }
+
     private List<User> traineesVisibleTo(Long staffId) {
         User staff = staffAccessService.requireUser(staffId);
         staffAccessService.requireHrOrMentor(staff);
-        return userRepository.findByRoleAndIsActiveTrue(UserRole.ROLE_TRAINEE);
+        if (staffAccessService.isHr(staff)) {
+            return userRepository.findByHrIdAndRoleAndIsActiveTrue(staffId, UserRole.ROLE_TRAINEE);
+        }
+        return userRepository.findByMentorIdAndRoleAndIsActiveTrue(staffId, UserRole.ROLE_TRAINEE);
     }
 
     @Transactional(readOnly = true)
@@ -146,6 +154,7 @@ public class HrTraineeService {
         }
 
         trainee.setRole(UserRole.ROLE_TRAINEE);
+        trainee.setHr(hr);
         User saved = userRepository.save(trainee);
 
         notificationService.createNotification(
@@ -178,7 +187,7 @@ public class HrTraineeService {
             throw new BadRequestException("Пользователь не является стажёром");
         }
 
-        trainee.setHr(mentor);
+        trainee.setMentor(mentor);
         User saved = userRepository.save(trainee);
 
         notificationService.createNotification(
@@ -205,7 +214,7 @@ public class HrTraineeService {
         User trainee = userRepository.findById(traineeId)
                 .orElseThrow(() -> new UserNotFoundException(traineeId));
 
-        trainee.setHr(null);
+        trainee.setMentor(null);
         User saved = userRepository.save(trainee);
 
         return UserMapper.toEmployeeResponse(saved);

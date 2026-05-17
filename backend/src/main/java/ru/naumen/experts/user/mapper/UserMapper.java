@@ -31,7 +31,7 @@ public final class UserMapper {
                     .progressBlockTwo(safeProgress(user.getProgressBlockTwo()))
                     .progressBlockThree(safeProgress(user.getProgressBlockThree()))
                     .totalProgress(calculateTotalProgress(user))
-                    .mentorFullName(user.getHr() != null ? user.getHr().getFullName() : null);
+                    .mentorFullName(user.getMentor() != null ? user.getMentor().getFullName() : null);
         }
 
         return builder.build();
@@ -70,6 +70,7 @@ public final class UserMapper {
 
     public static EmployeeResponse toEmployeeResponse(User user) {
         User hr = user.getHr();
+        User mentor = user.getMentor();
         DepartmentContext dept = departmentContext(user);
         return EmployeeResponse.builder()
                 .userId(user.getId())
@@ -89,11 +90,13 @@ public final class UserMapper {
                 .moodLevel(user.getMoodLevel())
                 .hrId(hr != null ? hr.getId() : null)
                 .hrFullName(hr != null ? hr.getFullName() : null)
+                .mentorId(mentor != null ? mentor.getId() : null)
+                .mentorFullName(mentor != null ? mentor.getFullName() : null)
                 .build();
     }
 
     public static TraineeProfileResponse toTraineeProfileResponse(User trainee) {
-        User mentor = trainee.getHr();
+        User mentor = trainee.getMentor();
         String[] nameParts = splitName(trainee.getFullName());
 
         return TraineeProfileResponse.builder()

@@ -25,6 +25,8 @@ function toDirectoryEmployee(employee: Employee): DirectoryEmployee {
     team: employee.team ?? null,
     hrId: employee.hrId,
     hrFullName: employee.hrFullName,
+    mentorId: employee.mentorId,
+    mentorFullName: employee.mentorFullName,
   }
 }
 
@@ -81,7 +83,7 @@ export function TraineesPage() {
                   <td className="px-6 py-4 font-medium text-[#1A1A2E]">{t.fullName}</td>
                   <td className="px-6 py-4 text-gray-600">{t.email}</td>
                   <td className="px-6 py-4 text-gray-600">{t.department ?? '—'}</td>
-                  <td className="px-6 py-4 text-gray-600">{t.hrFullName ?? '—'}</td>
+                  <td className="px-6 py-4 text-gray-600">{t.mentorFullName ?? '—'}</td>
                   <td className="px-6 py-4 text-right">
                     <Button asChild variant="ghost" size="sm" className="mr-2 gap-1">
                       <Link to={`${basePath}/trainees/${t.userId}`}>
@@ -89,14 +91,14 @@ export function TraineesPage() {
                         Профиль стажёра
                       </Link>
                     </Button>
-                    {canManageTrainees && t.hrId ? (
+                    {canManageTrainees && t.mentorId ? (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         className="gap-1"
-                        onClick={() => openMentorProfile(t.hrId!)}
-                        disabled={!mentorsById.has(t.hrId)}
+                        onClick={() => openMentorProfile(t.mentorId!)}
+                        disabled={!mentorsById.has(t.mentorId)}
                       >
                         <Users className="h-3.5 w-3.5" />
                         Профиль наставника

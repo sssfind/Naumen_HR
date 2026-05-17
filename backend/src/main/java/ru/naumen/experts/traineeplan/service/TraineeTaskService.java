@@ -123,7 +123,7 @@ public class TraineeTaskService {
     }
 
     private void notifyMentor(TraineePlanTask task, String title, String message, NotificationType type) {
-        User mentor = task.getTrainee().getHr();
+        User mentor = task.getTrainee().getMentor();
         if (mentor != null) {
             notificationService.createNotification(mentor.getId(), title, message, type);
         }

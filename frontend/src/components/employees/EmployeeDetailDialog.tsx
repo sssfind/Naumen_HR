@@ -83,7 +83,10 @@ export function EmployeeDetailDialog({
               <Field label="Зона ответственности" value={employee.responsibilityZone} />
             )}
             {employee.hrFullName && (
-              <Field label="Куратор / наставник" value={employee.hrFullName} />
+              <Field label="HR-куратор" value={employee.hrFullName} />
+            )}
+            {employee.mentorFullName && (
+              <Field label="Наставник" value={employee.mentorFullName} />
             )}
           </dl>
 

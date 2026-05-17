@@ -1,10 +1,11 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Bot, BookOpen, BookTemplate, GraduationCap, LogOut, User } from 'lucide-react'
+import { BarChart3, Bot, BookOpen, BookTemplate, GraduationCap, LogOut, User } from 'lucide-react'
 import { NotificationPanel } from '@/components/hr/NotificationPanel'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navItems = [
+  { to: '/dashboard/mentor/analytics', label: 'Аналитика адаптации', icon: BarChart3 },
   { to: '/dashboard/mentor/trainees', label: 'Стажёры', icon: GraduationCap },
   { to: '/dashboard/mentor/plan-templates', label: 'Шаблоны адаптации', icon: BookTemplate },
   { to: '/dashboard/mentor/employees', label: 'Справочник сотрудников', icon: BookOpen },

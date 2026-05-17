@@ -17,6 +17,7 @@ import { ProfilePage } from '@/pages/hr/ProfilePage'
 import { TraineeProfilePage as HrTraineeProfilePage } from '@/pages/hr/TraineeProfilePage'
 import { EditTraineePlanPage } from '@/pages/hr/EditTraineePlanPage'
 import { PlanTemplateDetailPage } from '@/pages/hr/PlanTemplateDetailPage'
+import { AdaptationAnalyticsPage } from '@/pages/hr/AdaptationAnalyticsPage'
 import { PlanTemplatesPage } from '@/pages/hr/PlanTemplatesPage'
 import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { TraineeBlockTasksPage } from '@/pages/trainee/BlockTasksPage'
@@ -88,7 +89,8 @@ export function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="trainees" replace />} />
+            <Route index element={<Navigate to="analytics" replace />} />
+            <Route path="analytics" element={<AdaptationAnalyticsPage />} />
             <Route path="plan-templates/:templateId" element={<PlanTemplateDetailPage />} />
             <Route path="plan-templates" element={<PlanTemplatesPage />} />
             <Route path="trainees/:traineeId/plan" element={<EditTraineePlanPage />} />
@@ -109,7 +111,8 @@ export function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="trainees" replace />} />
+            <Route index element={<Navigate to="analytics" replace />} />
+            <Route path="analytics" element={<AdaptationAnalyticsPage />} />
             <Route path="plan-templates/:templateId" element={<PlanTemplateDetailPage />} />
             <Route path="plan-templates" element={<PlanTemplatesPage />} />
             <Route path="trainees/:traineeId/plan" element={<EditTraineePlanPage />} />
