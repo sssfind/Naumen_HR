@@ -12,6 +12,8 @@ public class HrAdaptationDashboardResponse {
 
     private int traineeCount;
     private Double averageMoodLevel;
+    /** Средний индекс адаптации (0–100) по последним опросам стажёров */
+    private Double averageSentimentScore;
     private int averageTaskCompletionPercent;
     private List<TraineeTaskProgressItem> traineeProgress;
 

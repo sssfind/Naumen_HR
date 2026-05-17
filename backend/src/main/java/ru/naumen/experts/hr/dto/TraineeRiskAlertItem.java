@@ -2,6 +2,7 @@ package ru.naumen.experts.hr.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.naumen.experts.feedback.enums.SentimentLabel;
 import ru.naumen.experts.feedback.enums.WeekRating;
 
 import java.time.LocalDate;
@@ -15,5 +16,8 @@ public class TraineeRiskAlertItem {
     private Integer moodLevel;
     private LocalDate feedbackWeekStart;
     private WeekRating weekRating;
+    private Integer sentimentScore;
+    private SentimentLabel sentimentLabel;
+    private String commentSummary;
     private String riskSummary;
 }

@@ -19,6 +19,9 @@ export interface TraineeRiskAlert {
   moodLevel: number
   feedbackWeekStart: string | null
   weekRating: string | null
+  sentimentScore: number | null
+  sentimentLabel: string | null
+  commentSummary: string | null
   riskSummary: string
 }
 
@@ -43,6 +46,7 @@ export interface TraineeOverdueTasks {
 }
 
 export interface HrAdaptationDashboard extends HrTeamStats {
+  averageSentimentScore: number | null
   currentWeekStart: string
   atRiskCount: number
   feedbackPendingCount: number

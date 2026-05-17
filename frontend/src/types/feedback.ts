@@ -11,6 +11,16 @@ export type ResourceIssue =
   | 'NO_EQUIPMENT'
   | 'OTHER'
 
+export type SentimentLabel = 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'AT_RISK'
+
+export type CommentSentiment = 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'MIXED'
+
+export type CommentRiskFlag =
+  | 'STRESS'
+  | 'UNCLEAR_TASKS'
+  | 'LOW_ENGAGEMENT'
+  | 'ACCESS_ISSUES'
+
 export interface FeedbackResponse {
   id: number
   weekStart: string
@@ -19,6 +29,12 @@ export interface FeedbackResponse {
   resourceIssues: ResourceIssue[]
   mentorRating: number
   weekComment: string | null
+  sentimentScore: number | null
+  sentimentLabel: SentimentLabel | null
+  commentSentiment: CommentSentiment | null
+  commentRiskFlags: CommentRiskFlag[]
+  commentSummary: string | null
+  commentAnalyzedAt: string | null
   createdAt: string
 }
 

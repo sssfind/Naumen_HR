@@ -6,6 +6,7 @@ import {
   ClipboardList,
   GraduationCap,
   Smile,
+  Sparkles,
   TrendingUp,
 } from 'lucide-react'
 import { TraineeProgressChart } from '@/components/hr/TraineeProgressChart'
@@ -59,6 +60,11 @@ export function AdaptationAnalyticsPage() {
       ? Math.round(data.averageMoodLevel * 10) / 10
       : null
 
+  const sentimentRounded =
+    data?.averageSentimentScore != null
+      ? Math.round(data.averageSentimentScore * 10) / 10
+      : null
+
   if (isLoading) {
     return <p className="text-gray-500">Загрузка аналитики…</p>
   }
@@ -82,7 +88,7 @@ export function AdaptationAnalyticsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <SummaryCard
           icon={GraduationCap}
           label="Стажёров в программе"
@@ -95,6 +101,19 @@ export function AdaptationAnalyticsPage() {
           value={moodRounded != null ? `${moodRounded}/5` : '—'}
           hint={moodLabelForAverage(moodRounded)}
           accent={moodRounded != null && moodRounded >= 4 ? 'green' : 'orange'}
+        />
+        <SummaryCard
+          icon={Sparkles}
+          label="Индекс адаптации"
+          value={sentimentRounded != null ? `${sentimentRounded}/100` : '—'}
+          hint="По шкалам опроса и анализу комментариев"
+          accent={
+            sentimentRounded != null && sentimentRounded >= 75
+              ? 'green'
+              : sentimentRounded != null && sentimentRounded < 50
+                ? 'amber'
+                : 'neutral'
+          }
         />
         <SummaryCard
           icon={TrendingUp}
@@ -120,7 +139,7 @@ export function AdaptationAnalyticsPage() {
                 Риски по адаптации
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                По последнему опросу или низкому индексу настроения
+                По опросу, индексу адаптации и анализу комментариев (ИИ)
               </p>
             </div>
             <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800">
@@ -142,6 +161,9 @@ export function AdaptationAnalyticsPage() {
                     <p className="mt-1 text-sm text-amber-900/80">{item.riskSummary}</p>
                     <p className="mt-2 text-xs text-gray-500">
                       Настроение: {item.moodLevel}/5
+                      {item.sentimentScore != null
+                        ? ` · индекс ${item.sentimentScore}/100`
+                        : ''}
                       {item.feedbackWeekStart
                         ? ` · опрос за ${formatWeek(item.feedbackWeekStart)}`
                         : ''}

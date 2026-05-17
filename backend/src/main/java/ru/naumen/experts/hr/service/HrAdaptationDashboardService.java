@@ -56,6 +56,9 @@ public class HrAdaptationDashboardService {
                         .moodLevel(trainee.getMoodLevel())
                         .feedbackWeekStart(feedback.getWeekStart())
                         .weekRating(feedback.getWeekRating())
+                        .sentimentScore(feedback.getSentimentScore())
+                        .sentimentLabel(feedback.getSentimentLabel())
+                        .commentSummary(feedback.getCommentSummary())
                         .riskSummary(FeedbackRiskEvaluator.buildRiskSummary(feedback))
                         .build());
             } else if (trainee.getMoodLevel() != null && trainee.getMoodLevel() <= 2) {
@@ -82,10 +85,12 @@ public class HrAdaptationDashboardService {
         feedbackPending.sort(Comparator.comparing(TraineeFeedbackPendingItem::getFullName));
 
         List<TraineeOverdueTasksItem> overdueByTrainee = buildOverdueByTrainee(trainees, today);
+        Double averageSentiment = computeAverageSentimentScore(trainees);
 
         return HrAdaptationDashboardResponse.builder()
                 .traineeCount(stats.getTraineeCount())
                 .averageMoodLevel(stats.getAverageMoodLevel())
+                .averageSentimentScore(averageSentiment)
                 .averageTaskCompletionPercent(stats.getAverageTaskCompletionPercent())
                 .traineeProgress(stats.getTraineeProgress())
                 .currentWeekStart(weekStart)
@@ -96,6 +101,26 @@ public class HrAdaptationDashboardService {
                 .feedbackPending(feedbackPending)
                 .overdueByTrainee(overdueByTrainee)
                 .build();
+    }
+
+    private Double computeAverageSentimentScore(List<User> trainees) {
+        if (trainees.isEmpty()) {
+            return null;
+        }
+        double sum = 0;
+        int count = 0;
+        for (User trainee : trainees) {
+            Optional<FeedbackResponse> latest = feedbackRepository
+                    .findTopByTraineeIdOrderByWeekStartDesc(trainee.getId());
+            if (latest.isPresent() && latest.get().getSentimentScore() != null) {
+                sum += latest.get().getSentimentScore();
+                count++;
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        return Math.round((sum / count) * 10.0) / 10.0;
     }
 
     private List<TraineeOverdueTasksItem> buildOverdueByTrainee(List<User> trainees, LocalDate today) {

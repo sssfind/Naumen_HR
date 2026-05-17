@@ -2,7 +2,10 @@ package ru.naumen.experts.feedback.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.naumen.experts.feedback.enums.CommentRiskFlag;
+import ru.naumen.experts.feedback.enums.CommentSentiment;
 import ru.naumen.experts.feedback.enums.ResourceIssue;
+import ru.naumen.experts.feedback.enums.SentimentLabel;
 import ru.naumen.experts.feedback.enums.WeekRating;
 
 import java.time.LocalDate;
@@ -20,5 +23,11 @@ public class FeedbackResponseDto {
     private List<ResourceIssue> resourceIssues;
     private Integer mentorRating;
     private String weekComment;
+    private Integer sentimentScore;
+    private SentimentLabel sentimentLabel;
+    private CommentSentiment commentSentiment;
+    private List<CommentRiskFlag> commentRiskFlags;
+    private String commentSummary;
+    private OffsetDateTime commentAnalyzedAt;
     private OffsetDateTime createdAt;
 }

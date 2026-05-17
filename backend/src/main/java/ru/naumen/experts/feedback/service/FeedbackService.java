@@ -36,6 +36,7 @@ public class FeedbackService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final StaffAccessService staffAccessService;
+    private final FeedbackSentimentService feedbackSentimentService;
 
     @Transactional(readOnly = true)
     public FeedbackStatusResponse getStatus(Long traineeId) {
@@ -112,6 +113,8 @@ public class FeedbackService {
                 .mentorRating(request.getMentorRating())
                 .weekComment(emptyToNull(request.getWeekComment()))
                 .build();
+
+        feedbackSentimentService.enrich(entity, request);
 
         FeedbackResponse saved = feedbackRepository.save(entity);
 
@@ -222,6 +225,12 @@ public class FeedbackService {
                 .resourceIssues(FeedbackResourceIssuesCodec.decode(entity.getResourceIssues()))
                 .mentorRating(entity.getMentorRating())
                 .weekComment(entity.getWeekComment())
+                .sentimentScore(entity.getSentimentScore())
+                .sentimentLabel(entity.getSentimentLabel())
+                .commentSentiment(entity.getCommentSentiment())
+                .commentRiskFlags(CommentRiskFlagsCodec.decode(entity.getCommentRiskFlags()))
+                .commentSummary(entity.getCommentSummary())
+                .commentAnalyzedAt(entity.getCommentAnalyzedAt())
                 .createdAt(entity.getCreatedAt())
                 .build();
     }
