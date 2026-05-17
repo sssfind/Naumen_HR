@@ -68,8 +68,8 @@ export function ProfilePage() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,500px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]">
-        <section className="overflow-visible rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,500px)_1fr] lg:items-stretch xl:grid-cols-[minmax(0,520px)_1fr]">
+        <section className="h-full overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col items-center text-center">
             {profile?.photoUrl ? (
               <img
@@ -109,7 +109,7 @@ export function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-6 overflow-visible">
+          <div className="mt-6">
             <div className="mb-3 flex items-center gap-2">
               <Award className="h-4 w-4 text-primary" />
               <h2 className="font-semibold text-[#1A1A2E]">Ачивки</h2>
@@ -118,13 +118,13 @@ export function ProfilePage() {
           </div>
         </section>
 
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-[#1A1A2E]">Мои стажёры</h2>
+        <section className="flex h-full min-h-0 flex-col gap-4">
+          <h2 className="shrink-0 text-lg font-semibold text-[#1A1A2E]">Мои стажёры</h2>
           {statsLoading ? (
             <p className="text-sm text-gray-500">Загрузка показателей…</p>
           ) : (
-            <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="flex min-h-0 flex-1 flex-col gap-4">
+            <div className="grid shrink-0 gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
                   <GraduationCap className="h-5 w-5 text-primary" />
@@ -167,12 +167,14 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-              <h3 className="text-lg font-semibold text-[#1A1A2E]">Выполнение задач стажёров</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Процент завершённых задач по каждому стажёру
-              </p>
-              <div className="mt-8 min-h-[360px] w-full">
+            <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+              <div className="shrink-0">
+                <h3 className="text-lg font-semibold text-[#1A1A2E]">Выполнение задач стажёров</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Процент завершённых задач по каждому стажёру
+                </p>
+              </div>
+              <div className="mt-6 flex min-h-0 flex-1 flex-col justify-end">
                 <TraineeProgressChart items={stats?.traineeProgress ?? []} />
               </div>
             </div>

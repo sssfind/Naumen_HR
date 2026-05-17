@@ -15,124 +15,79 @@ interface AchievementBadgeRowProps {
   className?: string
 }
 
-const EXPANDED_WIDTH_RATIO = 2.75
-
 export function AchievementBadgeRow({ items, className }: AchievementBadgeRowProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
+  const activeItem = items.find((item) => item.id === activeId) ?? null
 
   return (
-    <div
-      className={cn(
-        'achievement-row relative grid grid-cols-3 gap-x-3 gap-y-4 overflow-visible',
-        className
-      )}
-      role="list"
-    >
-      {items.map((item, index) => (
-        <AchievementHoverBadge
-          key={item.id}
-          item={item}
-          index={index}
-          isActive={activeId === item.id}
-          onActivate={() => setActiveId(item.id)}
-          onDeactivate={() => setActiveId((current) => (current === item.id ? null : current))}
-        />
-      ))}
-    </div>
-  )
-}
-
-interface AchievementHoverBadgeProps {
-  item: AchievementItem
-  index: number
-  isActive: boolean
-  onActivate: () => void
-  onDeactivate: () => void
-}
-
-function AchievementHoverBadge({
-  item,
-  index,
-  isActive,
-  onActivate,
-  onDeactivate,
-}: AchievementHoverBadgeProps) {
-  const expandedWidth = `calc(var(--achievement-size) * ${EXPANDED_WIDTH_RATIO})`
-
-  return (
-    <div
-      role="listitem"
-      className="relative flex justify-center overflow-visible"
-      style={{ height: 'var(--achievement-size)' }}
-      onMouseEnter={onActivate}
-      onMouseLeave={onDeactivate}
-    >
+    <div className={cn('achievement-row', className)}>
       <div
-        className="relative"
-        style={{
-          width: 'var(--achievement-size)',
-          height: 'var(--achievement-size)',
-        }}
+        className="achievement-badges-grid"
+        role="list"
+        onMouseLeave={() => setActiveId(null)}
       >
-        <div
-          tabIndex={0}
-          className={cn(
-            'absolute left-0 top-0 flex items-center overflow-hidden',
-            'border-2 transition-[width,box-shadow,border-color,background-color] duration-300 ease-out',
-            'outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-            item.earned
-              ? 'border-primary bg-[#FFF0E6]'
-              : 'border-gray-300 bg-gray-100',
-            isActive ? 'shadow-lg' : 'shadow-sm'
-          )}
-          style={{
-            width: isActive ? expandedWidth : 'var(--achievement-size)',
-            height: 'var(--achievement-size)',
-            borderRadius: 'calc(var(--achievement-size) / 2)',
-            zIndex: isActive ? 50 : 10 + index,
-          }}
-          onFocus={onActivate}
-          onBlur={onDeactivate}
-        >
-          <div
-            className="relative shrink-0 overflow-hidden rounded-full"
-            style={{
-              width: 'var(--achievement-size)',
-              height: 'var(--achievement-size)',
-            }}
-            aria-hidden
-          >
-            <img
-              src={item.imageSrc}
-              alt=""
-              className={cn(
-                'h-full w-full object-cover',
-                !item.earned && 'grayscale opacity-45'
-              )}
-              loading="lazy"
-              draggable={false}
-            />
-          </div>
+        {items.map((item) => {
+          const isActive = activeId === item.id
 
-          <div
-            className={cn(
-              'min-w-0 flex-1 pr-4 transition-opacity duration-200 ease-out',
-              isActive ? 'opacity-100 delay-100' : 'pointer-events-none opacity-0'
-            )}
-          >
+          return (
+            <button
+              key={item.id}
+              type="button"
+              role="listitem"
+              className={cn(
+                'achievement-badge relative mx-auto w-full max-w-full overflow-hidden rounded-full border-2 transition-all duration-200',
+                'outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                item.earned
+                  ? 'border-primary bg-[#FFF0E6] hover:shadow-md'
+                  : 'border-gray-300 bg-gray-100',
+                isActive && 'scale-105 shadow-md ring-2 ring-primary/30'
+              )}
+              onMouseEnter={() => setActiveId(item.id)}
+              onFocus={() => setActiveId(item.id)}
+              onBlur={() => setActiveId((current) => (current === item.id ? null : current))}
+              aria-label={item.earned ? item.title : `Не получено: ${item.title}`}
+            >
+              <img
+                src={item.imageSrc}
+                alt=""
+                className={cn(
+                  'h-full w-full object-cover',
+                  !item.earned && 'grayscale opacity-45'
+                )}
+                loading="lazy"
+                draggable={false}
+              />
+            </button>
+          )
+        })}
+      </div>
+
+      <div
+        className={cn(
+          'mt-3 min-h-[3.25rem] rounded-xl border px-3 py-2.5 text-center text-sm transition-opacity duration-200',
+          activeItem
+            ? 'border-gray-200 bg-gray-50 opacity-100'
+            : 'pointer-events-none border-transparent bg-transparent opacity-0'
+        )}
+        aria-live="polite"
+      >
+        {activeItem ? (
+          <>
             <p
               className={cn(
-                'whitespace-nowrap text-sm font-bold leading-tight',
-                item.earned ? 'text-[#1A1A2E]' : 'text-gray-500'
+                'font-semibold leading-tight',
+                activeItem.earned ? 'text-[#1A1A2E]' : 'text-gray-500'
               )}
             >
-              {item.earned ? item.title : 'Не получено'}
+              {activeItem.earned ? activeItem.title : 'Не получено'}
             </p>
-            <p className="mt-0.5 max-w-[220px] text-xs leading-snug text-gray-500">
-              {item.earned ? item.description : item.unlockHint}
+            <p className="mt-1 text-xs leading-snug text-gray-500">
+              {activeItem.earned ? activeItem.description : activeItem.unlockHint}
             </p>
-          </div>
-        </div>
+          </>
+        ) : (
+          <span className="sr-only">Описание ачивки</span>
+        )}
       </div>
     </div>
   )

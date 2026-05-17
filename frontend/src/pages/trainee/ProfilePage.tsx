@@ -55,7 +55,7 @@ export function TraineeProfilePage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,500px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]">
-        <section className="overflow-visible rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col items-center text-center">
             {profile?.photoUrl ? (
               <img
@@ -90,7 +90,7 @@ export function TraineeProfilePage() {
             </div>
           </div>
 
-          <div className="mt-6 overflow-visible">
+          <div className="mt-6">
             <div className="mb-3 flex items-center gap-2">
               <Award className="h-4 w-4 text-primary" />
               <h2 className="font-semibold text-[#1A1A2E]">Ачивки</h2>
