@@ -40,7 +40,7 @@ export function LoginForm() {
   })
 
   return (
-    <form onSubmit={handleSubmit((data) => login(data))} className="space-y-5 md:space-y-6">
+    <form onSubmit={handleSubmit((data) => login(data))} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email" className={authLabelClass}>
           Email
@@ -93,7 +93,7 @@ export function LoginForm() {
         )}
       </Button>
 
-      <p className="text-center text-sm text-[rgba(37,37,37,0.7)] md:text-2xl md:leading-[30px]">
+      <p className="text-center text-sm text-[rgba(37,37,37,0.7)]">
         Нет аккаунта?{' '}
         <Link to="/register" className={authFooterLinkClass}>
           Зарегистрироваться

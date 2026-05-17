@@ -13,7 +13,7 @@ export function LoginPage() {
       title="Вход в систему"
       subtitle="Используйте корпоративный аккаунт Naumen"
     >
-      <div className="space-y-5 md:space-y-6">
+      <div className="space-y-4">
         <AuthRoleTabs value={role} onChange={setRole} />
         <AuthRoleHint role={role} />
         <LoginForm />

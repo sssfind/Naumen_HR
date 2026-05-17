@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -39,10 +39,11 @@ const registerSchema = z
 type RegisterFormValues = z.infer<typeof registerSchema>
 
 type RegisterFormProps = {
-  uiRole: AuthUiRole
+  uiRole: AuthUiRole | null
+  onMissingRole?: () => void
 }
 
-export function RegisterForm({ uiRole }: RegisterFormProps) {
+export function RegisterForm({ uiRole, onMissingRole }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const { mutate: register_, isPending } = useRegister()
@@ -54,13 +55,12 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      role: authUiRoleToRegisterRole(uiRole),
-    },
   })
 
   useEffect(() => {
-    setValue('role', authUiRoleToRegisterRole(uiRole))
+    if (uiRole) {
+      setValue('role', authUiRoleToRegisterRole(uiRole))
+    }
   }, [uiRole, setValue])
 
   const onSubmit = (data: RegisterFormValues) => {
@@ -68,11 +68,20 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
     register_(payload)
   }
 
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!uiRole) {
+      onMissingRole?.()
+      return
+    }
+    void handleSubmit(onSubmit)(event)
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5">
+    <form onSubmit={handleFormSubmit} className="space-y-3">
       <input type="hidden" {...register('role')} />
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="fullName" className={authLabelClass}>
           ФИО
         </Label>
@@ -86,7 +95,7 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
         {errors.fullName && <p className="text-xs text-red-500">{errors.fullName.message}</p>}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="reg-email" className={authLabelClass}>
           Email
         </Label>
@@ -101,7 +110,7 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
         {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="department" className={authLabelClass}>
           Отдел
         </Label>
@@ -114,8 +123,8 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
         {errors.department && <p className="text-xs text-red-500">{errors.department.message}</p>}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
           <Label htmlFor="reg-password" className={authLabelClass}>
             Пароль
           </Label>
@@ -140,7 +149,7 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
           {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="confirmPassword" className={authLabelClass}>
             Подтверждение
           </Label>
@@ -168,7 +177,7 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
         </div>
       </div>
 
-      <Button type="submit" disabled={isPending} className={cn(authSubmitClass, 'mt-2')}>
+      <Button type="submit" disabled={isPending} className={cn(authSubmitClass, 'mt-1')}>
         {isPending ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -179,7 +188,7 @@ export function RegisterForm({ uiRole }: RegisterFormProps) {
         )}
       </Button>
 
-      <p className="text-center text-sm text-[rgba(37,37,37,0.7)] md:text-2xl md:leading-[30px]">
+      <p className="text-center text-sm text-[rgba(37,37,37,0.7)]">
         Уже есть аккаунт?{' '}
         <Link to="/" className={authFooterLinkClass}>
           Войти
