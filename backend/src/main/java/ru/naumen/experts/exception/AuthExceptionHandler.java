@@ -70,10 +70,22 @@ public class AuthExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(EmailNotRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleEmailNotRegistered(EmailNotRegisteredException ex,
+                                                                  HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidPasswordException ex,
+                                                                HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex,
                                                                HttpServletRequest request) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", "Неверный email или пароль", request);
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", "Неправильный пароль", request);
     }
 
     @ExceptionHandler(DisabledException.class)

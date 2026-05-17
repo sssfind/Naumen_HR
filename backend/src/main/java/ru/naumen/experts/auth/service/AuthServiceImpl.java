@@ -3,7 +3,9 @@ package ru.naumen.experts.auth.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,8 @@ import ru.naumen.experts.auth.dto.UserInfoResponse;
 import ru.naumen.experts.auth.jwt.JwtTokenProvider;
 import ru.naumen.experts.config.AppSecurityProperties;
 import ru.naumen.experts.exception.CorporateEmailRequiredException;
+import ru.naumen.experts.exception.EmailNotRegisteredException;
+import ru.naumen.experts.exception.InvalidPasswordException;
 import ru.naumen.experts.exception.UserAlreadyExistsException;
 import ru.naumen.experts.exception.UserNotFoundException;
 import ru.naumen.experts.user.entity.User;
@@ -63,14 +67,22 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
         validateCorporateEmail(request.getEmail());
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail().toLowerCase(),
-                        request.getPassword()
-                )
-        );
+        String email = request.getEmail().toLowerCase();
+        if (!userRepository.existsByEmail(email)) {
+            throw new EmailNotRegisteredException();
+        }
 
-        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, request.getPassword())
+            );
+        } catch (BadCredentialsException ex) {
+            throw new InvalidPasswordException();
+        } catch (AuthenticationException ex) {
+            throw ex;
+        }
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(request.getEmail()));
 
         String token = jwtTokenProvider.generateToken(user);

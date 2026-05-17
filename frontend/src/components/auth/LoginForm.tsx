@@ -4,6 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner'
+import { parseLoginError } from '@/components/auth/authLoginErrors'
 import {
   authFieldClass,
   authFooterLinkClass,
@@ -29,6 +31,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const [loginErrorMessage, setLoginErrorMessage] = useState<string | null>(null)
   const { mutate: login, isPending } = useLogin()
 
   const {
@@ -39,8 +42,31 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   })
 
+  const clearLoginError = () => setLoginErrorMessage(null)
+
+  const emailField = register('email', {
+    onChange: clearLoginError,
+  })
+
+  const passwordField = register('password', {
+    onChange: clearLoginError,
+  })
+
   return (
-    <form onSubmit={handleSubmit((data) => login(data))} className="space-y-4">
+    <form
+      onSubmit={handleSubmit((data) => {
+        clearLoginError()
+        login(data, {
+          onError: (error) => {
+            const { message } = parseLoginError(error)
+            setLoginErrorMessage(message)
+          },
+        })
+      })}
+      className="space-y-4"
+    >
+      {loginErrorMessage && <AuthErrorBanner message={loginErrorMessage} />}
+
       <div className="space-y-2">
         <Label htmlFor="email" className={authLabelClass}>
           Email
@@ -51,7 +77,10 @@ export function LoginForm() {
           placeholder="ivanov@naumen.ru"
           autoComplete="email"
           className={authFieldClass(Boolean(errors.email))}
-          {...register('email')}
+          name={emailField.name}
+          ref={emailField.ref}
+          onBlur={emailField.onBlur}
+          onChange={emailField.onChange}
         />
         {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
       </div>
@@ -67,7 +96,10 @@ export function LoginForm() {
             placeholder="••••••••"
             autoComplete="current-password"
             className={cn(authFieldClass(Boolean(errors.password)), 'pr-11')}
-            {...register('password')}
+            name={passwordField.name}
+            ref={passwordField.ref}
+            onBlur={passwordField.onBlur}
+            onChange={passwordField.onChange}
           />
           <button
             type="button"

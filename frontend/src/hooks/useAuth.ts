@@ -38,9 +38,8 @@ export function useLogin() {
       toast.success(`Добро пожаловать, ${data.fullName}!`)
       navigate(data.redirectUrl || '/app')
     },
-    onError: (error: Error) => {
-      const message = extractApiErrorMessage(error, 'Неверный email или пароль')
-      toast.error(message)
+    onError: () => {
+      // Ошибки входа показываются в LoginForm (красная плашка)
     },
   })
 }
