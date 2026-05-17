@@ -3,8 +3,14 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
+interface HistoryMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 interface ChatRequest {
   message: string
+  history?: HistoryMessage[]
 }
 
 interface ChatResponse {

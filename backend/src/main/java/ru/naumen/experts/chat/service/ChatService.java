@@ -14,6 +14,7 @@ import ru.naumen.experts.chat.dto.OpenRouterChatRequest;
 import ru.naumen.experts.chat.dto.OpenRouterChatResponse;
 import ru.naumen.experts.exception.BadRequestException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -44,13 +45,25 @@ public class ChatService {
         }
 
         String message = request.getMessage().trim();
+
+        List<OpenRouterChatRequest.Message> messages = new ArrayList<>();
+        messages.add(new OpenRouterChatRequest.Message("system", SYSTEM_PROMPT));
+        messages.add(new OpenRouterChatRequest.Message("system", "Роль пользователя в системе: " + userRole));
+
+        if (request.getHistory() != null && !request.getHistory().isEmpty()) {
+            int skip = Math.max(0, request.getHistory().size() - 10);
+            request.getHistory().stream()
+                    .skip(skip)
+                    .filter(h -> h.getRole() != null && h.getContent() != null && !h.getContent().isBlank())
+                    .map(h -> new OpenRouterChatRequest.Message(h.getRole(), h.getContent().trim()))
+                    .forEach(messages::add);
+        }
+
+        messages.add(new OpenRouterChatRequest.Message("user", message));
+
         OpenRouterChatRequest openRouterRequest = new OpenRouterChatRequest(
                 properties.model(),
-                List.of(
-                        new OpenRouterChatRequest.Message("system", SYSTEM_PROMPT),
-                        new OpenRouterChatRequest.Message("system", "Роль пользователя в системе: " + userRole),
-                        new OpenRouterChatRequest.Message("user", message)
-                ),
+                messages,
                 0.2,
                 600
         );
