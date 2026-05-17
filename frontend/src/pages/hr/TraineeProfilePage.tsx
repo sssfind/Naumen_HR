@@ -82,7 +82,7 @@ export function TraineeProfilePage() {
         <Button asChild variant="ghost" className="mb-4 gap-2">
           <Link to={`${basePath}/trainees`}>
             <ArrowLeft className="h-4 w-4" />
-            Назад к стажёрам
+            Назад к списку
           </Link>
         </Button>
         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
@@ -98,7 +98,7 @@ export function TraineeProfilePage() {
         <Button asChild variant="ghost" className="gap-2">
           <Link to={`${basePath}/trainees`}>
             <ArrowLeft className="h-4 w-4" />
-            Назад к стажёрам
+            Назад к списку
           </Link>
         </Button>
         {canEditPlans && (
