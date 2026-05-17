@@ -13,7 +13,7 @@ interface TaskBlockTasksListProps {
   highlightedTaskId?: number | null
   reviewMode?: boolean
   onApprove?: (taskId: number) => Promise<unknown>
-  onReject?: (taskId: number, comment?: string) => Promise<unknown>
+  onReject?: (taskId: number, comment: string) => Promise<unknown>
 }
 
 export function TaskBlockTasksList({

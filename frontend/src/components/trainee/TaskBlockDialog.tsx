@@ -20,7 +20,7 @@ interface TaskBlockDialogProps {
   activeAction?: 'start' | 'complete' | 'comment' | 'approve' | 'reject' | null
   reviewMode?: boolean
   onApprove?: (taskId: number) => Promise<unknown>
-  onReject?: (taskId: number, comment?: string) => Promise<unknown>
+  onReject?: (taskId: number, comment: string) => Promise<unknown>
 }
 
 export function TaskBlockDialog({

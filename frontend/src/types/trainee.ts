@@ -92,3 +92,10 @@ export interface PagedTraineeEmployees {
   totalElements: number
   totalPages: number
 }
+
+export interface PendingReviewTask {
+  traineeId: number
+  traineeFullName: string
+  traineeTeam: string | null
+  task: TraineePlanTask
+}

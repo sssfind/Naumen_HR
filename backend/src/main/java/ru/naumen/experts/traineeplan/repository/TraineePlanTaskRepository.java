@@ -78,4 +78,14 @@ public interface TraineePlanTaskRepository extends JpaRepository<TraineePlanTask
             ORDER BY t.deadline ASC, t.id ASC
             """)
     List<TraineePlanTask> findNotStartedByTrainee(@Param("traineeId") Long traineeId);
+
+    @Query("""
+            SELECT t FROM TraineePlanTask t
+            JOIN FETCH t.trainee
+            WHERE t.trainee.id IN :traineeIds
+              AND t.status = ru.naumen.experts.traineeplan.enums.TaskStatus.PENDING_REVIEW
+            ORDER BY t.trainee.fullName ASC, t.deadline ASC, t.id ASC
+            """)
+    List<TraineePlanTask> findPendingReviewByTraineeIds(
+            @Param("traineeIds") Collection<Long> traineeIds);
 }
