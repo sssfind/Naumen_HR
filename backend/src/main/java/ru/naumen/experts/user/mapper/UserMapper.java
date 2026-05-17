@@ -109,6 +109,7 @@ public final class UserMapper {
                 .progressBlockTwo(trainee.getProgressBlockTwo())
                 .progressBlockThree(trainee.getProgressBlockThree())
                 .totalProgress(calculateTotalProgress(trainee))
+                .mentorId(mentor != null ? mentor.getId() : null)
                 .mentorFullName(mentor != null ? mentor.getFullName() : null)
                 .mentorPhone(mentor != null ? mentor.getPhone() : null)
                 .moodLevel(trainee.getMoodLevel())

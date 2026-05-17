@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "HR Feedback", description = "Обратная связь стажёров для HR")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasRole('HR')")
+@PreAuthorize("hasAnyRole('HR', 'MENTOR')")
 public class HrFeedbackController {
 
     private final FeedbackService feedbackService;

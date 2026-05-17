@@ -3,8 +3,10 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { queryClient } from '@/lib/queryClient'
 import { HrRoute } from '@/components/HrRoute'
+import { MentorRoute } from '@/components/MentorRoute'
 import { TraineeRoute } from '@/components/TraineeRoute'
 import { HrLayout } from '@/layouts/HrLayout'
+import { MentorLayout } from '@/layouts/MentorLayout'
 import { TraineeLayout } from '@/layouts/TraineeLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
@@ -94,6 +96,27 @@ export function App() {
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/hr/profile" />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+          <Route
+            path="/dashboard/mentor"
+            element={
+              <ProtectedRoute>
+                <MentorRoute>
+                  <MentorLayout />
+                </MentorRoute>
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="trainees" replace />} />
+            <Route path="plan-templates/:templateId" element={<PlanTemplateDetailPage />} />
+            <Route path="plan-templates" element={<PlanTemplatesPage />} />
+            <Route path="trainees/:traineeId/plan" element={<EditTraineePlanPage />} />
+            <Route path="trainees/:traineeId" element={<HrTraineeProfilePage />} />
+            <Route path="trainees" element={<TraineesPage />} />
+            <Route path="employees" element={<EmployeesPage />} />
+            <Route path="chat" element={<ChatPage />} />
+            <Route path="profile/edit" element={<ProfileEditPage backTo="/dashboard/mentor/profile" />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
           <Route

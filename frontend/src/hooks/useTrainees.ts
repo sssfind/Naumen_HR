@@ -146,6 +146,37 @@ export function useAssignTrainee() {
   })
 }
 
+export function useMentors() {
+  return useQuery({
+    queryKey: ['hr', 'mentors'],
+    queryFn: async () => {
+      const { data } = await api.get<Employee[]>('/hr/mentors')
+      return data
+    },
+  })
+}
+
+export function useAssignMentor() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ traineeId, mentorId }: { traineeId: number; mentorId: number }) => {
+      const { data } = await api.post<Employee>(
+        `/hr/trainees/${traineeId}/assign-mentor`,
+        { mentorId }
+      )
+      return data
+    },
+    onSuccess: (_, { traineeId }) => {
+      queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId] })
+      queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
+      queryClient.invalidateQueries({ queryKey: ['employees'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      toast.success('Наставник назначен')
+    },
+    onError: () => toast.error('Не удалось назначить наставника'),
+  })
+}
+
 export function useUnassignTrainee() {
   const queryClient = useQueryClient()
   return useMutation({

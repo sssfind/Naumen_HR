@@ -27,7 +27,7 @@ const registerSchema = z
       .email('Введите корректный email')
       .endsWith('@naumen.ru', 'Email должен заканчиваться на @naumen.ru'),
     department: z.string().min(2, 'Укажите отдел'),
-    role: z.enum(['ROLE_TRAINEE', 'ROLE_HR']),
+    role: z.enum(['ROLE_TRAINEE', 'ROLE_HR', 'ROLE_MENTOR']),
     password: z.string().min(8, 'Пароль должен содержать минимум 8 символов'),
     confirmPassword: z.string().min(1, 'Подтвердите пароль'),
   })

@@ -24,7 +24,7 @@ public class EmployeeController {
 
     @Operation(summary = "Справочник сотрудников с поиском и фильтром по отделу")
     @GetMapping
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAnyRole('HR', 'MENTOR')")
     public ResponseEntity<PagedEmployeesResponse> search(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String department,

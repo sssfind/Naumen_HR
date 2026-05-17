@@ -1,23 +1,28 @@
 import { Link } from 'react-router-dom'
 import { UserMinus, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { useMyTrainees, useUnassignTrainee } from '@/hooks/useTrainees'
 
 const roleLabels: Record<string, string> = {
   ROLE_TRAINEE: 'Стажёр',
   ROLE_EMPLOYEE: 'Сотрудник',
   ROLE_HR: 'HR',
+  ROLE_MENTOR: 'Наставник',
 }
 
 export function TraineesPage() {
+  const { basePath, canManageTrainees } = useStaffDashboard()
   const { data: trainees = [], isLoading } = useMyTrainees()
   const unassign = useUnassignTrainee()
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#1A1A2E]">Мои стажёры</h1>
+      <h1 className="text-2xl font-bold text-[#1A1A2E]">Стажёры</h1>
       <p className="mt-1 text-sm text-gray-500">
-        Стажёры, закреплённые за вами. Назначить новых можно в справочнике сотрудников.
+        {canManageTrainees
+          ? 'Все стажёры в программе адаптации. Назначить новых и наставника — в справочнике и профиле стажёра.'
+          : 'Все стажёры в программе адаптации. Назначение в программу и наставника выполняет HR.'}
       </p>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -49,21 +54,23 @@ export function TraineesPage() {
                   <td className="px-6 py-4 text-gray-600">{roleLabels[t.role] ?? t.role}</td>
                   <td className="px-6 py-4 text-right">
                     <Button asChild variant="ghost" size="sm" className="mr-2 gap-1">
-                      <Link to={`/dashboard/hr/trainees/${t.userId}`}>
+                      <Link to={`${basePath}/trainees/${t.userId}`}>
                         <UserRound className="h-3.5 w-3.5" />
                         Профиль
                       </Link>
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1"
-                      onClick={() => unassign.mutate(t.userId)}
-                      disabled={unassign.isPending}
-                    >
-                      <UserMinus className="h-3.5 w-3.5" />
-                      Снять
-                    </Button>
+                    {canManageTrainees && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        onClick={() => unassign.mutate(t.userId)}
+                        disabled={unassign.isPending}
+                      >
+                        <UserMinus className="h-3.5 w-3.5" />
+                        Снять наставника
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}

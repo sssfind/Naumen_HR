@@ -1,4 +1,4 @@
-export type UserRole = 'ROLE_EMPLOYEE' | 'ROLE_HR' | 'ROLE_TRAINEE'
+export type UserRole = 'ROLE_EMPLOYEE' | 'ROLE_HR' | 'ROLE_MENTOR' | 'ROLE_TRAINEE'
 
 export interface UserProfile {
   userId: number
@@ -56,6 +56,7 @@ export interface TraineeProfile {
   progressBlockTwo: number
   progressBlockThree: number
   totalProgress: number
+  mentorId: number | null
   mentorFullName: string | null
   mentorPhone: string | null
   moodLevel: number

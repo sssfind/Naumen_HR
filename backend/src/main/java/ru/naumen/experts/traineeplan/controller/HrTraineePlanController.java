@@ -23,7 +23,7 @@ import ru.naumen.experts.traineeplan.service.TraineePlanService;
 @RequiredArgsConstructor
 @Tag(name = "HR Trainee Plan", description = "Редактирование плана стажёра")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasRole('HR')")
+@PreAuthorize("hasAnyRole('HR', 'MENTOR')")
 public class HrTraineePlanController {
 
     private final TraineePlanService traineePlanService;

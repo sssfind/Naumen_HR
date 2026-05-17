@@ -19,6 +19,7 @@ public class TraineeProfileResponse {
     private Integer progressBlockTwo;
     private Integer progressBlockThree;
     private Integer totalProgress;
+    private Long mentorId;
     private String mentorFullName;
     private String mentorPhone;
     private Integer moodLevel;

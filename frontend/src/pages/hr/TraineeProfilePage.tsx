@@ -16,8 +16,10 @@ import { AdaptationPathTimeline } from '@/components/trainee/AdaptationPathTimel
 import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
 import { ProgressBar as TraineeProgressBar } from '@/components/trainee/ProgressBar'
 import { formatDateTime } from '@/components/trainee/planTaskLabels'
+import { AssignMentorPanel } from '@/components/hr/AssignMentorPanel'
 import { FeedbackResponseCard } from '@/components/feedback/FeedbackResponseCard'
 import { Button } from '@/components/ui/button'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { useTraineeFeedback } from '@/hooks/useFeedback'
 import { useHrTraineeDashboard, useTraineeProfile } from '@/hooks/useTrainees'
 import type { TaskProgressBlock, TraineePlanTask } from '@/types/trainee'
@@ -46,6 +48,7 @@ function initials(firstName: string, lastName: string) {
 }
 
 export function TraineeProfilePage() {
+  const { basePath, canEditPlans, canManageTrainees } = useStaffDashboard()
   const { traineeId } = useParams()
   const numericTraineeId = traineeId ? Number(traineeId) : undefined
   const { data: trainee, isLoading, isError } = useTraineeProfile(numericTraineeId)
@@ -77,7 +80,7 @@ export function TraineeProfilePage() {
     return (
       <div>
         <Button asChild variant="ghost" className="mb-4 gap-2">
-          <Link to="/dashboard/hr/trainees">
+          <Link to={`${basePath}/trainees`}>
             <ArrowLeft className="h-4 w-4" />
             Назад к стажёрам
           </Link>
@@ -93,17 +96,29 @@ export function TraineeProfilePage() {
     <div>
       <div className="mb-6 flex items-center justify-between gap-4">
         <Button asChild variant="ghost" className="gap-2">
-          <Link to="/dashboard/hr/trainees">
+          <Link to={`${basePath}/trainees`}>
             <ArrowLeft className="h-4 w-4" />
             Назад к стажёрам
           </Link>
         </Button>
-        <Button asChild>
-          <Link to={`/dashboard/hr/trainees/${trainee.userId}/plan`}>
-            Редактировать план стажера
-          </Link>
-        </Button>
+        {canEditPlans && (
+          <Button asChild>
+            <Link to={`${basePath}/trainees/${trainee.userId}/plan`}>
+              Редактировать план стажёра
+            </Link>
+          </Button>
+        )}
       </div>
+
+      {canManageTrainees && numericTraineeId != null && (
+        <div className="mb-6">
+          <AssignMentorPanel
+            traineeId={numericTraineeId}
+            currentMentorId={trainee.mentorId}
+            currentMentorName={trainee.mentorFullName}
+          />
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
         <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -148,7 +163,10 @@ export function TraineeProfilePage() {
           {taskDashboard?.adaptationPath && (
             <AdaptationPathTimeline
               path={taskDashboard.adaptationPath}
-              blockLinkPrefix={`/dashboard/hr/trainees/${trainee.userId}/plan`}
+              blockLinkPrefix={
+                canEditPlans ? `${basePath}/trainees/${trainee.userId}/plan` : undefined
+              }
+              linkMilestones={canEditPlans}
               compact
             />
           )}

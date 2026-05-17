@@ -17,8 +17,8 @@ import ru.naumen.experts.traineeplan.entity.TraineePlanTask;
 import ru.naumen.experts.traineeplan.repository.TraineePlanTaskRepository;
 import ru.naumen.experts.traineeplan.service.TraineePlanService;
 import ru.naumen.experts.user.entity.User;
-import ru.naumen.experts.user.enums.UserRole;
 import ru.naumen.experts.user.repository.UserRepository;
+import ru.naumen.experts.user.service.StaffAccessService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,10 +32,11 @@ public class AdaptationPlanTemplateService {
     private final TraineePlanTaskRepository traineeTaskRepository;
     private final TraineePlanService traineePlanService;
     private final UserRepository userRepository;
+    private final StaffAccessService staffAccessService;
 
     @Transactional(readOnly = true)
     public List<PlanTemplateSummaryResponse> listForHr(Long hrId) {
-        requireHr(hrId);
+        requireStaff(hrId);
         return templateRepository.findAvailableForHr(hrId).stream()
                 .map(template -> PlanTemplateSummaryResponse.builder()
                         .id(template.getId())
@@ -51,7 +52,7 @@ public class AdaptationPlanTemplateService {
 
     @Transactional(readOnly = true)
     public PlanTemplateDetailResponse getForHr(Long hrId, Long templateId) {
-        requireHr(hrId);
+        requireStaff(hrId);
         AdaptationPlanTemplate template = requireTemplateForHr(hrId, templateId);
         List<AdaptationPlanTemplateTask> tasks =
                 templateTaskRepository.findByTemplateIdOrderBySortOrderAscIdAsc(templateId);
@@ -60,7 +61,7 @@ public class AdaptationPlanTemplateService {
 
     @Transactional
     public PlanTemplateDetailResponse createTemplate(Long hrId, PlanTemplateRequest request) {
-        User hr = requireHr(hrId);
+        User hr = requireStaff(hrId);
         AdaptationPlanTemplate template = AdaptationPlanTemplate.builder()
                 .name(request.getName().trim())
                 .description(request.getDescription().trim())
@@ -75,7 +76,7 @@ public class AdaptationPlanTemplateService {
 
     @Transactional
     public PlanTemplateDetailResponse updateTemplate(Long hrId, Long templateId, PlanTemplateRequest request) {
-        requireHr(hrId);
+        requireStaff(hrId);
         AdaptationPlanTemplate template = requireOwnedTemplate(hrId, templateId);
         template.setName(request.getName().trim());
         template.setDescription(request.getDescription().trim());
@@ -89,14 +90,14 @@ public class AdaptationPlanTemplateService {
 
     @Transactional
     public void deleteTemplate(Long hrId, Long templateId) {
-        requireHr(hrId);
+        requireStaff(hrId);
         AdaptationPlanTemplate template = requireOwnedTemplate(hrId, templateId);
         templateRepository.delete(template);
     }
 
     @Transactional
     public PlanTemplateTaskResponse createTask(Long hrId, Long templateId, PlanTemplateTaskRequest request) {
-        requireHr(hrId);
+        requireStaff(hrId);
         AdaptationPlanTemplate template = requireOwnedTemplate(hrId, templateId);
         AdaptationPlanTemplateTask task = buildTask(template, request);
         return PlanTemplateMapper.toTaskResponse(templateTaskRepository.save(task));
@@ -105,7 +106,7 @@ public class AdaptationPlanTemplateService {
     @Transactional
     public PlanTemplateTaskResponse updateTask(
             Long hrId, Long templateId, Long taskId, PlanTemplateTaskRequest request) {
-        requireHr(hrId);
+        requireStaff(hrId);
         requireOwnedTemplate(hrId, templateId);
         AdaptationPlanTemplateTask task = templateTaskRepository
                 .findByIdAndTemplateId(taskId, templateId)
@@ -116,7 +117,7 @@ public class AdaptationPlanTemplateService {
 
     @Transactional
     public void deleteTask(Long hrId, Long templateId, Long taskId) {
-        requireHr(hrId);
+        requireStaff(hrId);
         requireOwnedTemplate(hrId, templateId);
         AdaptationPlanTemplateTask task = templateTaskRepository
                 .findByIdAndTemplateId(taskId, templateId)
@@ -127,7 +128,7 @@ public class AdaptationPlanTemplateService {
     @Transactional
     public ApplyPlanTemplateResponse applyToTrainee(
             Long hrId, Long traineeId, Long templateId, ApplyPlanTemplateRequest request) {
-        requireHr(hrId);
+        requireStaff(hrId);
         traineePlanService.requireAssignedTraineeForApply(hrId, traineeId);
         AdaptationPlanTemplate template = requireTemplateForHr(hrId, templateId);
         List<AdaptationPlanTemplateTask> templateTasks =
@@ -223,13 +224,11 @@ public class AdaptationPlanTemplateService {
         return template;
     }
 
-    private User requireHr(Long hrId) {
-        User hr = userRepository.findById(hrId)
-                .orElseThrow(() -> new UserNotFoundException(hrId));
-        if (hr.getRole() != UserRole.ROLE_HR) {
-            throw new ForbiddenException("Доступно только для HR");
-        }
-        return hr;
+    private User requireStaff(Long staffId) {
+        User staff = userRepository.findById(staffId)
+                .orElseThrow(() -> new UserNotFoundException(staffId));
+        staffAccessService.requireHrOrMentor(staff);
+        return staff;
     }
 
     private static String trimOrNull(String value) {

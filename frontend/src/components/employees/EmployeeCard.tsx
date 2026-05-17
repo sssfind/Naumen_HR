@@ -7,6 +7,7 @@ const roleLabels: Record<UserRole, string> = {
   ROLE_TRAINEE: 'Стажёр',
   ROLE_EMPLOYEE: 'Сотрудник',
   ROLE_HR: 'HR',
+  ROLE_MENTOR: 'Наставник',
 }
 
 interface EmployeeCardProps {

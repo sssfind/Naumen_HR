@@ -20,6 +20,7 @@ import ru.naumen.experts.notification.service.NotificationService;
 import ru.naumen.experts.user.entity.User;
 import ru.naumen.experts.user.enums.UserRole;
 import ru.naumen.experts.user.repository.UserRepository;
+import ru.naumen.experts.user.service.StaffAccessService;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -35,6 +36,7 @@ public class FeedbackService {
     private final FeedbackResponseRepository feedbackRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final StaffAccessService staffAccessService;
 
     @Transactional(readOnly = true)
     public FeedbackStatusResponse getStatus(Long traineeId) {
@@ -74,18 +76,14 @@ public class FeedbackService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedbackResponseDto> getTraineeFeedbackForHr(Long hrId, Long traineeId, int limit) {
-        User hr = userRepository.findById(hrId)
-                .orElseThrow(() -> new UserNotFoundException(hrId));
-        if (hr.getRole() != UserRole.ROLE_HR) {
-            throw new ForbiddenException("Доступно только для HR");
-        }
-
+    public List<FeedbackResponseDto> getTraineeFeedbackForHr(Long staffId, Long traineeId, int limit) {
+        User staff = staffAccessService.requireUser(staffId);
         User trainee = userRepository.findById(traineeId)
                 .orElseThrow(() -> new UserNotFoundException(traineeId));
         if (trainee.getRole() != UserRole.ROLE_TRAINEE) {
             throw new BadRequestException("Пользователь не является стажёром");
         }
+        staffAccessService.requireCanViewTrainee(staff, trainee);
 
         int size = Math.max(1, Math.min(limit, 52));
         return feedbackRepository

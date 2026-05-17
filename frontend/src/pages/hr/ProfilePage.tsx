@@ -15,6 +15,7 @@ import { AchievementBadgeRow } from '@/components/profile/AchievementBadgeRow'
 import { TraineeProgressChart } from '@/components/hr/TraineeProgressChart'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/hooks/useProfile'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { useHrTeamStats } from '@/hooks/useTrainees'
 import { cn } from '@/lib/utils'
 
@@ -43,6 +44,7 @@ function moodLabelForAverage(value: number | null | undefined) {
 }
 
 export function ProfilePage() {
+  const { basePath, isMentor } = useStaffDashboard()
   const { data: profile, isLoading } = useProfile()
   const { data: stats, isLoading: statsLoading } = useHrTeamStats()
 
@@ -59,7 +61,11 @@ export function ProfilePage() {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#1A1A2E]">Мой профиль</h1>
-        <p className="mt-1 text-sm text-gray-500">Личные данные и сводка по стажёрам</p>
+        <p className="mt-1 text-sm text-gray-500">
+          {isMentor
+            ? 'Личные данные и сводка по вашим стажёрам'
+            : 'Личные данные и сводка по стажёрам'}
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,500px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]">
@@ -177,7 +183,7 @@ export function ProfilePage() {
 
       <div className="mt-6 flex justify-end">
         <Button asChild className="gap-2">
-          <Link to="/dashboard/hr/profile/edit">
+          <Link to={`${basePath}/profile/edit`}>
             <Pencil className="h-4 w-4" />
             Редактировать данные
           </Link>

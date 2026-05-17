@@ -106,6 +106,7 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponse buildAuthResponse(User user, String token) {
         String redirectUrl = switch (user.getRole()) {
             case ROLE_HR -> "/dashboard/hr";
+            case ROLE_MENTOR -> "/dashboard/mentor";
             case ROLE_TRAINEE -> "/dashboard/trainee";
             default -> "/app";
         };

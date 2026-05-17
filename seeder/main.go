@@ -161,11 +161,14 @@ func main() {
 	hrIDs := seedHR(ctx, pool, defaultHash)
 	fmt.Printf("Создано HR-менеджеров: %d\n", len(hrIDs))
 
+	mentorIDs := seedMentors(ctx, pool, defaultHash)
+	fmt.Printf("Создано наставников: %d\n", len(mentorIDs))
+
 	seedEmployees(ctx, pool, defaultHash, rng)
 	fmt.Println("Создано сотрудников: 20")
 
 	personas := buildPersonas(rng)
-	traineeRecords := seedTrainees(ctx, pool, defaultHash, hrIDs, personas, rng)
+	traineeRecords := seedTrainees(ctx, pool, defaultHash, mentorIDs, personas, rng)
 	fmt.Printf("Создано стажеров: %d\n", len(traineeRecords))
 
 	taskCount := 0
@@ -294,6 +297,38 @@ func seedHR(ctx context.Context, pool *pgxpool.Pool, passwordHash string) []int6
 	return ids
 }
 
+func seedMentors(ctx context.Context, pool *pgxpool.Pool, passwordHash string) []int64 {
+	names := []struct {
+		FullName string
+		Position string
+		Dept     string
+	}{
+		{"Петров Алексей Сергеевич", "Tech Lead", "Разработка"},
+		{"Соколова Мария Игоревна", "Senior QA", "Тестирование"},
+	}
+	ids := make([]int64, 0, len(names))
+	for i, m := range names {
+		var id int64
+		phone := fmt.Sprintf("+7994%07d", 4000000+i*211)
+		deptID := lookupDepartmentID(ctx, pool, m.Dept)
+		zone := responsibilityZone(m.Position, m.Dept)
+		err := pool.QueryRow(ctx, `
+			INSERT INTO users (
+				email, password_hash, full_name, department, department_id, role,
+				phone, position, team, responsibility_zone
+			)
+			VALUES ($1, $2, $3, $4, $5, 'ROLE_MENTOR', $6, $7, $8, $9)
+			RETURNING id`,
+			fmt.Sprintf("mentor%d@naumen.ru", i+1), passwordHash, m.FullName, m.Dept, deptID,
+			phone, m.Position, m.Dept, zone).Scan(&id)
+		if err != nil {
+			log.Fatalf("Ошибка вставки наставника: %v", err)
+		}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
 func seedEmployees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, rng *rand.Rand) {
 	teams := []string{"Платформа А", "Аналитика данных", "Backend Core", "Frontend Guild", "Команда 2", "Команда 3"}
 	teamByTrainee := map[int]string{
@@ -331,7 +366,7 @@ func seedEmployees(ctx context.Context, pool *pgxpool.Pool, passwordHash string,
 	}
 }
 
-func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, hrIDs []int64, personas []traineePersona, rng *rand.Rand) []traineeRecord {
+func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, mentorIDs []int64, personas []traineePersona, rng *rand.Rand) []traineeRecord {
 	records := make([]traineeRecord, 0, len(personas))
 	extraChars := make([]Character, len(characters))
 	copy(extraChars, characters)
@@ -342,7 +377,7 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 		if p.Index > 4 {
 			c = extraChars[(p.Index-5)%len(extraChars)]
 		}
-		hrID := hrIDs[p.HrIndex]
+		mentorID := mentorIDs[p.HrIndex%len(mentorIDs)]
 		phone := fmt.Sprintf("+7993%07d", 3000000+p.Index*211)
 		var id int64
 		deptID := lookupDepartmentID(ctx, pool, c.Dept)
@@ -356,12 +391,12 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 			VALUES ($1, $2, $3, $4, $5, 'ROLE_TRAINEE', $6, $7, $8, $9, $10, 3, 0, 0, 0)
 			RETURNING id`,
 			fmt.Sprintf("trainee%d@naumen.ru", p.Index), passwordHash, c.FullName, c.Dept, deptID,
-			hrID, p.Team, phone, c.Position, zone).Scan(&id)
+			mentorID, p.Team, phone, c.Position, zone).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки стажера %d: %v", p.Index, err)
 		}
 		records = append(records, traineeRecord{
-			ID: id, Index: p.Index, HrID: hrID, Char: c, Persona: p, Team: p.Team,
+			ID: id, Index: p.Index, HrID: mentorID, Char: c, Persona: p, Team: p.Team,
 		})
 	}
 	return records

@@ -18,6 +18,7 @@ import ru.naumen.experts.traineeplan.repository.TraineePlanTaskRepository;
 import ru.naumen.experts.user.entity.User;
 import ru.naumen.experts.user.enums.UserRole;
 import ru.naumen.experts.user.repository.UserRepository;
+import ru.naumen.experts.user.service.StaffAccessService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +32,7 @@ public class TraineePlanService {
     private final UserRepository userRepository;
     private final TraineePlanTaskRepository taskRepository;
     private final TraineePlanTaskCommentRepository commentRepository;
+    private final StaffAccessService staffAccessService;
 
     @Transactional(readOnly = true)
     public TraineePlanResponse getPlanForHr(Long hrId, Long traineeId) {
@@ -104,11 +106,10 @@ public class TraineePlanService {
         return requireAssignedTrainee(hrId, traineeId);
     }
 
-    private User requireAssignedTrainee(Long hrId, Long traineeId) {
+    private User requireAssignedTrainee(Long staffId, Long traineeId) {
+        User staff = staffAccessService.requireUser(staffId);
         User trainee = requireTrainee(traineeId);
-        if (trainee.getHr() == null || !trainee.getHr().getId().equals(hrId)) {
-            throw new ForbiddenException("Этот стажёр не закреплён за вами");
-        }
+        staffAccessService.requireCanViewTrainee(staff, trainee);
         return trainee;
     }
 

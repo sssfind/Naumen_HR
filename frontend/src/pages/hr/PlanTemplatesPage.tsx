@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import { BookTemplate, ChevronRight, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { useCreatePlanTemplate, useDeletePlanTemplate, usePlanTemplates } from '@/hooks/usePlanTemplates'
 import type { PlanTemplateSummary } from '@/types/template'
 
 export function PlanTemplatesPage() {
+  const { basePath } = useStaffDashboard()
   const { data: templates = [], isLoading, isError } = usePlanTemplates()
   const createTemplate = useCreatePlanTemplate()
   const deleteTemplate = useDeletePlanTemplate()
@@ -32,7 +34,7 @@ export function PlanTemplatesPage() {
     setDescription('')
     setTargetPosition('')
     setDurationWeeks('12')
-    window.location.href = `/dashboard/hr/plan-templates/${created.id}`
+    window.location.href = `${basePath}/plan-templates/${created.id}`
   }
 
   return (
@@ -109,8 +111,9 @@ export function PlanTemplatesPage() {
 
       {!isLoading && !isError && (
         <>
-          <TemplateSection title="Системные шаблоны" items={systemTemplates} />
+          <TemplateSection basePath={basePath} title="Системные шаблоны" items={systemTemplates} />
           <TemplateSection
+            basePath={basePath}
             title="Мои шаблоны"
             items={customTemplates}
             emptyText="Вы ещё не создали собственных шаблонов."
@@ -126,12 +129,14 @@ export function PlanTemplatesPage() {
 }
 
 function TemplateSection({
+  basePath,
   title,
   items,
   emptyText,
   onDelete,
   deleting,
 }: {
+  basePath: string
   title: string
   items: PlanTemplateSummary[]
   emptyText?: string
@@ -175,7 +180,7 @@ function TemplateSection({
               </div>
               <div className="mt-4 flex items-center justify-between gap-2 border-t border-gray-100 pt-4">
                 <Button asChild variant="ghost" size="sm" className="gap-1">
-                  <Link to={`/dashboard/hr/plan-templates/${template.id}`}>
+                  <Link to={`${basePath}/plan-templates/${template.id}`}>
                     Открыть
                     <ChevronRight className="h-4 w-4" />
                   </Link>

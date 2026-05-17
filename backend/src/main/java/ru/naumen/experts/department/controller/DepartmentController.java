@@ -26,14 +26,14 @@ public class DepartmentController {
 
     @Operation(summary = "Дерево отделов и команд")
     @GetMapping("/tree")
-    @PreAuthorize("hasAnyRole('HR', 'TRAINEE')")
+    @PreAuthorize("hasAnyRole('HR', 'MENTOR', 'TRAINEE')")
     public ResponseEntity<List<DepartmentTreeNodeDto>> getTree() {
         return ResponseEntity.ok(departmentService.getTree());
     }
 
     @Operation(summary = "Плоский список отделов (без корневых групп)")
     @GetMapping
-    @PreAuthorize("hasAnyRole('HR', 'TRAINEE')")
+    @PreAuthorize("hasAnyRole('HR', 'MENTOR', 'TRAINEE')")
     public ResponseEntity<List<DepartmentDto>> list() {
         return ResponseEntity.ok(departmentService.listFlat());
     }

@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "HR Plan Templates", description = "Шаблоны планов адаптации")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasRole('HR')")
+@PreAuthorize("hasAnyRole('HR', 'MENTOR')")
 public class HrPlanTemplateController {
 
     private final AdaptationPlanTemplateService templateService;

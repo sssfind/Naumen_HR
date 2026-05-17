@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { FormEvent, useState } from 'react'
 import { ArrowLeft, CalendarDays, Pencil, Plus, Trash2 } from 'lucide-react'
 import { statusBadgeClass, statusLabels } from '@/components/trainee/planTaskLabels'
@@ -48,6 +49,7 @@ const emptyForm = (block: TraineePlanBlockType): TraineePlanTaskRequest => ({
 })
 
 export function EditTraineePlanPage() {
+  const { basePath } = useStaffDashboard()
   const { traineeId } = useParams()
   const numericTraineeId = traineeId ? Number(traineeId) : undefined
   const { data, isLoading, isError } = useTraineePlan(numericTraineeId)
@@ -58,7 +60,7 @@ export function EditTraineePlanPage() {
   return (
     <div>
       <Button asChild variant="ghost" className="mb-6 gap-2">
-        <Link to={`/dashboard/hr/trainees/${traineeId}`}>
+        <Link to={`${basePath}/trainees/${traineeId}`}>
           <ArrowLeft className="h-4 w-4" />
           Назад к профилю стажёра
         </Link>

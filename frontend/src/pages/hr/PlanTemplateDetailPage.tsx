@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import {
   useCreatePlanTemplateTask,
   useDeletePlanTemplateTask,
@@ -42,6 +43,7 @@ const emptyTaskForm = (block: TraineePlanBlockType): PlanTemplateTaskRequest => 
 })
 
 export function PlanTemplateDetailPage() {
+  const { basePath } = useStaffDashboard()
   const { templateId } = useParams()
   const numericId = templateId ? Number(templateId) : undefined
   const { data, isLoading, isError } = usePlanTemplate(numericId)
@@ -60,7 +62,7 @@ export function PlanTemplateDetailPage() {
   return (
     <div>
       <Button asChild variant="ghost" className="mb-6 gap-2">
-        <Link to="/dashboard/hr/plan-templates">
+        <Link to={`${basePath}/plan-templates`}>
           <ArrowLeft className="h-4 w-4" />
           К списку шаблонов
         </Link>

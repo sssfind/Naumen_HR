@@ -3,10 +3,12 @@ import { CheckCircle2, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmployeeDirectoryView } from '@/components/employees/EmployeeDirectoryView'
 import { useEmployees } from '@/hooks/useEmployees'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { useAssignTrainee } from '@/hooks/useTrainees'
 import type { DirectoryEmployee } from '@/types/employee'
 
 export function EmployeesPage() {
+  const { canManageTrainees } = useStaffDashboard()
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [page, setPage] = useState(0)
@@ -18,7 +20,7 @@ export function EmployeesPage() {
   const assign = useAssignTrainee()
 
   function renderCardFooter(emp: DirectoryEmployee) {
-    if (emp.role === 'ROLE_HR') return null
+    if (emp.role === 'ROLE_HR' || emp.role === 'ROLE_MENTOR') return null
     if (emp.hrId === currentHrId) {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-primary">
@@ -27,6 +29,7 @@ export function EmployeesPage() {
         </span>
       )
     }
+    if (!canManageTrainees) return null
     if (!emp.hrId) {
       return (
         <Button
@@ -50,7 +53,11 @@ export function EmployeesPage() {
   return (
     <EmployeeDirectoryView
       title="Справочник сотрудников"
-      subtitle="Справочник сотрудников по структуре компании и назначение стажёров"
+      subtitle={
+        canManageTrainees
+          ? 'Справочник сотрудников по структуре компании и назначение стажёров'
+          : 'Справочник сотрудников по структуре компании'
+      }
       data={data}
       isLoading={isLoading}
       search={search}

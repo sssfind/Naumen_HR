@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { BookTemplate } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { useApplyPlanTemplate, usePlanTemplates } from '@/hooks/usePlanTemplates'
 
 interface ApplyPlanTemplatePanelProps {
@@ -10,6 +11,7 @@ interface ApplyPlanTemplatePanelProps {
 }
 
 export function ApplyPlanTemplatePanel({ traineeId }: ApplyPlanTemplatePanelProps) {
+  const { basePath } = useStaffDashboard()
   const { data: templates = [], isLoading } = usePlanTemplates()
   const applyTemplate = useApplyPlanTemplate(traineeId)
   const [templateId, setTemplateId] = useState('')
@@ -41,7 +43,7 @@ export function ApplyPlanTemplatePanel({ traineeId }: ApplyPlanTemplatePanelProp
             Добавьте задачи из готового шаблона. Дедлайны считаются от даты старта.
           </p>
           <Link
-            to="/dashboard/hr/plan-templates"
+            to={`${basePath}/plan-templates`}
             className="mt-1 inline-block text-sm font-medium text-primary hover:underline"
           >
             Все шаблоны →

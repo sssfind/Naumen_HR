@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import type { TraineeTaskProgressItem } from '@/types/hr'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +21,8 @@ interface TraineeProgressChartProps {
 }
 
 export function TraineeProgressChart({ items }: TraineeProgressChartProps) {
+  const { basePath } = useStaffDashboard()
+
   if (items.length === 0) {
     return (
       <p className="rounded-xl border border-dashed border-gray-200 py-16 text-center text-sm text-gray-500">
@@ -79,7 +82,7 @@ export function TraineeProgressChart({ items }: TraineeProgressChartProps) {
                     {item.completionPercent}%
                   </span>
                   <Link
-                    to={`/dashboard/hr/trainees/${item.traineeId}`}
+                    to={`${basePath}/trainees/${item.traineeId}`}
                     title={`${item.fullName}: ${item.completedTasks} из ${item.totalTasks} задач`}
                     className={cn(
                       'block w-full max-w-[88px] rounded-t-lg bg-primary shadow-sm',
@@ -100,7 +103,7 @@ export function TraineeProgressChart({ items }: TraineeProgressChartProps) {
             {items.map((item) => (
               <div key={item.traineeId} className="min-w-0 text-center">
                 <Link
-                  to={`/dashboard/hr/trainees/${item.traineeId}`}
+                  to={`${basePath}/trainees/${item.traineeId}`}
                   className="block truncate text-sm font-medium text-gray-700 hover:text-primary"
                   title={item.fullName}
                 >

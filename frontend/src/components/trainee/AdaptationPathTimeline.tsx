@@ -80,12 +80,15 @@ function MilestoneStatusLabel({ milestone }: { milestone: AdaptationPathMileston
 interface AdaptationPathTimelineProps {
   path: AdaptationPath
   blockLinkPrefix?: string
+  /** Если false, контрольные точки без ссылки на редактирование (режим наставника) */
+  linkMilestones?: boolean
   compact?: boolean
 }
 
 export function AdaptationPathTimeline({
   path,
   blockLinkPrefix = '/dashboard/trainee/blocks',
+  linkMilestones = true,
   compact = false,
 }: AdaptationPathTimelineProps) {
   const { totalWeeks, currentWeek, phases, milestones, startDate, endDate, weeks } = path
@@ -245,19 +248,18 @@ export function AdaptationPathTimeline({
             Ключевые вехи испытательного срока — отмечайте выполнение в задачах
           </p>
           <ul className="mt-4 space-y-3">
-            {milestones.map((milestone) => (
-              <li key={milestone.taskId}>
-                <Link
-                  to={`${blockLinkPrefix}/${milestone.blockId}`}
-                  className={cn(
-                    'flex gap-3 rounded-xl border px-4 py-3 transition-colors hover:bg-gray-50',
-                    milestone.status === 'COMPLETED'
-                      ? 'border-green-100 bg-green-50/40'
-                      : milestone.overdue
-                        ? 'border-red-100 bg-red-50/30'
-                        : 'border-gray-100 bg-gray-50/50'
-                  )}
-                >
+            {milestones.map((milestone) => {
+              const rowClass = cn(
+                'flex gap-3 rounded-xl border px-4 py-3',
+                linkMilestones && 'transition-colors hover:bg-gray-50',
+                milestone.status === 'COMPLETED'
+                  ? 'border-green-100 bg-green-50/40'
+                  : milestone.overdue
+                    ? 'border-red-100 bg-red-50/30'
+                    : 'border-gray-100 bg-gray-50/50'
+              )
+              const content = (
+                <>
                   <div className="mt-0.5 shrink-0">
                     <MilestoneStatusIcon milestone={milestone} />
                   </div>
@@ -271,9 +273,20 @@ export function AdaptationPathTimeline({
                       <MilestoneStatusLabel milestone={milestone} />
                     </p>
                   </div>
-                </Link>
-              </li>
-            ))}
+                </>
+              )
+              return (
+                <li key={milestone.taskId}>
+                  {linkMilestones && blockLinkPrefix ? (
+                    <Link to={`${blockLinkPrefix}/${milestone.blockId}`} className={rowClass}>
+                      {content}
+                    </Link>
+                  ) : (
+                    <div className={rowClass}>{content}</div>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}
