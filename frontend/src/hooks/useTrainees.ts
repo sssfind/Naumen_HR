@@ -146,9 +146,10 @@ export function useAssignTrainee() {
   })
 }
 
-export function useMentors() {
+export function useMentors(enabled = true) {
   return useQuery({
     queryKey: ['hr', 'mentors'],
+    enabled,
     queryFn: async () => {
       const { data } = await api.get<Employee[]>('/hr/mentors')
       return data
@@ -184,13 +185,14 @@ export function useUnassignTrainee() {
       const { data } = await api.post<Employee>(`/hr/trainees/${traineeId}/unassign`)
       return data
     },
-    onSuccess: () => {
+    onSuccess: (_, traineeId) => {
+      queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       queryClient.invalidateQueries({ queryKey: ['employees'] })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
-      toast.success('Стажёр снят')
+      toast.success('Наставник снят')
     },
-    onError: () => toast.error('Не удалось снять стажёра'),
+    onError: () => toast.error('Не удалось снять наставника'),
   })
 }

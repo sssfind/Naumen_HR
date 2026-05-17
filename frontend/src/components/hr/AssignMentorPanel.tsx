@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { UserCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { UserCheck, UserMinus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAssignMentor, useMentors } from '@/hooks/useTrainees'
+import { useAssignMentor, useMentors, useUnassignTrainee } from '@/hooks/useTrainees'
 
 type AssignMentorPanelProps = {
   traineeId: number
@@ -16,9 +16,14 @@ export function AssignMentorPanel({
 }: AssignMentorPanelProps) {
   const { data: mentors = [], isLoading } = useMentors()
   const assignMentor = useAssignMentor()
+  const unassignMentor = useUnassignTrainee()
   const [selectedId, setSelectedId] = useState<string>(
     currentMentorId != null ? String(currentMentorId) : ''
   )
+
+  useEffect(() => {
+    setSelectedId(currentMentorId != null ? String(currentMentorId) : '')
+  }, [currentMentorId])
 
   function handleAssign() {
     const mentorId = Number(selectedId)
@@ -69,6 +74,18 @@ export function AssignMentorPanel({
         >
           {assignMentor.isPending ? 'Сохранение…' : 'Назначить'}
         </Button>
+        {currentMentorId != null && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => unassignMentor.mutate(traineeId)}
+            disabled={unassignMentor.isPending}
+            className="shrink-0 gap-1"
+          >
+            <UserMinus className="h-3.5 w-3.5" />
+            {unassignMentor.isPending ? 'Снятие…' : 'Снять наставника'}
+          </Button>
+        )}
       </div>
       {!isLoading && mentors.length === 0 && (
         <p className="mt-2 text-xs text-amber-700">
