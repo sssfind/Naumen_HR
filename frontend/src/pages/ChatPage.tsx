@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
-import { Bot, Loader2, Send, UserRound } from 'lucide-react'
+import { Bot, Loader2, Send, Trash2, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useChat } from '@/hooks/useChat'
@@ -98,8 +98,10 @@ export function ChatPage() {
             size="sm"
             onClick={clearHistory}
             disabled={chat.isPending || !hasConversation}
+            className="gap-2"
           >
-            Стереть историю
+            <Trash2 className="h-4 w-4" />
+            Очистить историю
           </Button>
         </div>
       </div>

@@ -192,7 +192,7 @@ export function ProfileWorkSummary() {
       </div>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h3 className="font-semibold text-[#1A1A2E]">Нужно сделать</h3>
+        <h3 className="font-semibold text-[#1A1A2E]">Стоит обратить внимание</h3>
         {actionItems.length === 0 ? (
           <p className="mt-3 rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-6 text-center text-sm text-gray-500">
             {dashboard.traineeCount === 0
