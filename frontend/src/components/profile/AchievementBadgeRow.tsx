@@ -8,6 +8,8 @@ export type AchievementItem = {
   unlockHint: string
   imageSrc: string
   earned: boolean
+  /** contain — для иконок с полями/чёрным фоном (например «Чемпион») */
+  imageFit?: 'cover' | 'contain'
 }
 
 interface AchievementBadgeRowProps {
@@ -51,7 +53,8 @@ export function AchievementBadgeRow({ items, className }: AchievementBadgeRowPro
                 src={item.imageSrc}
                 alt=""
                 className={cn(
-                  'h-full w-full object-cover',
+                  'h-full w-full',
+                  item.imageFit === 'contain' ? 'object-contain p-2' : 'object-cover',
                   !item.earned && 'grayscale opacity-45'
                 )}
                 loading="lazy"

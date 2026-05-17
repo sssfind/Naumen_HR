@@ -3,12 +3,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import type { AuthUiRole } from '@/components/auth/authRoles'
 import { authUiRoleToRegisterRole } from '@/components/auth/authRoles'
 import {
   authFieldClass,
-  authFooterLinkClass,
   authLabelClass,
   authSubmitClass,
 } from '@/components/auth/authFieldStyles'
@@ -188,12 +186,6 @@ export function RegisterForm({ uiRole, onMissingRole }: RegisterFormProps) {
         )}
       </Button>
 
-      <p className="text-center text-sm text-[rgba(37,37,37,0.7)]">
-        Уже есть аккаунт?{' '}
-        <Link to="/" className={authFooterLinkClass}>
-          Войти
-        </Link>
-      </p>
     </form>
   )
 }

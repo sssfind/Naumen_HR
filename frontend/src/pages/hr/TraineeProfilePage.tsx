@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
+  Award,
   Building2,
   Briefcase,
   CheckCircle2,
@@ -12,6 +13,8 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react'
+import { AchievementBadgeRow } from '@/components/profile/AchievementBadgeRow'
+import { buildTraineeAchievements } from '@/components/profile/achievementItems'
 import { AdaptationPathTimeline } from '@/components/trainee/AdaptationPathTimeline'
 import { TaskBlockDialog } from '@/components/trainee/TaskBlockDialog'
 import { ProgressBar as TraineeProgressBar } from '@/components/trainee/ProgressBar'
@@ -56,6 +59,8 @@ export function TraineeProfilePage() {
     useTraineeFeedback(numericTraineeId)
   const { data: taskDashboard, isLoading: tasksLoading } = useHrTraineeDashboard(numericTraineeId)
   const [selectedBlock, setSelectedBlock] = useState<TaskProgressBlock | null>(null)
+
+  const traineeAchievements = useMemo(() => buildTraineeAchievements(trainee), [trainee])
 
   const recentCompletedTasks = useMemo((): CompletedTaskWithBlock[] => {
     if (!taskDashboard) return []
@@ -156,6 +161,16 @@ export function TraineeProfilePage() {
               <span className="text-gray-600">Телефон:</span>
               <span className="ml-auto font-medium text-[#1A1A2E]">{trainee.phone ?? '—'}</span>
             </div>
+          </div>
+          <div className="mt-6">
+            <div className="mb-3 flex items-center gap-2">
+              <Award className="h-4 w-4 text-primary" />
+              <h2 className="font-semibold text-[#1A1A2E]">Ачивки стажёра</h2>
+            </div>
+            <p className="mb-3 text-xs text-gray-500">
+              Цветные значки — получены, серые — ещё не открыты
+            </p>
+            <AchievementBadgeRow items={traineeAchievements} className="mt-1" />
           </div>
         </section>
 

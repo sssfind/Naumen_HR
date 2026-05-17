@@ -1,5 +1,10 @@
 import type { AchievementItem } from '@/components/profile/AchievementBadgeRow'
-import type { UserProfile } from '@/types/user'
+
+export type TraineeAchievementProgress = {
+  progressBlockOne?: number
+  progressBlockTwo?: number
+  progressBlockThree?: number
+}
 
 const TRAINEE_ACHIEVEMENT_IMAGES = {
   firstSteps: '/achievements/first-steps.png',
@@ -7,6 +12,7 @@ const TRAINEE_ACHIEVEMENT_IMAGES = {
   onTarget: '/achievements/on-target.png',
   amongOwn: '/achievements/among-own.png',
   scholar: '/achievements/scholar.png',
+  firstSalary: '/achievements/trainee-first-salary.png',
 } as const
 
 const HR_ACHIEVEMENT_IMAGES = {
@@ -15,9 +21,14 @@ const HR_ACHIEVEMENT_IMAGES = {
   graduation: '/achievements/hr-graduation.png',
   checklist: '/achievements/hr-checklist.png',
   heart: '/achievements/hr-heart.png',
+  champion: '/achievements/hr-champion.png',
 } as const
 
-export function buildTraineeAchievements(profile: UserProfile | undefined): AchievementItem[] {
+const HR_BASE_ACHIEVEMENT_COUNT = 5
+
+export function buildTraineeAchievements(
+  profile: TraineeAchievementProgress | undefined
+): AchievementItem[] {
   const blockOne = profile?.progressBlockOne ?? 0
   const blockTwo = profile?.progressBlockTwo ?? 0
   const blockThree = profile?.progressBlockThree ?? 0
@@ -64,6 +75,15 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.stackMastered,
       earned: blockTwo >= 100,
     },
+    {
+      id: 'first-salary',
+      title: 'Молодой уже богатый',
+      description: 'Получить первую зарплату',
+      unlockHint: 'Получить первую зарплату',
+      imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.firstSalary,
+      imageFit: 'contain',
+      earned: false,
+    },
   ]
 }
 
@@ -74,8 +94,7 @@ export type HrAchievementStats = {
   hasCustomTemplate: boolean
 }
 
-/** HR: ачивки по фактическим показателям команды */
-export function buildHrAchievements(stats?: HrAchievementStats): AchievementItem[] {
+function buildHrBaseAchievements(stats?: HrAchievementStats): AchievementItem[] {
   const traineeCount = stats?.traineeCount ?? 0
   const mood = stats?.averageMoodLevel ?? null
   const maxCompletion = stats?.maxTraineeCompletionPercent ?? 0
@@ -123,4 +142,23 @@ export function buildHrAchievements(stats?: HrAchievementStats): AchievementItem
       earned: mood != null && mood >= 4.5,
     },
   ]
+}
+
+function buildHrChampionAchievement(earnedBaseCount: number): AchievementItem {
+  return {
+    id: 'hr-champion',
+    title: 'Чемпион',
+    description: 'Вы собрали все пять достижений HR и наставника',
+    unlockHint: `Получите все ${HR_BASE_ACHIEVEMENT_COUNT} остальных достижений`,
+    imageSrc: HR_ACHIEVEMENT_IMAGES.champion,
+    imageFit: 'contain',
+    earned: earnedBaseCount >= HR_BASE_ACHIEVEMENT_COUNT,
+  }
+}
+
+/** HR и наставник: базовые ачивки по показателям команды + «Чемпион» при сборе всех пяти */
+export function buildHrAchievements(stats?: HrAchievementStats): AchievementItem[] {
+  const base = buildHrBaseAchievements(stats)
+  const earnedBaseCount = base.filter((item) => item.earned).length
+  return [...base, buildHrChampionAchievement(earnedBaseCount)]
 }

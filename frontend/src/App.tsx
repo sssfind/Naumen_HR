@@ -26,6 +26,7 @@ import { TraineeDashboardPage } from '@/pages/trainee/DashboardPage'
 import { TraineeEmployeesPage } from '@/pages/trainee/EmployeesPage'
 import { TraineeProfilePage } from '@/pages/trainee/ProfilePage'
 import { TraineeFeedbackPage } from '@/pages/trainee/FeedbackPage'
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
   if (!token) return <Navigate to="/" replace />
