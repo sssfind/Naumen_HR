@@ -1,4 +1,5 @@
 import type { AdaptationPath } from '@/types/adaptationPath'
+import type { UserRole } from '@/types/user'
 
 export type TraineePlanBlockType = 'ONBOARDING' | 'SKILLS' | 'WORK'
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH'
@@ -65,10 +66,15 @@ export interface TraineeEmployee {
   userId: number
   email: string
   fullName: string
-  role: string
+  role: UserRole
+  departmentId: number | null
   department: string | null
+  parentDepartmentName: string | null
+  divisionName: string | null
+  responsibilityZone: string | null
   phone: string | null
   position: string | null
+  photoUrl: string | null
   team: string | null
   inMyTeam: boolean
 }

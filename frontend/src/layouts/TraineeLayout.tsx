@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 const navItems = [
   { to: '/dashboard/trainee', label: 'Главная', icon: Home, end: true },
   { to: '/dashboard/trainee/feedback', label: 'Опрос', icon: ClipboardList },
-  { to: '/dashboard/trainee/employees', label: 'Сотрудники', icon: BookOpen },
+  { to: '/dashboard/trainee/employees', label: 'Справочник сотрудников', icon: BookOpen },
   { to: '/dashboard/trainee/chat', label: 'Чат-бот', icon: Bot },
   { to: '/dashboard/trainee/profile', label: 'Мой профиль', icon: User },
 ]

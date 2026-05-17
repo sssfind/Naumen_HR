@@ -1,5 +1,6 @@
 package ru.naumen.experts.user.mapper;
 
+import ru.naumen.experts.department.entity.Department;
 import ru.naumen.experts.user.dto.EmployeeResponse;
 import ru.naumen.experts.user.dto.TraineeEmployeeResponse;
 import ru.naumen.experts.user.dto.TraineeProfileResponse;
@@ -37,14 +38,20 @@ public final class UserMapper {
     }
 
     public static TraineeEmployeeResponse toTraineeEmployeeResponse(User user, String traineeTeam) {
+        DepartmentContext dept = departmentContext(user);
         return TraineeEmployeeResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())
-                .department(user.getDepartment())
+                .departmentId(dept.departmentId())
+                .department(dept.departmentName())
+                .parentDepartmentName(dept.parentDepartmentName())
+                .divisionName(dept.divisionName())
+                .responsibilityZone(user.getResponsibilityZone())
                 .phone(user.getPhone())
                 .position(user.getPosition())
+                .photoUrl(user.getPhotoUrl())
                 .team(user.getTeam())
                 .inMyTeam(isSameTeam(traineeTeam, user.getTeam()))
                 .build();
@@ -63,12 +70,17 @@ public final class UserMapper {
 
     public static EmployeeResponse toEmployeeResponse(User user) {
         User hr = user.getHr();
+        DepartmentContext dept = departmentContext(user);
         return EmployeeResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())
-                .department(user.getDepartment())
+                .departmentId(dept.departmentId())
+                .department(dept.departmentName())
+                .parentDepartmentName(dept.parentDepartmentName())
+                .divisionName(dept.divisionName())
+                .responsibilityZone(user.getResponsibilityZone())
                 .phone(user.getPhone())
                 .position(user.getPosition())
                 .photoUrl(user.getPhotoUrl())
@@ -108,6 +120,24 @@ public final class UserMapper {
             return 0;
         }
         return Math.max(0, Math.min(100, value));
+    }
+
+    private static DepartmentContext departmentContext(User user) {
+        Department org = user.getOrgDepartment();
+        if (org == null) {
+            return new DepartmentContext(null, user.getDepartment(), null, null);
+        }
+        Department parent = org.getParent();
+        String divisionName = parent == null ? org.getName() : parent.getName();
+        String parentName = parent == null ? null : parent.getName();
+        return new DepartmentContext(org.getId(), org.getName(), parentName, divisionName);
+    }
+
+    private record DepartmentContext(
+            Long departmentId,
+            String departmentName,
+            String parentDepartmentName,
+            String divisionName) {
     }
 
     private static String[] splitName(String fullName) {

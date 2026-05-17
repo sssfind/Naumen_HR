@@ -12,7 +12,11 @@ public class EmployeeResponse {
     private String email;
     private String fullName;
     private UserRole role;
+    private Long departmentId;
     private String department;
+    private String parentDepartmentName;
+    private String divisionName;
+    private String responsibilityZone;
     private String phone;
     private String position;
     private String photoUrl;

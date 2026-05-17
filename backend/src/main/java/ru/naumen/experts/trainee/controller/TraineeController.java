@@ -38,8 +38,10 @@ public class TraineeController {
     public ResponseEntity<PagedTraineeEmployeesResponse> searchEmployees(
             @AuthenticationPrincipal JwtAuthenticationPrincipal principal,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) Long departmentId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(traineeService.searchEmployees(principal.getUserId(), search, page, size));
+        return ResponseEntity.ok(
+                traineeService.searchEmployees(principal.getUserId(), search, departmentId, page, size));
     }
 }

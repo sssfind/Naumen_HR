@@ -28,8 +28,9 @@ public class EmployeeController {
     public ResponseEntity<PagedEmployeesResponse> search(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String department,
+            @RequestParam(required = false) Long departmentId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(employeeDirectoryService.search(search, department, page, size));
+        return ResponseEntity.ok(employeeDirectoryService.search(search, department, departmentId, page, size));
     }
 }
