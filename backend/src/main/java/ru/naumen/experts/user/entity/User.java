@@ -78,17 +78,31 @@ public class User {
     @Builder.Default
     private UserRole role = UserRole.ROLE_EMPLOYEE;
 
+    /** HR-куратор, закрепивший стажёра за программой адаптации. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hr_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User hr;
 
+    /** Наставник стажёра. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentor_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private User mentor;
+
     @OneToMany(mappedBy = "hr")
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<User> trainees = new ArrayList<>();
+    private List<User> hrTrainees = new ArrayList<>();
+
+    @OneToMany(mappedBy = "mentor")
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<User> mentoredTrainees = new ArrayList<>();
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default

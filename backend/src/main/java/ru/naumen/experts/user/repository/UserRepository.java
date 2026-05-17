@@ -19,6 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByHrIdAndRoleAndIsActiveTrue(Long hrId, UserRole role);
 
+    List<User> findByMentorIdAndRoleAndIsActiveTrue(Long mentorId, UserRole role);
+
     List<User> findByRoleAndIsActiveTrue(UserRole role);
 
     @Query(value = """

@@ -21,7 +21,7 @@ export function EmployeesPage() {
 
   function renderCardFooter(emp: DirectoryEmployee) {
     if (emp.role === 'ROLE_HR' || emp.role === 'ROLE_MENTOR') return null
-    if (emp.hrId === currentHrId) {
+    if (emp.role === 'ROLE_TRAINEE' && emp.hrId === currentHrId) {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-primary">
           <CheckCircle2 className="h-3.5 w-3.5" />
@@ -30,7 +30,7 @@ export function EmployeesPage() {
       )
     }
     if (!canManageTrainees) return null
-    if (!emp.hrId) {
+    if (emp.role !== 'ROLE_TRAINEE' || !emp.hrId) {
       return (
         <Button
           variant="outline"

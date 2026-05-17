@@ -41,6 +41,8 @@ export interface Employee {
   team?: string | null
   hrId: number | null
   hrFullName: string | null
+  mentorId: number | null
+  mentorFullName: string | null
 }
 
 export interface TraineeProfile {

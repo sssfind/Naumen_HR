@@ -168,7 +168,7 @@ func main() {
 	fmt.Println("Создано сотрудников: 20")
 
 	personas := buildPersonas(rng)
-	traineeRecords := seedTrainees(ctx, pool, defaultHash, mentorIDs, personas, rng)
+	traineeRecords := seedTrainees(ctx, pool, defaultHash, hrIDs, mentorIDs, personas, rng)
 	fmt.Printf("Создано стажеров: %d\n", len(traineeRecords))
 
 	taskCount := 0
@@ -366,7 +366,7 @@ func seedEmployees(ctx context.Context, pool *pgxpool.Pool, passwordHash string,
 	}
 }
 
-func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, mentorIDs []int64, personas []traineePersona, rng *rand.Rand) []traineeRecord {
+func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, hrIDs []int64, mentorIDs []int64, personas []traineePersona, rng *rand.Rand) []traineeRecord {
 	records := make([]traineeRecord, 0, len(personas))
 	extraChars := make([]Character, len(characters))
 	copy(extraChars, characters)
@@ -377,6 +377,7 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 		if p.Index > 4 {
 			c = extraChars[(p.Index-5)%len(extraChars)]
 		}
+		hrID := hrIDs[p.HrIndex%len(hrIDs)]
 		mentorID := mentorIDs[p.HrIndex%len(mentorIDs)]
 		phone := fmt.Sprintf("+7993%07d", 3000000+p.Index*211)
 		var id int64
@@ -385,18 +386,18 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (
 				email, password_hash, full_name, department, department_id, role,
-				hr_id, team, phone, position, responsibility_zone, mood_level,
+				hr_id, mentor_id, team, phone, position, responsibility_zone, mood_level,
 				progress_block_one, progress_block_two, progress_block_three
 			)
-			VALUES ($1, $2, $3, $4, $5, 'ROLE_TRAINEE', $6, $7, $8, $9, $10, 3, 0, 0, 0)
+			VALUES ($1, $2, $3, $4, $5, 'ROLE_TRAINEE', $6, $7, $8, $9, $10, $11, 3, 0, 0, 0)
 			RETURNING id`,
 			fmt.Sprintf("trainee%d@naumen.ru", p.Index), passwordHash, c.FullName, c.Dept, deptID,
-			mentorID, p.Team, phone, c.Position, zone).Scan(&id)
+			hrID, mentorID, p.Team, phone, c.Position, zone).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки стажера %d: %v", p.Index, err)
 		}
 		records = append(records, traineeRecord{
-			ID: id, Index: p.Index, HrID: mentorID, Char: c, Persona: p, Team: p.Team,
+			ID: id, Index: p.Index, HrID: hrID, Char: c, Persona: p, Team: p.Team,
 		})
 	}
 	return records

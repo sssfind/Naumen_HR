@@ -24,7 +24,10 @@ import ru.naumen.experts.user.service.StaffAccessService;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -134,27 +137,54 @@ public class FeedbackService {
     }
 
     private void notifyHrOnFeedback(User trainee, FeedbackResponse feedback) {
-        List<User> hrRecipients = trainee.getHr() != null
-                ? List.of(trainee.getHr())
-                : userRepository.findByRoleAndIsActiveTrue(UserRole.ROLE_HR);
-
         String traineeName = trainee.getFullName();
+        boolean risk = isRiskSignal(feedback);
+        String riskTitle = feedback.getWeekRating() == WeekRating.NEED_HELP
+                ? "Срочно: стажёр просит помощи"
+                : "Внимание: риск по адаптации";
+        String riskBody = traineeName + ": " + buildRiskDetails(feedback);
+
+        Set<Long> notified = new LinkedHashSet<>();
+
+        List<User> hrRecipients = new ArrayList<>();
+        if (trainee.getHr() != null) {
+            hrRecipients.add(trainee.getHr());
+        }
+        hrRecipients.addAll(userRepository.findByRoleAndIsActiveTrue(UserRole.ROLE_HR));
+
         for (User hr : hrRecipients) {
+            if (!notified.add(hr.getId())) {
+                continue;
+            }
             notificationService.createNotification(
                     hr.getId(),
                     "Новый опрос стажёра",
                     traineeName + " заполнил еженедельный опрос обратной связи.",
                     NotificationType.FEEDBACK_SUBMITTED
             );
-
-            if (isRiskSignal(feedback)) {
-                String details = buildRiskDetails(feedback);
+            if (risk) {
                 notificationService.createNotification(
                         hr.getId(),
-                        feedback.getWeekRating() == WeekRating.NEED_HELP
-                                ? "Срочно: стажёр просит помощи"
-                                : "Внимание: риск по адаптации",
-                        traineeName + ": " + details,
+                        riskTitle,
+                        riskBody,
+                        NotificationType.FEEDBACK_RISK
+                );
+            }
+        }
+
+        User mentor = trainee.getMentor();
+        if (mentor != null && notified.add(mentor.getId())) {
+            notificationService.createNotification(
+                    mentor.getId(),
+                    "Новый опрос вашего стажёра",
+                    traineeName + " заполнил еженедельный опрос обратной связи.",
+                    NotificationType.FEEDBACK_SUBMITTED
+            );
+            if (risk) {
+                notificationService.createNotification(
+                        mentor.getId(),
+                        "Внимание: риск по адаптации стажёра",
+                        riskBody,
                         NotificationType.FEEDBACK_RISK
                 );
             }
