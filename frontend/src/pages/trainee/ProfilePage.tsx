@@ -92,7 +92,11 @@ export function TraineeProfilePage() {
               <Award className="h-4 w-4 text-primary" />
               <h2 className="font-semibold text-[#1A1A2E]">Ачивки</h2>
             </div>
-            <AchievementBadgeRow items={achievements} className="mt-1" />
+            <AchievementBadgeRow
+              items={achievements}
+              userId={profile?.userId}
+              className="mt-1"
+            />
           </div>
         </section>
 

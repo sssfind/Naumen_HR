@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AchievementDetailDialog } from '@/components/profile/AchievementDetailDialog'
 import { cn } from '@/lib/utils'
 
 export type AchievementItem = {
@@ -8,6 +9,10 @@ export type AchievementItem = {
   unlockHint: string
   imageSrc: string
   earned: boolean
+  /** Доля сотрудников с этим достижением (для карточки) */
+  ownershipPercent: number
+  /** ISO-дата разблокировки с бэкенда (если есть) */
+  unlockedAt?: string
   /** contain — для иконок с полями/чёрным фоном (например «Чемпион») */
   imageFit?: 'cover' | 'contain'
 }
@@ -15,10 +20,13 @@ export type AchievementItem = {
 interface AchievementBadgeRowProps {
   items: AchievementItem[]
   className?: string
+  userId?: number
 }
 
-export function AchievementBadgeRow({ items, className }: AchievementBadgeRowProps) {
+export function AchievementBadgeRow({ items, className, userId }: AchievementBadgeRowProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [dialogItem, setDialogItem] = useState<AchievementItem | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const activeItem = items.find((item) => item.id === activeId) ?? null
 
   return (
@@ -44,6 +52,10 @@ export function AchievementBadgeRow({ items, className }: AchievementBadgeRowPro
                   : 'border-gray-300 bg-gray-100',
                 isActive && 'scale-105 shadow-md ring-2 ring-primary/30'
               )}
+              onClick={() => {
+                setDialogItem(item)
+                setDialogOpen(true)
+              }}
               onMouseEnter={() => setActiveId(item.id)}
               onFocus={() => setActiveId(item.id)}
               onBlur={() => setActiveId((current) => (current === item.id ? null : current))}
@@ -92,6 +104,13 @@ export function AchievementBadgeRow({ items, className }: AchievementBadgeRowPro
           <span className="sr-only">Описание ачивки</span>
         )}
       </div>
+
+      <AchievementDetailDialog
+        item={dialogItem}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        userId={userId}
+      />
     </div>
   )
 }

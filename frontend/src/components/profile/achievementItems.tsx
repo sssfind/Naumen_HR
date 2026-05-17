@@ -41,6 +41,7 @@ export function buildTraineeAchievements(
       description: 'Ты справился с первой задачей!',
       unlockHint: 'Выполни первую задачу в плане адаптации',
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.firstSteps,
+      ownershipPercent: 95,
       earned: hasStarted,
     },
     {
@@ -49,6 +50,7 @@ export function buildTraineeAchievements(
       description: 'Закрыл блок с рабочими задачами',
       unlockHint: 'Заверши все задачи блока «Рабочие задачи»',
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.onTarget,
+      ownershipPercent: 38,
       earned: blockThree >= 100,
     },
     {
@@ -57,6 +59,7 @@ export function buildTraineeAchievements(
       description: 'Закрыл блок знакомства с командой',
       unlockHint: 'Заверши все задачи блока «Знакомство с компанией и командой»',
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.amongOwn,
+      ownershipPercent: 62,
       earned: blockOne >= 100,
     },
     {
@@ -65,6 +68,7 @@ export function buildTraineeAchievements(
       description: 'Закрыл блок со всеми задачами',
       unlockHint: 'Заверши все задачи во всех трёх блоках адаптации',
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.scholar,
+      ownershipPercent: 18,
       earned: blockOne >= 100 && blockTwo >= 100 && blockThree >= 100,
     },
     {
@@ -73,6 +77,7 @@ export function buildTraineeAchievements(
       description: 'Закрыл блок прокачки скилов',
       unlockHint: 'Заверши все задачи блока «Прокачка скиллов»',
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.stackMastered,
+      ownershipPercent: 44,
       earned: blockTwo >= 100,
     },
     {
@@ -82,6 +87,7 @@ export function buildTraineeAchievements(
       unlockHint: 'Получить первую зарплату',
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.firstSalary,
       imageFit: 'contain',
+      ownershipPercent: 72,
       earned: false,
     },
   ]
@@ -107,6 +113,7 @@ function buildHrBaseAchievements(stats?: HrAchievementStats): AchievementItem[] 
       description: 'Первый стажёр в вашей программе адаптации',
       unlockHint: 'Добавьте первого стажёра в программу',
       imageSrc: HR_ACHIEVEMENT_IMAGES.rocketLaunch,
+      ownershipPercent: 78,
       earned: traineeCount >= 1,
     },
     {
@@ -115,6 +122,7 @@ function buildHrBaseAchievements(stats?: HrAchievementStats): AchievementItem[] 
       description: 'У стажёра выполнены все задачи плана',
       unlockHint: 'Доведите прогресс хотя бы одного стажёра до 100%',
       imageSrc: HR_ACHIEVEMENT_IMAGES.bullseye,
+      ownershipPercent: 34,
       earned: maxCompletion >= 100,
     },
     {
@@ -123,6 +131,7 @@ function buildHrBaseAchievements(stats?: HrAchievementStats): AchievementItem[] 
       description: 'Создан собственный шаблон адаптации',
       unlockHint: 'Создайте свой шаблон в разделе «Шаблоны адаптации»',
       imageSrc: HR_ACHIEVEMENT_IMAGES.checklist,
+      ownershipPercent: 41,
       earned: hasTemplate,
     },
     {
@@ -131,6 +140,7 @@ function buildHrBaseAchievements(stats?: HrAchievementStats): AchievementItem[] 
       description: 'Пять и более стажёров под вашим кураторством',
       unlockHint: 'Закрепите за собой 5 стажёров',
       imageSrc: HR_ACHIEVEMENT_IMAGES.graduation,
+      ownershipPercent: 22,
       earned: traineeCount >= 5,
     },
     {
@@ -139,6 +149,7 @@ function buildHrBaseAchievements(stats?: HrAchievementStats): AchievementItem[] 
       description: 'Среднее настроение команды выше 4.5',
       unlockHint: 'Поддерживайте настроение стажёров на высоком уровне',
       imageSrc: HR_ACHIEVEMENT_IMAGES.heart,
+      ownershipPercent: 29,
       earned: mood != null && mood >= 4.5,
     },
   ]
@@ -152,6 +163,7 @@ function buildHrChampionAchievement(earnedBaseCount: number): AchievementItem {
     unlockHint: `Получите все ${HR_BASE_ACHIEVEMENT_COUNT} остальных достижений`,
     imageSrc: HR_ACHIEVEMENT_IMAGES.champion,
     imageFit: 'contain',
+    ownershipPercent: 12,
     earned: earnedBaseCount >= HR_BASE_ACHIEVEMENT_COUNT,
   }
 }

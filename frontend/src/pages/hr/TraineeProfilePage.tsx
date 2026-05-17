@@ -203,7 +203,11 @@ export function TraineeProfilePage() {
             <p className="mb-3 text-xs text-gray-500">
               Цветные значки — получены, серые — ещё не открыты
             </p>
-            <AchievementBadgeRow items={traineeAchievements} className="mt-1" />
+            <AchievementBadgeRow
+              items={traineeAchievements}
+              userId={trainee?.userId}
+              className="mt-1"
+            />
           </div>
         </section>
 
