@@ -1,15 +1,20 @@
-import { FormEvent, useRef, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { Bot, Loader2, Send, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useChat } from '@/hooks/useChat'
+import {
+  CHAT_MAX_MESSAGES,
+  CHAT_WELCOME_ID,
+  clearChatHistory,
+  createWelcomeMessage,
+  loadChatMessages,
+  nextMessageId,
+  saveChatMessages,
+  trimChatMessages,
+  type ChatMessage,
+} from '@/lib/chatHistoryStorage'
 import { cn } from '@/lib/utils'
-
-type ChatMessage = {
-  id: number
-  role: 'user' | 'assistant'
-  text: string
-}
 
 const suggestedQuestions = [
   'Как оформить отпуск?',
@@ -19,15 +24,22 @@ const suggestedQuestions = [
 
 export function ChatPage() {
   const chat = useChat()
-  const nextId = useRef(1)
+  const nextId = useRef(nextMessageId(loadChatMessages()))
   const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 0,
-      role: 'assistant',
-      text: 'Здравствуйте! Я помогу с простыми HR-вопросами: отпуск, регламенты, пропуск, план стажировки и задачи.',
-    },
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadChatMessages())
+
+  useEffect(() => {
+    saveChatMessages(messages)
+  }, [messages])
+
+  const hasConversation = messages.some((m) => m.id !== CHAT_WELCOME_ID)
+
+  function clearHistory() {
+    clearChatHistory()
+    nextId.current = 1
+    setMessages([createWelcomeMessage()])
+    setMessage('')
+  }
 
   async function sendMessage(text: string) {
     const trimmed = text.trim()
@@ -39,23 +51,25 @@ export function ChatPage() {
       text: trimmed,
     }
 
-    setMessages((prev) => {
-      const history = prev
-        .filter((m) => m.id !== 0)
-        .slice(-10)
-        .map((m) => ({ role: m.role, content: m.text }))
+    const history = messages
+      .filter((m) => m.id !== CHAT_WELCOME_ID)
+      .slice(-CHAT_MAX_MESSAGES)
+      .map((m) => ({ role: m.role, content: m.text }))
 
-      void chat.mutateAsync({ message: trimmed, history }).then((response) => {
-        setMessages((current) => [
-          ...current,
+    setMessages((prev) => trimChatMessages([...prev, userMessage]))
+    setMessage('')
+
+    try {
+      const response = await chat.mutateAsync({ message: trimmed, history })
+      setMessages((prev) =>
+        trimChatMessages([
+          ...prev,
           { id: nextId.current++, role: 'assistant', text: response.reply },
         ])
-      })
-
-      return [...prev, userMessage]
-    })
-
-    setMessage('')
+      )
+    } catch {
+      // toast handled in useChat
+    }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -66,21 +80,32 @@ export function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-9rem)] flex-col rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="border-b border-gray-100 px-6 py-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50">
-            <Bot className="h-6 w-6 text-primary" />
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50">
+              <Bot className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-[#1A1A2E]">Чат-бот</h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Задайте вопрос по внутренним процессам или адаптации
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[#1A1A2E]">Чат-бот</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Задайте вопрос по внутренним процессам или адаптации
-            </p>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={clearHistory}
+            disabled={chat.isPending || !hasConversation}
+          >
+            Стереть историю
+          </Button>
         </div>
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto bg-gray-50/60 p-6">
-        {[messages[0], ...messages.slice(1).slice(-10)].map((item) => {
+        {messages.map((item) => {
           const isAssistant = item.role === 'assistant'
           return (
             <div
