@@ -38,18 +38,24 @@ export function ChatPage() {
       role: 'user',
       text: trimmed,
     }
-    setMessages((prev) => [...prev, userMessage])
-    setMessage('')
 
-    const response = await chat.mutateAsync({ message: trimmed })
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: nextId.current++,
-        role: 'assistant',
-        text: response.reply,
-      },
-    ])
+    setMessages((prev) => {
+      const history = prev
+        .filter((m) => m.id !== 0)
+        .slice(-10)
+        .map((m) => ({ role: m.role, content: m.text }))
+
+      void chat.mutateAsync({ message: trimmed, history }).then((response) => {
+        setMessages((current) => [
+          ...current,
+          { id: nextId.current++, role: 'assistant', text: response.reply },
+        ])
+      })
+
+      return [...prev, userMessage]
+    })
+
+    setMessage('')
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -74,7 +80,7 @@ export function ChatPage() {
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto bg-gray-50/60 p-6">
-        {messages.map((item) => {
+        {[messages[0], ...messages.slice(1).slice(-10)].map((item) => {
           const isAssistant = item.role === 'assistant'
           return (
             <div
