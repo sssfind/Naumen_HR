@@ -4,7 +4,12 @@ import type { UserRole } from '@/types/user'
 export type TraineePlanBlockType = 'ONBOARDING' | 'SKILLS' | 'WORK'
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH'
 export type AcceptanceCheckType = 'MACHINE' | 'USER'
-export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED'
+export type TaskStatus =
+  | 'NOT_STARTED'
+  | 'IN_PROGRESS'
+  | 'PENDING_REVIEW'
+  | 'REJECTED'
+  | 'COMPLETED'
 
 export interface TraineePlanTaskComment {
   id: number
@@ -26,6 +31,7 @@ export interface TraineePlanTask {
   status: TaskStatus
   startedAt: string | null
   completedAt: string | null
+  rejectionComment: string | null
   milestone: boolean
   comments: TraineePlanTaskComment[]
 }

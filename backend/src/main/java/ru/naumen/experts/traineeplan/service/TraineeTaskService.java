@@ -14,6 +14,7 @@ import ru.naumen.experts.traineeplan.dto.TraineePlanTaskCommentResponse;
 import ru.naumen.experts.traineeplan.dto.TraineePlanTaskResponse;
 import ru.naumen.experts.traineeplan.entity.TraineePlanTask;
 import ru.naumen.experts.traineeplan.entity.TraineePlanTaskComment;
+import ru.naumen.experts.traineeplan.enums.AcceptanceCheckType;
 import ru.naumen.experts.traineeplan.enums.TaskStatus;
 import ru.naumen.experts.traineeplan.enums.TraineePlanBlock;
 import ru.naumen.experts.traineeplan.mapper.TraineePlanTaskMapper;
@@ -38,11 +39,14 @@ public class TraineeTaskService {
     @Transactional
     public TraineePlanTaskResponse startTask(Long traineeId, Long taskId) {
         TraineePlanTask task = requireOwnTask(traineeId, taskId);
-        if (task.getStatus() != TaskStatus.NOT_STARTED) {
-            throw new BadRequestException("Задачу можно взять в работу только из статуса «Не начата»");
+        if (task.getStatus() != TaskStatus.NOT_STARTED && task.getStatus() != TaskStatus.REJECTED) {
+            throw new BadRequestException("Задачу можно взять в работу только из статуса «Не начата» или после доработки");
         }
         task.setStatus(TaskStatus.IN_PROGRESS);
-        task.setStartedAt(OffsetDateTime.now());
+        task.setRejectionComment(null);
+        if (task.getStartedAt() == null) {
+            task.setStartedAt(OffsetDateTime.now());
+        }
         taskRepository.save(task);
         notifyMentor(task, "Стажёр взял задачу в работу",
                 task.getTrainee().getFullName() + ": " + truncate(task.getDescription()),
@@ -56,13 +60,29 @@ public class TraineeTaskService {
         if (task.getStatus() != TaskStatus.IN_PROGRESS) {
             throw new BadRequestException("Завершить можно только задачу, которая уже в работе");
         }
-        task.setStatus(TaskStatus.COMPLETED);
-        task.setCompletedAt(OffsetDateTime.now());
-        taskRepository.save(task);
-        recalculateBlockProgress(task.getTrainee(), task.getBlock());
-        notifyMentor(task, "Стажёр завершил задачу",
-                task.getTrainee().getFullName() + ": " + truncate(task.getDescription()),
-                NotificationType.TASK_COMPLETED);
+        if (task.getAcceptanceCheckType() == AcceptanceCheckType.USER) {
+            task.setStatus(TaskStatus.PENDING_REVIEW);
+            task.setCompletedAt(null);
+            task.setRejectionComment(null);
+            taskRepository.save(task);
+            notifyMentor(task, "Задача на проверке",
+                    task.getTrainee().getFullName() + " отправил(а) задачу на проверку: " + truncate(task.getDescription()),
+                    NotificationType.TASK_PENDING_REVIEW);
+            notificationService.createNotification(
+                    traineeId,
+                    "Задача отправлена на проверку",
+                    "Наставник проверит выполнение: " + truncate(task.getDescription()),
+                    NotificationType.TASK_PENDING_REVIEW
+            );
+        } else {
+            task.setStatus(TaskStatus.COMPLETED);
+            task.setCompletedAt(OffsetDateTime.now());
+            taskRepository.save(task);
+            recalculateBlockProgress(task.getTrainee(), task.getBlock());
+            notifyMentor(task, "Стажёр завершил задачу",
+                    task.getTrainee().getFullName() + ": " + truncate(task.getDescription()),
+                    NotificationType.TASK_COMPLETED);
+        }
         return toResponseWithComments(task);
     }
 

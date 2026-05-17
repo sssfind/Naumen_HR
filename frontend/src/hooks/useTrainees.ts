@@ -188,6 +188,53 @@ export function useAssignMentor() {
   })
 }
 
+function invalidateTraineeTaskQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  traineeId: number
+) {
+  queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'dashboard'] })
+  queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId, 'plan'] })
+  queryClient.invalidateQueries({ queryKey: ['hr', 'trainees', traineeId] })
+  queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
+  queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
+  queryClient.invalidateQueries({ queryKey: ['notifications'] })
+}
+
+export function useApproveTraineeTask(traineeId?: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: number) => {
+      const { data } = await api.post<TraineePlanTask>(
+        `/hr/trainees/${traineeId}/tasks/${taskId}/approve`
+      )
+      return data
+    },
+    onSuccess: () => {
+      if (traineeId) invalidateTraineeTaskQueries(queryClient, traineeId)
+      toast.success('Задача принята')
+    },
+    onError: () => toast.error('Не удалось подтвердить задачу'),
+  })
+}
+
+export function useRejectTraineeTask(traineeId?: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ taskId, comment }: { taskId: number; comment?: string }) => {
+      const { data } = await api.post<TraineePlanTask>(
+        `/hr/trainees/${traineeId}/tasks/${taskId}/reject`,
+        { comment: comment?.trim() || undefined }
+      )
+      return data
+    },
+    onSuccess: () => {
+      if (traineeId) invalidateTraineeTaskQueries(queryClient, traineeId)
+      toast.success('Задача отправлена на доработку')
+    },
+    onError: () => toast.error('Не удалось отклонить задачу'),
+  })
+}
+
 export function useUnassignTrainee() {
   const queryClient = useQueryClient()
   return useMutation({

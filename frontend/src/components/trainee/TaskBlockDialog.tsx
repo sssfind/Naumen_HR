@@ -17,7 +17,10 @@ interface TaskBlockDialogProps {
   onComplete?: (taskId: number) => Promise<unknown>
   onComment?: (taskId: number, text: string) => Promise<unknown>
   activeTaskId?: number | null
-  activeAction?: 'start' | 'complete' | 'comment' | null
+  activeAction?: 'start' | 'complete' | 'comment' | 'approve' | 'reject' | null
+  reviewMode?: boolean
+  onApprove?: (taskId: number) => Promise<unknown>
+  onReject?: (taskId: number, comment?: string) => Promise<unknown>
 }
 
 export function TaskBlockDialog({
@@ -30,6 +33,9 @@ export function TaskBlockDialog({
   onComment,
   activeTaskId,
   activeAction,
+  reviewMode = false,
+  onApprove,
+  onReject,
 }: TaskBlockDialogProps) {
   if (!block) return null
 
@@ -48,6 +54,9 @@ export function TaskBlockDialog({
             onComment={onComment}
             activeTaskId={activeTaskId}
             activeAction={activeAction}
+            reviewMode={reviewMode}
+            onApprove={onApprove}
+            onReject={onReject}
           />
         </DialogBody>
       </DialogContent>

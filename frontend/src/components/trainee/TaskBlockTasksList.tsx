@@ -9,8 +9,11 @@ interface TaskBlockTasksListProps {
   onComplete?: (taskId: number) => Promise<unknown>
   onComment?: (taskId: number, text: string) => Promise<unknown>
   activeTaskId?: number | null
-  activeAction?: 'start' | 'complete' | 'comment' | null
+  activeAction?: 'start' | 'complete' | 'comment' | 'approve' | 'reject' | null
   highlightedTaskId?: number | null
+  reviewMode?: boolean
+  onApprove?: (taskId: number) => Promise<unknown>
+  onReject?: (taskId: number, comment?: string) => Promise<unknown>
 }
 
 export function TaskBlockTasksList({
@@ -22,6 +25,9 @@ export function TaskBlockTasksList({
   activeTaskId,
   activeAction,
   highlightedTaskId,
+  reviewMode = false,
+  onApprove,
+  onReject,
 }: TaskBlockTasksListProps) {
   const completedCount = block.tasks.filter(
     (task) => (task.status ?? 'NOT_STARTED') === 'COMPLETED'
@@ -48,12 +54,17 @@ export function TaskBlockTasksList({
               key={task.id}
               task={task}
               readOnly={readOnly}
+              reviewMode={reviewMode}
               onStart={onStart}
               onComplete={onComplete}
               onComment={onComment}
+              onApprove={onApprove}
+              onReject={onReject}
               isStarting={activeAction === 'start' && activeTaskId === task.id}
               isCompleting={activeAction === 'complete' && activeTaskId === task.id}
               isCommenting={activeAction === 'comment' && activeTaskId === task.id}
+              isApproving={activeAction === 'approve' && activeTaskId === task.id}
+              isRejecting={activeAction === 'reject' && activeTaskId === task.id}
               isHighlighted={highlightedTaskId === task.id}
             />
           ))

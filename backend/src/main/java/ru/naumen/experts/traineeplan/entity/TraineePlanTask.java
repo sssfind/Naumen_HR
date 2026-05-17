@@ -64,6 +64,9 @@ public class TraineePlanTask {
     @Column(name = "completed_at")
     private OffsetDateTime completedAt;
 
+    @Column(name = "rejection_comment", columnDefinition = "TEXT")
+    private String rejectionComment;
+
     @Column(name = "is_milestone", nullable = false)
     @Builder.Default
     private boolean milestone = false;
