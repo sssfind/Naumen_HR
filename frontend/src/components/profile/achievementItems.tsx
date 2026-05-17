@@ -7,6 +7,7 @@ const TRAINEE_ACHIEVEMENT_IMAGES = {
   onTarget: '/achievements/on-target.png',
   amongOwn: '/achievements/among-own.png',
   scholar: '/achievements/scholar.png',
+  firstSalary: '/achievements/trainee-first-salary.png',
 } as const
 
 const HR_ACHIEVEMENT_IMAGES = {
@@ -15,7 +16,10 @@ const HR_ACHIEVEMENT_IMAGES = {
   graduation: '/achievements/hr-graduation.png',
   checklist: '/achievements/hr-checklist.png',
   heart: '/achievements/hr-heart.png',
+  champion: '/achievements/hr-champion.png',
 } as const
+
+const HR_BASE_ACHIEVEMENT_COUNT = 5
 
 export function buildTraineeAchievements(profile: UserProfile | undefined): AchievementItem[] {
   const blockOne = profile?.progressBlockOne ?? 0
@@ -64,11 +68,19 @@ export function buildTraineeAchievements(profile: UserProfile | undefined): Achi
       imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.stackMastered,
       earned: blockTwo >= 100,
     },
+    {
+      id: 'first-salary',
+      title: 'Молодой уже богатый',
+      description: 'Получить первую зарплату',
+      unlockHint: 'Получить первую зарплату',
+      imageSrc: TRAINEE_ACHIEVEMENT_IMAGES.firstSalary,
+      imageFit: 'contain',
+      earned: false,
+    },
   ]
 }
 
-/** HR: набор ачивок (порядок отображения фиксирован) */
-export function buildHrAchievements(): AchievementItem[] {
+function buildHrBaseAchievements(): AchievementItem[] {
   return [
     {
       id: 'hr-rocket-launch',
@@ -115,4 +127,23 @@ export function buildHrAchievements(): AchievementItem[] {
       earned: true,
     },
   ]
+}
+
+function buildHrChampionAchievement(earnedBaseCount: number): AchievementItem {
+  return {
+    id: 'hr-champion',
+    title: 'Чемпион',
+    description: 'Вы собрали все пять достижений HR и наставника',
+    unlockHint: `Получите все ${HR_BASE_ACHIEVEMENT_COUNT} остальных достижений`,
+    imageSrc: HR_ACHIEVEMENT_IMAGES.champion,
+    imageFit: 'contain',
+    earned: earnedBaseCount >= HR_BASE_ACHIEVEMENT_COUNT,
+  }
+}
+
+/** HR и наставник: базовые ачивки + «Чемпион» при сборе всех пяти */
+export function buildHrAchievements(): AchievementItem[] {
+  const base = buildHrBaseAchievements()
+  const earnedBaseCount = base.filter((item) => item.earned).length
+  return [...base, buildHrChampionAchievement(earnedBaseCount)]
 }
