@@ -1,5 +1,10 @@
 import type { AchievementItem } from '@/components/profile/AchievementBadgeRow'
-import type { UserProfile } from '@/types/user'
+
+export type TraineeAchievementProgress = {
+  progressBlockOne?: number
+  progressBlockTwo?: number
+  progressBlockThree?: number
+}
 
 const TRAINEE_ACHIEVEMENT_IMAGES = {
   firstSteps: '/achievements/first-steps.png',
@@ -21,7 +26,9 @@ const HR_ACHIEVEMENT_IMAGES = {
 
 const HR_BASE_ACHIEVEMENT_COUNT = 5
 
-export function buildTraineeAchievements(profile: UserProfile | undefined): AchievementItem[] {
+export function buildTraineeAchievements(
+  profile: TraineeAchievementProgress | undefined
+): AchievementItem[] {
   const blockOne = profile?.progressBlockOne ?? 0
   const blockTwo = profile?.progressBlockTwo ?? 0
   const blockThree = profile?.progressBlockThree ?? 0

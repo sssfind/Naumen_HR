@@ -1,7 +1,7 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Bot, BookOpen, BookTemplate, GraduationCap, LogOut, User } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router-dom'
+import { Bot, BookOpen, BookTemplate, GraduationCap, User } from 'lucide-react'
+import { DashboardLogoutButton } from '@/components/layout/DashboardLogoutButton'
 import { NotificationPanel } from '@/components/hr/NotificationPanel'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -13,24 +13,17 @@ const navItems = [
 ]
 
 export function MentorLayout() {
-  const navigate = useNavigate()
   const stored = localStorage.getItem('user')
   const user = stored ? JSON.parse(stored) : null
 
-  function handleLogout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    navigate('/')
-  }
-
   return (
-    <div className="flex min-h-screen bg-[#F5F5F5]">
-      <aside className="flex w-64 flex-col border-r border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-6 py-5">
+    <div className="flex h-[100dvh] overflow-hidden bg-[#F5F5F5]">
+      <aside className="flex h-full w-64 shrink-0 flex-col border-r border-gray-200 bg-white">
+        <div className="shrink-0 border-b border-gray-100 px-6 py-5">
           <p className="text-lg font-bold text-[#1A1A2E]">Naumen HR</p>
           <p className="mt-1 text-xs text-gray-500">Кабинет наставника</p>
         </div>
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-4 pb-20">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
@@ -49,26 +42,22 @@ export function MentorLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-gray-100 p-4">
-          <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleLogout}>
-            <LogOut className="h-4 w-4" />
-            Выйти
-          </Button>
-        </div>
       </aside>
 
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-8 py-4">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-8 py-4">
           <div>
             <p className="text-sm text-gray-500">Добро пожаловать</p>
             <p className="font-semibold text-[#1A1A2E]">{user?.fullName ?? 'Наставник'}</p>
           </div>
           <NotificationPanel />
         </header>
-        <main className="flex-1 p-8">
+        <main className="min-h-0 flex-1 overflow-y-auto p-8">
           <Outlet />
         </main>
       </div>
+
+      <DashboardLogoutButton />
     </div>
   )
 }
