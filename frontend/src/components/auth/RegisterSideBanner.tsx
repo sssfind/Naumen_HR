@@ -1,40 +1,41 @@
-import logo from '@/assets/register-side/logo.png'
+﻿import logo from '@/assets/register-side/logo.png'
 import { cn } from '@/lib/utils'
 
 type RegisterSideBannerProps = {
   className?: string
 }
 
-/** Текст левой панели — позиции Figma 1920×1080. */
+/** Левая панель входа/регистрации (макет Figma, текст в потоке — без наложений). */
 export function RegisterSideBanner({ className }: RegisterSideBannerProps) {
   return (
     <div
       className={cn(
-        'auth-font-body relative z-10 h-full w-full bg-transparent text-white',
+        'auth-font-body relative z-10 flex h-full w-full flex-col justify-between bg-transparent text-white',
         className
       )}
     >
-      <h1 className="auth-font-heading absolute left-[13.33%] top-[16.67%] max-w-[min(680px,75%)] text-[clamp(2.5rem,4.9vw,5.875rem)] uppercase leading-[1.12] tracking-wide">
-        NAU-START
-      </h1>
+      <div className="max-w-[min(720px,92%)] pl-[13.33%] pr-6 pt-[16.67%]">
+        <h1 className="auth-font-heading whitespace-nowrap text-[clamp(2rem,3.65vw,4.5rem)] uppercase leading-[1.12] tracking-wide">
+          NAU-START
+        </h1>
 
-      <h2 className="absolute left-[13.33%] top-[33.89%] max-w-[420px] text-[clamp(1.65rem,2.6vw,3.125rem)] font-medium leading-[1.26]">
-        Сервис для адаптации новых сотрудников
-      </h2>
+        <h2 className="mt-[clamp(3rem,10vh,6.5rem)] max-w-[420px] text-[clamp(1.65rem,2.6vw,3.125rem)] font-medium leading-[1.26]">
+          Карта
+          <br />
+          экспертизы
+        </h2>
 
-      <div className="absolute left-[13.33%] top-[calc(59%_-_5px)] max-w-[430px] space-y-[2.6vh] text-[clamp(0.95rem,1.35vw,1.625rem)] font-medium leading-[1.31]">
-        <p>Стань частью команды</p>
-        <p>Прокачай свои навыки</p>
-        <p>
-          Создавай востребованный продукт
-          <br />с наставниками
-        </p>
+        <div className="mt-[clamp(1.5rem,4vh,3rem)] max-w-[480px] space-y-[0.65em] text-[clamp(0.95rem,1.35vw,1.625rem)] font-medium leading-[1.45]">
+          <p>Найдите нужного специалиста внутри компании</p>
+          <p>Подтвердите навыки коллег</p>
+          <p>Развивайте экспертизу вместе</p>
+        </div>
       </div>
 
       <img
         src={logo}
         alt="NAUMEN"
-        className="absolute bottom-[6.1%] left-[2.7%] h-7 w-auto select-none md:left-[26px] md:h-9"
+        className="absolute bottom-[6.1%] left-[2.7%] z-10 h-5 w-auto select-none opacity-95 md:left-[26px] md:h-6"
       />
     </div>
   )

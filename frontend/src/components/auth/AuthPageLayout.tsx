@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+﻿import type { ReactNode } from 'react'
 import topLeftLines from '@/assets/register-side/top-left-lines.png'
 import { AuthDecorLayer } from '@/components/auth/AuthDecorLayer'
 import { RegisterSideBanner } from '@/components/auth/RegisterSideBanner'
