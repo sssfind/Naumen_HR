@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { to: '/dashboard/hr/trainees', label: 'Мои стажёры', icon: GraduationCap },
+  { to: '/dashboard/hr/trainees', label: 'Стажёры и наставники', icon: GraduationCap },
   { to: '/dashboard/hr/plan-templates', label: 'Шаблоны адаптации', icon: BookTemplate },
   { to: '/dashboard/hr/employees', label: 'Справочник сотрудников', icon: BookOpen },
   { to: '/dashboard/hr/chat', label: 'Чат-бот', icon: Bot },

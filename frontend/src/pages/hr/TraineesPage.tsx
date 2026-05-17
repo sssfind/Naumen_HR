@@ -1,28 +1,58 @@
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { UserMinus, UserRound } from 'lucide-react'
+import { UserRound, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { EmployeeDetailDialog } from '@/components/employees/EmployeeDetailDialog'
 import { useStaffDashboard } from '@/hooks/useStaffDashboard'
-import { useMyTrainees, useUnassignTrainee } from '@/hooks/useTrainees'
+import { useMentors, useMyTrainees } from '@/hooks/useTrainees'
+import type { DirectoryEmployee } from '@/types/employee'
+import type { Employee } from '@/types/user'
 
-const roleLabels: Record<string, string> = {
-  ROLE_TRAINEE: 'Стажёр',
-  ROLE_EMPLOYEE: 'Сотрудник',
-  ROLE_HR: 'HR',
-  ROLE_MENTOR: 'Наставник',
+function toDirectoryEmployee(employee: Employee): DirectoryEmployee {
+  return {
+    userId: employee.userId,
+    email: employee.email,
+    fullName: employee.fullName,
+    role: employee.role,
+    departmentId: employee.departmentId,
+    department: employee.department,
+    parentDepartmentName: employee.parentDepartmentName,
+    divisionName: employee.divisionName,
+    responsibilityZone: employee.responsibilityZone,
+    phone: employee.phone,
+    position: employee.position,
+    photoUrl: employee.photoUrl,
+    team: employee.team ?? null,
+    hrId: employee.hrId,
+    hrFullName: employee.hrFullName,
+  }
 }
 
 export function TraineesPage() {
-  const { basePath, canManageTrainees } = useStaffDashboard()
+  const { basePath, canManageTrainees, isHr } = useStaffDashboard()
   const { data: trainees = [], isLoading } = useMyTrainees()
-  const unassign = useUnassignTrainee()
+  const { data: mentors = [] } = useMentors(isHr)
+  const [selectedMentor, setSelectedMentor] = useState<DirectoryEmployee | null>(null)
+
+  const mentorsById = useMemo(
+    () => new Map(mentors.map((m) => [m.userId, toDirectoryEmployee(m)])),
+    [mentors]
+  )
+
+  function openMentorProfile(mentorId: number) {
+    const mentor = mentorsById.get(mentorId)
+    if (mentor) setSelectedMentor(mentor)
+  }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#1A1A2E]">Стажёры</h1>
+      <h1 className="text-2xl font-bold text-[#1A1A2E]">
+        {isHr ? 'Стажёры и наставники' : 'Стажёры'}
+      </h1>
       <p className="mt-1 text-sm text-gray-500">
         {canManageTrainees
-          ? 'Все стажёры в программе адаптации. Назначить новых и наставника — в справочнике и профиле стажёра.'
-          : 'Все стажёры в программе адаптации. Назначение в программу и наставника выполняет HR.'}
+          ? 'Стажёры в программе адаптации. Назначить наставника можно в профиле стажёра.'
+          : 'Стажёры в программе адаптации. Назначение наставника выполняет HR в профиле стажёра.'}
       </p>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -31,7 +61,7 @@ export function TraineesPage() {
         )}
         {!isLoading && trainees.length === 0 && (
           <p className="px-6 py-8 text-center text-gray-500">
-            У вас пока нет закреплённых стажёров
+            Пока нет стажёров в программе адаптации
           </p>
         )}
         {!isLoading && trainees.length > 0 && (
@@ -41,7 +71,7 @@ export function TraineesPage() {
                 <th className="px-6 py-3 font-medium text-gray-600">ФИО</th>
                 <th className="px-6 py-3 font-medium text-gray-600">Email</th>
                 <th className="px-6 py-3 font-medium text-gray-600">Отдел</th>
-                <th className="px-6 py-3 font-medium text-gray-600">Роль</th>
+                <th className="px-6 py-3 font-medium text-gray-600">Наставник</th>
                 <th className="px-6 py-3 font-medium text-gray-600" />
               </tr>
             </thead>
@@ -51,26 +81,27 @@ export function TraineesPage() {
                   <td className="px-6 py-4 font-medium text-[#1A1A2E]">{t.fullName}</td>
                   <td className="px-6 py-4 text-gray-600">{t.email}</td>
                   <td className="px-6 py-4 text-gray-600">{t.department ?? '—'}</td>
-                  <td className="px-6 py-4 text-gray-600">{roleLabels[t.role] ?? t.role}</td>
+                  <td className="px-6 py-4 text-gray-600">{t.hrFullName ?? '—'}</td>
                   <td className="px-6 py-4 text-right">
                     <Button asChild variant="ghost" size="sm" className="mr-2 gap-1">
                       <Link to={`${basePath}/trainees/${t.userId}`}>
                         <UserRound className="h-3.5 w-3.5" />
-                        Профиль
+                        Профиль стажёра
                       </Link>
                     </Button>
-                    {canManageTrainees && (
+                    {canManageTrainees && t.hrId ? (
                       <Button
+                        type="button"
                         variant="outline"
                         size="sm"
                         className="gap-1"
-                        onClick={() => unassign.mutate(t.userId)}
-                        disabled={unassign.isPending}
+                        onClick={() => openMentorProfile(t.hrId!)}
+                        disabled={!mentorsById.has(t.hrId)}
                       >
-                        <UserMinus className="h-3.5 w-3.5" />
-                        Снять наставника
+                        <Users className="h-3.5 w-3.5" />
+                        Профиль наставника
                       </Button>
-                    )}
+                    ) : null}
                   </td>
                 </tr>
               ))}
@@ -78,6 +109,12 @@ export function TraineesPage() {
           </table>
         )}
       </div>
+
+      <EmployeeDetailDialog
+        employee={selectedMentor}
+        open={selectedMentor !== null}
+        onOpenChange={(open) => !open && setSelectedMentor(null)}
+      />
     </div>
   )
 }
