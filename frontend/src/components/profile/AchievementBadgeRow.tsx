@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AchievementDetailDialog } from '@/components/profile/AchievementDetailDialog'
+import { preloadImages } from '@/lib/imageCache'
 import { cn } from '@/lib/utils'
 
 export type AchievementItem = {
@@ -28,6 +29,10 @@ export function AchievementBadgeRow({ items, className, userId }: AchievementBad
   const [dialogItem, setDialogItem] = useState<AchievementItem | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const activeItem = items.find((item) => item.id === activeId) ?? null
+
+  useEffect(() => {
+    preloadImages(items.map((item) => item.imageSrc))
+  }, [items])
 
   return (
     <div className={cn('achievement-row', className)}>
@@ -69,7 +74,8 @@ export function AchievementBadgeRow({ items, className, userId }: AchievementBad
                   item.imageFit === 'contain' ? 'object-contain p-2' : 'object-cover',
                   !item.earned && 'grayscale opacity-45'
                 )}
-                loading="lazy"
+                loading="eager"
+                decoding="async"
                 draggable={false}
               />
             </button>

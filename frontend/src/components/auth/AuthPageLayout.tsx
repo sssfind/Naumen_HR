@@ -1,7 +1,11 @@
-﻿import type { ReactNode } from 'react'
+﻿import { useEffect, type ReactNode } from 'react'
+import decorRings from '@/assets/register-side/decor-rings.png'
+import decorSeam from '@/assets/register-side/decor-seam.png'
+import logo from '@/assets/register-side/logo.png'
 import topLeftLines from '@/assets/register-side/top-left-lines.png'
 import { AuthDecorLayer } from '@/components/auth/AuthDecorLayer'
 import { RegisterSideBanner } from '@/components/auth/RegisterSideBanner'
+import { preloadImages } from '@/lib/imageCache'
 import { cn } from '@/lib/utils'
 
 type AuthPageLayoutProps = {
@@ -14,6 +18,10 @@ type AuthPageLayoutProps = {
 
 export function AuthPageLayout({ title, subtitle, children, size = 'default' }: AuthPageLayoutProps) {
   const isCompact = size === 'compact'
+
+  useEffect(() => {
+    preloadImages([topLeftLines, decorRings, decorSeam, logo])
+  }, [])
 
   return (
     <div className="auth-font-body relative h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#EAEAEA] md:grid md:grid-cols-2">

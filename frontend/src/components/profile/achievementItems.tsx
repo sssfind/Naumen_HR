@@ -24,6 +24,14 @@ const HR_ACHIEVEMENT_IMAGES = {
   champion: '/achievements/hr-champion.png',
 } as const
 
+/** Все иконки ачивок — для предзагрузки при старте приложения */
+export const ALL_ACHIEVEMENT_IMAGE_URLS = [
+  ...new Set([
+    ...Object.values(TRAINEE_ACHIEVEMENT_IMAGES),
+    ...Object.values(HR_ACHIEVEMENT_IMAGES),
+  ]),
+]
+
 const HR_BASE_ACHIEVEMENT_COUNT = 5
 
 export function buildTraineeAchievements(

@@ -48,6 +48,7 @@ export function AchievementDetailDialog({
                     item.imageFit === 'contain' ? 'object-contain p-1.5' : 'object-cover',
                     !item.earned && 'grayscale opacity-55'
                   )}
+                  decoding="async"
                   draggable={false}
                 />
               </div>
