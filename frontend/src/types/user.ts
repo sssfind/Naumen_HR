@@ -1,5 +1,20 @@
 export type UserRole = 'ROLE_EMPLOYEE' | 'ROLE_HR' | 'ROLE_MENTOR' | 'ROLE_TRAINEE'
 
+export interface MentorSummary {
+  userId: number
+  email: string
+  fullName: string
+  role: UserRole
+  department: string | null
+  parentDepartmentName: string | null
+  divisionName: string | null
+  responsibilityZone: string | null
+  phone: string | null
+  position: string | null
+  photoUrl?: string | null
+  team: string | null
+}
+
 export interface UserProfile {
   userId: number
   email: string
@@ -16,6 +31,7 @@ export interface UserProfile {
   progressBlockThree?: number
   totalProgress?: number
   mentorFullName?: string | null
+  mentor?: MentorSummary | null
 }
 
 export interface UpdateProfileRequest {

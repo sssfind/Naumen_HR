@@ -2,6 +2,7 @@ package ru.naumen.experts.user.mapper;
 
 import ru.naumen.experts.department.entity.Department;
 import ru.naumen.experts.user.dto.EmployeeResponse;
+import ru.naumen.experts.user.dto.MentorSummaryResponse;
 import ru.naumen.experts.user.dto.TraineeEmployeeResponse;
 import ru.naumen.experts.user.dto.TraineeProfileResponse;
 import ru.naumen.experts.user.dto.UserProfileResponse;
@@ -31,7 +32,8 @@ public final class UserMapper {
                     .progressBlockTwo(safeProgress(user.getProgressBlockTwo()))
                     .progressBlockThree(safeProgress(user.getProgressBlockThree()))
                     .totalProgress(calculateTotalProgress(user))
-                    .mentorFullName(user.getMentor() != null ? user.getMentor().getFullName() : null);
+                    .mentorFullName(user.getMentor() != null ? user.getMentor().getFullName() : null)
+                    .mentor(toMentorSummary(user.getMentor()));
         }
 
         return builder.build();
@@ -116,6 +118,27 @@ public final class UserMapper {
                 .mentorFullName(mentor != null ? mentor.getFullName() : null)
                 .mentorPhone(mentor != null ? mentor.getPhone() : null)
                 .moodLevel(trainee.getMoodLevel())
+                .build();
+    }
+
+    private static MentorSummaryResponse toMentorSummary(User mentor) {
+        if (mentor == null) {
+            return null;
+        }
+        DepartmentContext dept = departmentContext(mentor);
+        return MentorSummaryResponse.builder()
+                .userId(mentor.getId())
+                .email(mentor.getEmail())
+                .fullName(mentor.getFullName())
+                .role(mentor.getRole())
+                .department(dept.departmentName())
+                .parentDepartmentName(dept.parentDepartmentName())
+                .divisionName(dept.divisionName())
+                .responsibilityZone(mentor.getResponsibilityZone())
+                .phone(mentor.getPhone())
+                .position(mentor.getPosition())
+                .photoUrl(mentor.getPhotoUrl())
+                .team(mentor.getTeam())
                 .build();
     }
 

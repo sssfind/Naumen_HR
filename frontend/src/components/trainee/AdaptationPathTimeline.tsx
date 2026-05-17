@@ -149,21 +149,6 @@ export function AdaptationPathTimeline({
         </span>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-4 text-xs">
-        {phases.map((phase) => {
-          const colors = blockBarColors[phase.id] ?? defaultBlockColors
-          return (
-            <div key={phase.id} className="flex items-center gap-2">
-              <span className={cn('h-2.5 w-2.5 rounded-full', colors.completed)} />
-              <span className="text-gray-600">
-                {phase.title}
-                <span className="text-gray-400"> ({phase.progress}% этапа)</span>
-              </span>
-            </div>
-          )
-        })}
-      </div>
-
       <div className="mt-4 overflow-x-auto pb-2">
         <div className="relative min-w-[640px]">
           <div className="flex h-4 gap-0.5 overflow-hidden rounded-full bg-gray-100 p-0.5">

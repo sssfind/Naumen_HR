@@ -4,13 +4,10 @@ import { Award, Mail, Pencil, Phone, Users } from 'lucide-react'
 import { AchievementBadgeRow } from '@/components/profile/AchievementBadgeRow'
 import { buildTraineeAchievements } from '@/components/profile/achievementItems'
 import { Button } from '@/components/ui/button'
+import { EmployeeProfileCard } from '@/components/employees/EmployeeProfileCard'
+import { formatTraineeBlockLabel, TRAINEE_PLAN_BLOCKS } from '@/constants/traineePlanBlocks'
 import { useProfile } from '@/hooks/useProfile'
-
-const progressBlocks = [
-  { key: 'progressBlockOne', label: 'Блок 1' },
-  { key: 'progressBlockTwo', label: 'Блок 2' },
-  { key: 'progressBlockThree', label: 'Блок 3' },
-] as const
+import { mentorSummaryToDirectory } from '@/lib/mentorProfile'
 
 function ProgressBar({ label, value }: { label: string; value: number }) {
   return (
@@ -104,31 +101,35 @@ export function TraineeProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-[#1A1A2E]">Прогресс стажировки</h2>
-                <p className="text-sm text-gray-500">Три блока программы</p>
+                <p className="text-sm text-gray-500">Прогресс по блокам программы адаптации</p>
               </div>
               <div className="rounded-full bg-orange-50 px-4 py-2 text-lg font-bold text-primary">
                 {profile?.totalProgress ?? 0}%
               </div>
             </div>
             <div className="mt-6 space-y-5">
-              {progressBlocks.map((block) => (
-                <ProgressBar key={block.key} label={block.label} value={profile?.[block.key] ?? 0} />
+              {TRAINEE_PLAN_BLOCKS.map((block) => (
+                <ProgressBar
+                  key={block.id}
+                  label={formatTraineeBlockLabel(block)}
+                  value={profile?.[block.progressKey] ?? 0}
+                />
               ))}
             </div>
           </section>
 
           <section>
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-[#1A1A2E]">Наставник</h2>
-              <div className="mt-4 space-y-2 text-sm">
-                <p>
-                  <span className="text-gray-500">Имя:</span>{' '}
-                  <span className="font-medium text-[#1A1A2E]">
-                    {profile?.mentorFullName ?? 'Не назначен'}
-                  </span>
-                </p>
+            <h2 className="mb-4 text-lg font-semibold text-[#1A1A2E]">Наставник</h2>
+            {profile?.mentor ? (
+              <EmployeeProfileCard
+                employee={mentorSummaryToDirectory(profile.mentor)}
+                hideHrField
+              />
+            ) : (
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-10 text-center text-sm text-gray-500 shadow-sm">
+                Наставник пока не назначен
               </div>
-            </div>
+            )}
           </section>
         </div>
       </div>
@@ -144,3 +145,4 @@ export function TraineeProfilePage() {
     </div>
   )
 }
+
