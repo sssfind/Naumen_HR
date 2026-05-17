@@ -25,4 +25,6 @@ public class EmployeeResponse {
     private Integer moodLevel;
     private Long hrId;
     private String hrFullName;
+    private Long mentorId;
+    private String mentorFullName;
 }

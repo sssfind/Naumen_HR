@@ -168,7 +168,7 @@ func main() {
 	fmt.Println("Создано сотрудников: 20")
 
 	personas := buildPersonas(rng)
-	traineeRecords := seedTrainees(ctx, pool, defaultHash, mentorIDs, personas, rng)
+	traineeRecords := seedTrainees(ctx, pool, defaultHash, hrIDs, mentorIDs, personas, rng)
 	fmt.Printf("Создано стажеров: %d\n", len(traineeRecords))
 
 	taskCount := 0
@@ -188,7 +188,7 @@ func main() {
 	hrNotifCount := seedHRNotifications(ctx, pool, hrIDs, traineeRecords, personas, now, rng)
 	fmt.Printf("Добавлено уведомлений HR: %d\n", hrNotifCount)
 
-	fmt.Println("Готово. Пароль для hr*/emp*/trainee*@naumen.ru: 123123123")
+	fmt.Println("Готово. Пароль для hr*/mentor*/emp*/trainee*@naumen.ru: 123123123")
 	fmt.Println("Демо: trainee1 — успешная адаптация, trainee2 — риск, trainee4 — новичок, текущий опрос не заполнен у trainee1/2.")
 }
 
@@ -284,9 +284,20 @@ func seedHR(ctx context.Context, pool *pgxpool.Pool, passwordHash string) []int6
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (
 				email, password_hash, full_name, department, department_id, role,
-				phone, position, team, responsibility_zone
+				phone, position, team, responsibility_zone, is_active
 			)
-			VALUES ($1, $2, $3, 'HR', $4, 'ROLE_HR', $5, $6, 'HR Operations', $7)
+			VALUES ($1, $2, $3, 'HR', $4, 'ROLE_HR', $5, $6, 'HR Operations', $7, true)
+			ON CONFLICT (email) DO UPDATE SET
+				password_hash = EXCLUDED.password_hash,
+				full_name = EXCLUDED.full_name,
+				department = EXCLUDED.department,
+				department_id = EXCLUDED.department_id,
+				role = EXCLUDED.role,
+				phone = EXCLUDED.phone,
+				position = EXCLUDED.position,
+				team = EXCLUDED.team,
+				responsibility_zone = EXCLUDED.responsibility_zone,
+				is_active = true
 			RETURNING id`,
 			fmt.Sprintf("hr%d@naumen.ru", i+1), passwordHash, c.FullName, hrDeptID, phone, c.Position, zone).Scan(&id)
 		if err != nil {
@@ -315,9 +326,20 @@ func seedMentors(ctx context.Context, pool *pgxpool.Pool, passwordHash string) [
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (
 				email, password_hash, full_name, department, department_id, role,
-				phone, position, team, responsibility_zone
+				phone, position, team, responsibility_zone, is_active
 			)
-			VALUES ($1, $2, $3, $4, $5, 'ROLE_MENTOR', $6, $7, $8, $9)
+			VALUES ($1, $2, $3, $4, $5, 'ROLE_MENTOR', $6, $7, $8, $9, true)
+			ON CONFLICT (email) DO UPDATE SET
+				password_hash = EXCLUDED.password_hash,
+				full_name = EXCLUDED.full_name,
+				department = EXCLUDED.department,
+				department_id = EXCLUDED.department_id,
+				role = EXCLUDED.role,
+				phone = EXCLUDED.phone,
+				position = EXCLUDED.position,
+				team = EXCLUDED.team,
+				responsibility_zone = EXCLUDED.responsibility_zone,
+				is_active = true
 			RETURNING id`,
 			fmt.Sprintf("mentor%d@naumen.ru", i+1), passwordHash, m.FullName, m.Dept, deptID,
 			phone, m.Position, m.Dept, zone).Scan(&id)
@@ -356,9 +378,20 @@ func seedEmployees(ctx context.Context, pool *pgxpool.Pool, passwordHash string,
 		_, err := pool.Exec(ctx, `
 			INSERT INTO users (
 				email, password_hash, full_name, department, department_id, role,
-				position, phone, team, responsibility_zone
+				position, phone, team, responsibility_zone, is_active
 			)
-			VALUES ($1, $2, $3, $4, $5, 'ROLE_EMPLOYEE', $6, $7, $8, $9)`,
+			VALUES ($1, $2, $3, $4, $5, 'ROLE_EMPLOYEE', $6, $7, $8, $9, true)
+			ON CONFLICT (email) DO UPDATE SET
+				password_hash = EXCLUDED.password_hash,
+				full_name = EXCLUDED.full_name,
+				department = EXCLUDED.department,
+				department_id = EXCLUDED.department_id,
+				role = EXCLUDED.role,
+				position = EXCLUDED.position,
+				phone = EXCLUDED.phone,
+				team = EXCLUDED.team,
+				responsibility_zone = EXCLUDED.responsibility_zone,
+				is_active = true`,
 			fmt.Sprintf("emp%d@naumen.ru", i), passwordHash, c.FullName, c.Dept, deptID, c.Position, phone, team, zone)
 		if err != nil {
 			log.Fatalf("Ошибка вставки сотрудника %d: %v", i, err)
@@ -366,7 +399,7 @@ func seedEmployees(ctx context.Context, pool *pgxpool.Pool, passwordHash string,
 	}
 }
 
-func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, mentorIDs []int64, personas []traineePersona, rng *rand.Rand) []traineeRecord {
+func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, hrIDs []int64, mentorIDs []int64, personas []traineePersona, rng *rand.Rand) []traineeRecord {
 	records := make([]traineeRecord, 0, len(personas))
 	extraChars := make([]Character, len(characters))
 	copy(extraChars, characters)
@@ -377,6 +410,7 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 		if p.Index > 4 {
 			c = extraChars[(p.Index-5)%len(extraChars)]
 		}
+		hrID := hrIDs[p.HrIndex%len(hrIDs)]
 		mentorID := mentorIDs[p.HrIndex%len(mentorIDs)]
 		phone := fmt.Sprintf("+7993%07d", 3000000+p.Index*211)
 		var id int64
@@ -385,18 +419,35 @@ func seedTrainees(ctx context.Context, pool *pgxpool.Pool, passwordHash string, 
 		err := pool.QueryRow(ctx, `
 			INSERT INTO users (
 				email, password_hash, full_name, department, department_id, role,
-				hr_id, team, phone, position, responsibility_zone, mood_level,
-				progress_block_one, progress_block_two, progress_block_three
+				hr_id, mentor_id, team, phone, position, responsibility_zone, mood_level,
+				progress_block_one, progress_block_two, progress_block_three, is_active
 			)
-			VALUES ($1, $2, $3, $4, $5, 'ROLE_TRAINEE', $6, $7, $8, $9, $10, 3, 0, 0, 0)
+			VALUES ($1, $2, $3, $4, $5, 'ROLE_TRAINEE', $6, $7, $8, $9, $10, $11, 3, 0, 0, 0, true)
+			ON CONFLICT (email) DO UPDATE SET
+				password_hash = EXCLUDED.password_hash,
+				full_name = EXCLUDED.full_name,
+				department = EXCLUDED.department,
+				department_id = EXCLUDED.department_id,
+				role = EXCLUDED.role,
+				hr_id = EXCLUDED.hr_id,
+				mentor_id = EXCLUDED.mentor_id,
+				team = EXCLUDED.team,
+				phone = EXCLUDED.phone,
+				position = EXCLUDED.position,
+				responsibility_zone = EXCLUDED.responsibility_zone,
+				mood_level = 3,
+				progress_block_one = 0,
+				progress_block_two = 0,
+				progress_block_three = 0,
+				is_active = true
 			RETURNING id`,
 			fmt.Sprintf("trainee%d@naumen.ru", p.Index), passwordHash, c.FullName, c.Dept, deptID,
-			mentorID, p.Team, phone, c.Position, zone).Scan(&id)
+			hrID, mentorID, p.Team, phone, c.Position, zone).Scan(&id)
 		if err != nil {
 			log.Fatalf("Ошибка вставки стажера %d: %v", p.Index, err)
 		}
 		records = append(records, traineeRecord{
-			ID: id, Index: p.Index, HrID: mentorID, Char: c, Persona: p, Team: p.Team,
+			ID: id, Index: p.Index, HrID: hrID, Char: c, Persona: p, Team: p.Team,
 		})
 	}
 	return records
@@ -495,6 +546,10 @@ func assignStatuses(n int, rate float64, rng *rand.Rand) []string {
 }
 
 func seedTasksForTrainee(ctx context.Context, pool *pgxpool.Pool, tr traineeRecord, now time.Time, rng *rand.Rand) int {
+	if _, err := pool.Exec(ctx, `DELETE FROM trainee_plan_tasks WHERE trainee_id = $1`, tr.ID); err != nil {
+		log.Fatalf("Ошибка очистки задач trainee%d: %v", tr.Index, err)
+	}
+
 	start := now.AddDate(0, 0, -tr.Persona.WeeksEmployed*7)
 	specs := tasksForPersona(tr.Char, tr.Persona, rng)
 	count := 0
@@ -777,42 +832,69 @@ func schemaReady(ctx context.Context, pool *pgxpool.Pool) bool {
 }
 
 func clearSeedData(ctx context.Context, pool *pgxpool.Pool) error {
-	testUsers := `email ~ '^(hr|emp|trainee)[0-9]+@naumen\.ru$'`
+	const (
+		seedUsers     = `email ~ '^(hr|emp|trainee|mentor)[0-9]+@naumen\.ru$'`
+		seedTrainees  = `email ~ '^trainee[0-9]+@naumen\.ru$'`
+		seedStaff     = `email ~ '^(hr|emp|mentor)[0-9]+@naumen\.ru$'`
+		seedUsersSubq = `SELECT id FROM users WHERE ` + seedUsers
+	)
 
 	_, err := pool.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM trainee_plan_task_comments
 		WHERE task_id IN (
 			SELECT id FROM trainee_plan_tasks WHERE trainee_id IN (
-				SELECT id FROM users WHERE %s))`, testUsers))
+				SELECT id FROM users WHERE %s))`, seedTrainees))
 	if err != nil {
 		return fmt.Errorf("trainee_plan_task_comments: %w", err)
 	}
 
 	_, err = pool.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM trainee_plan_tasks
-		WHERE trainee_id IN (SELECT id FROM users WHERE %s)`, testUsers))
+		WHERE trainee_id IN (SELECT id FROM users WHERE %s)`, seedTrainees))
 	if err != nil {
 		return fmt.Errorf("trainee_plan_tasks: %w", err)
 	}
 
 	_, err = pool.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM feedback_responses
-		WHERE trainee_id IN (SELECT id FROM users WHERE %s)`, testUsers))
+		WHERE trainee_id IN (SELECT id FROM users WHERE %s)`, seedTrainees))
 	if err != nil {
 		return fmt.Errorf("feedback_responses: %w", err)
 	}
 
 	_, err = pool.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM notifications
-		WHERE user_id IN (SELECT id FROM users WHERE %s)`, testUsers))
+		WHERE user_id IN (%s)`, seedUsersSubq))
 	if err != nil {
 		return fmt.Errorf("notifications: %w", err)
 	}
 
-	tag, err := pool.Exec(ctx, fmt.Sprintf(`DELETE FROM users WHERE %s`, testUsers))
+	_, err = pool.Exec(ctx, fmt.Sprintf(`
+		UPDATE users SET hr_id = NULL
+		WHERE hr_id IN (%s)`, seedUsersSubq))
 	if err != nil {
-		return fmt.Errorf("users: %w", err)
+		return fmt.Errorf("users.hr_id: %w", err)
 	}
-	fmt.Printf("Удалено тестовых пользователей: %d\n", tag.RowsAffected())
+
+	_, err = pool.Exec(ctx, fmt.Sprintf(`
+		UPDATE users SET mentor_id = NULL
+		WHERE mentor_id IN (%s)`, seedUsersSubq))
+	if err != nil {
+		return fmt.Errorf("users.mentor_id: %w", err)
+	}
+
+	tagTrainees, err := pool.Exec(ctx, fmt.Sprintf(`DELETE FROM users WHERE %s`, seedTrainees))
+	if err != nil {
+		return fmt.Errorf("users trainees: %w", err)
+	}
+
+	tagStaff, err := pool.Exec(ctx, fmt.Sprintf(`DELETE FROM users WHERE %s`, seedStaff))
+	if err != nil {
+		return fmt.Errorf("users staff: %w", err)
+	}
+
+	total := tagTrainees.RowsAffected() + tagStaff.RowsAffected()
+	fmt.Printf("Удалено тестовых пользователей: %d (стажёры: %d, hr/mentor/emp: %d)\n",
+		total, tagTrainees.RowsAffected(), tagStaff.RowsAffected())
 	return nil
 }

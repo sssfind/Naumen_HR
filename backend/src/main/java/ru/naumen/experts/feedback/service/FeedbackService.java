@@ -12,7 +12,6 @@ import ru.naumen.experts.feedback.dto.FeedbackResponseDto;
 import ru.naumen.experts.feedback.dto.FeedbackStatusResponse;
 import ru.naumen.experts.feedback.dto.SubmitFeedbackRequest;
 import ru.naumen.experts.feedback.entity.FeedbackResponse;
-import ru.naumen.experts.feedback.enums.ResourceIssue;
 import ru.naumen.experts.feedback.enums.WeekRating;
 import ru.naumen.experts.feedback.repository.FeedbackResponseRepository;
 import ru.naumen.experts.notification.enums.NotificationType;
@@ -24,14 +23,14 @@ import ru.naumen.experts.user.service.StaffAccessService;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class FeedbackService {
-
-    private static final int RISK_CLARITY_THRESHOLD = 2;
-    private static final int RISK_MENTOR_THRESHOLD = 2;
 
     private final FeedbackResponseRepository feedbackRepository;
     private final UserRepository userRepository;
@@ -134,74 +133,58 @@ public class FeedbackService {
     }
 
     private void notifyHrOnFeedback(User trainee, FeedbackResponse feedback) {
-        List<User> hrRecipients = trainee.getHr() != null
-                ? List.of(trainee.getHr())
-                : userRepository.findByRoleAndIsActiveTrue(UserRole.ROLE_HR);
-
         String traineeName = trainee.getFullName();
+        boolean risk = FeedbackRiskEvaluator.isRisk(feedback);
+        String riskTitle = feedback.getWeekRating() == WeekRating.NEED_HELP
+                ? "Срочно: стажёр просит помощи"
+                : "Внимание: риск по адаптации";
+        String riskBody = traineeName + ": " + FeedbackRiskEvaluator.buildRiskSummary(feedback);
+
+        Set<Long> notified = new LinkedHashSet<>();
+
+        List<User> hrRecipients = new ArrayList<>();
+        if (trainee.getHr() != null) {
+            hrRecipients.add(trainee.getHr());
+        }
+        hrRecipients.addAll(userRepository.findByRoleAndIsActiveTrue(UserRole.ROLE_HR));
+
         for (User hr : hrRecipients) {
+            if (!notified.add(hr.getId())) {
+                continue;
+            }
             notificationService.createNotification(
                     hr.getId(),
                     "Новый опрос стажёра",
                     traineeName + " заполнил еженедельный опрос обратной связи.",
                     NotificationType.FEEDBACK_SUBMITTED
             );
-
-            if (isRiskSignal(feedback)) {
-                String details = buildRiskDetails(feedback);
+            if (risk) {
                 notificationService.createNotification(
                         hr.getId(),
-                        feedback.getWeekRating() == WeekRating.NEED_HELP
-                                ? "Срочно: стажёр просит помощи"
-                                : "Внимание: риск по адаптации",
-                        traineeName + ": " + details,
+                        riskTitle,
+                        riskBody,
                         NotificationType.FEEDBACK_RISK
                 );
             }
         }
-    }
 
-    private boolean isRiskSignal(FeedbackResponse feedback) {
-        WeekRating rating = feedback.getWeekRating();
-        if (rating == WeekRating.STRESSED || rating == WeekRating.NEED_HELP) {
-            return true;
+        User mentor = trainee.getMentor();
+        if (mentor != null && notified.add(mentor.getId())) {
+            notificationService.createNotification(
+                    mentor.getId(),
+                    "Новый опрос вашего стажёра",
+                    traineeName + " заполнил еженедельный опрос обратной связи.",
+                    NotificationType.FEEDBACK_SUBMITTED
+            );
+            if (risk) {
+                notificationService.createNotification(
+                        mentor.getId(),
+                        "Внимание: риск по адаптации стажёра",
+                        riskBody,
+                        NotificationType.FEEDBACK_RISK
+                );
+            }
         }
-        if (feedback.getTasksClarity() <= RISK_CLARITY_THRESHOLD) {
-            return true;
-        }
-        if (feedback.getMentorRating() <= RISK_MENTOR_THRESHOLD) {
-            return true;
-        }
-        List<ResourceIssue> issues = FeedbackResourceIssuesCodec.decode(feedback.getResourceIssues());
-        return issues.stream().anyMatch(issue -> issue != ResourceIssue.ALL_OK);
-    }
-
-    private String buildRiskDetails(FeedbackResponse feedback) {
-        StringBuilder sb = new StringBuilder();
-        WeekRating rating = feedback.getWeekRating();
-        if (rating == WeekRating.NEED_HELP) {
-            sb.append("запрошена помощь HR");
-        } else if (rating == WeekRating.STRESSED) {
-            sb.append("тяжёлая неделя, стресс");
-        }
-        if (feedback.getTasksClarity() <= RISK_CLARITY_THRESHOLD) {
-            appendDetail(sb, "задачи непонятны (" + feedback.getTasksClarity() + "/5)");
-        }
-        if (feedback.getMentorRating() <= RISK_MENTOR_THRESHOLD) {
-            appendDetail(sb, "низкая оценка наставника (" + feedback.getMentorRating() + "/5)");
-        }
-        List<ResourceIssue> issues = FeedbackResourceIssuesCodec.decode(feedback.getResourceIssues());
-        if (issues.stream().anyMatch(issue -> issue != ResourceIssue.ALL_OK)) {
-            appendDetail(sb, "проблемы с доступами или ресурсами");
-        }
-        return sb.toString();
-    }
-
-    private void appendDetail(StringBuilder sb, String detail) {
-        if (!sb.isEmpty()) {
-            sb.append(", ");
-        }
-        sb.append(detail);
     }
 
     private int mapWeekRatingToMood(WeekRating rating) {
@@ -226,7 +209,7 @@ public class FeedbackService {
         return user;
     }
 
-    static LocalDate currentWeekStart() {
+    public static LocalDate currentWeekStart() {
         return LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     }
 

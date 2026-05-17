@@ -53,6 +53,18 @@ public interface TraineePlanTaskRepository extends JpaRepository<TraineePlanTask
 
     @Query("""
             SELECT t FROM TraineePlanTask t
+            JOIN FETCH t.trainee
+            WHERE t.trainee.id IN :traineeIds
+              AND t.status IN (ru.naumen.experts.traineeplan.enums.TaskStatus.NOT_STARTED,
+                               ru.naumen.experts.traineeplan.enums.TaskStatus.IN_PROGRESS)
+              AND t.deadline < :today
+            ORDER BY t.trainee.fullName ASC, t.deadline ASC, t.id ASC
+            """)
+    List<TraineePlanTask> findOverdueIncompleteByTraineeIds(
+            @Param("traineeIds") Collection<Long> traineeIds, @Param("today") LocalDate today);
+
+    @Query("""
+            SELECT t FROM TraineePlanTask t
             WHERE t.trainee.id = :traineeId
               AND t.status = ru.naumen.experts.traineeplan.enums.TaskStatus.IN_PROGRESS
             ORDER BY t.deadline ASC, t.id ASC

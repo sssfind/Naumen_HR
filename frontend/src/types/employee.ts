@@ -17,6 +17,8 @@ export interface DirectoryEmployee {
   inMyTeam?: boolean
   hrId?: number | null
   hrFullName?: string | null
+  mentorId?: number | null
+  mentorFullName?: string | null
   totalProgress?: number
   moodLevel?: number
 }

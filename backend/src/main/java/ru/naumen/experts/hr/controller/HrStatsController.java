@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.naumen.experts.auth.jwt.JwtAuthenticationPrincipal;
+import ru.naumen.experts.hr.dto.HrAdaptationDashboardResponse;
 import ru.naumen.experts.hr.dto.HrTeamStatsResponse;
+import ru.naumen.experts.hr.service.HrAdaptationDashboardService;
 import ru.naumen.experts.hr.service.HrTraineeService;
 
 @RestController
@@ -23,11 +25,19 @@ import ru.naumen.experts.hr.service.HrTraineeService;
 public class HrStatsController {
 
     private final HrTraineeService hrTraineeService;
+    private final HrAdaptationDashboardService adaptationDashboardService;
 
     @Operation(summary = "Сводка по моим стажёрам")
     @GetMapping
     public ResponseEntity<HrTeamStatsResponse> getTeamStats(
             @AuthenticationPrincipal JwtAuthenticationPrincipal principal) {
         return ResponseEntity.ok(hrTraineeService.getTeamStats(principal.getUserId()));
+    }
+
+    @Operation(summary = "Дашборд адаптации: риски, опросы, просрочки")
+    @GetMapping("/adaptation-dashboard")
+    public ResponseEntity<HrAdaptationDashboardResponse> getAdaptationDashboard(
+            @AuthenticationPrincipal JwtAuthenticationPrincipal principal) {
+        return ResponseEntity.ok(adaptationDashboardService.getDashboard(principal.getUserId()));
     }
 }

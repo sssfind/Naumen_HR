@@ -45,5 +45,31 @@ public class StaffAccessService {
 
     public void requireCanViewTrainee(User staff, User trainee) {
         requireHrOrMentor(staff);
+        if (trainee.getRole() != UserRole.ROLE_TRAINEE) {
+            throw new ForbiddenException("Пользователь не является стажёром");
+        }
+        if (isHr(staff)) {
+            return;
+        }
+        if (isMentor(staff)) {
+            User mentor = trainee.getMentor();
+            if (mentor == null || !mentor.getId().equals(staff.getId())) {
+                throw new ForbiddenException("Стажёр не закреплён за вами");
+            }
+        }
+    }
+
+    public boolean canViewTrainee(User staff, User trainee) {
+        if (trainee.getRole() != UserRole.ROLE_TRAINEE) {
+            return false;
+        }
+        if (isHr(staff)) {
+            return true;
+        }
+        if (isMentor(staff)) {
+            User mentor = trainee.getMentor();
+            return mentor != null && mentor.getId().equals(staff.getId());
+        }
+        return false;
     }
 }

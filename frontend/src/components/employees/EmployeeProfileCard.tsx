@@ -78,7 +78,10 @@ export function EmployeeProfileCard({
             <Field label="Зона ответственности" value={employee.responsibilityZone} />
           )}
           {!hideHrField && employee.hrFullName && (
-            <Field label="Куратор / наставник" value={employee.hrFullName} />
+            <Field label="HR-куратор" value={employee.hrFullName} />
+          )}
+          {!hideHrField && employee.mentorFullName && (
+            <Field label="Наставник" value={employee.mentorFullName} />
           )}
         </dl>
 

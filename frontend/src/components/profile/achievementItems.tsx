@@ -87,51 +87,59 @@ export function buildTraineeAchievements(
   ]
 }
 
-function buildHrBaseAchievements(): AchievementItem[] {
+export type HrAchievementStats = {
+  traineeCount: number
+  averageMoodLevel: number | null
+  maxTraineeCompletionPercent: number
+  hasCustomTemplate: boolean
+}
+
+function buildHrBaseAchievements(stats?: HrAchievementStats): AchievementItem[] {
+  const traineeCount = stats?.traineeCount ?? 0
+  const mood = stats?.averageMoodLevel ?? null
+  const maxCompletion = stats?.maxTraineeCompletionPercent ?? 0
+  const hasTemplate = stats?.hasCustomTemplate ?? false
+
   return [
     {
       id: 'hr-rocket-launch',
       title: 'Первый пошёл',
-      description: 'Выдаётся за первого стажёра',
-      unlockHint: 'Выдаётся за первого стажёра',
+      description: 'Первый стажёр в вашей программе адаптации',
+      unlockHint: 'Добавьте первого стажёра в программу',
       imageSrc: HR_ACHIEVEMENT_IMAGES.rocketLaunch,
-      earned: true,
+      earned: traineeCount >= 1,
     },
     {
       id: 'hr-bullseye',
       title: '100% match',
-      description:
-        'Ваш стажёр закрыл абсолютно все задачи по трём блокам точно к дедлайну',
-      unlockHint:
-        'Ваш стажёр закрыл абсолютно все задачи по трём блокам точно к дедлайну',
+      description: 'У стажёра выполнены все задачи плана',
+      unlockHint: 'Доведите прогресс хотя бы одного стажёра до 100%',
       imageSrc: HR_ACHIEVEMENT_IMAGES.bullseye,
-      earned: true,
+      earned: maxCompletion >= 100,
     },
     {
       id: 'hr-checklist',
       title: 'Архитектор траекторий',
-      description: 'Выдаётся за сборку своего первого шаблона',
-      unlockHint: 'Выдаётся за сборку своего первого шаблона',
+      description: 'Создан собственный шаблон адаптации',
+      unlockHint: 'Создайте свой шаблон в разделе «Шаблоны адаптации»',
       imageSrc: HR_ACHIEVEMENT_IMAGES.checklist,
-      earned: true,
+      earned: hasTemplate,
     },
     {
       id: 'hr-graduation',
       title: 'Выпускной класс',
-      description:
-        'За первые 5 стажёров, успешно прошедших программу испытательного срока под вашим кураторством',
-      unlockHint:
-        'За первые 5 стажёров, успешно прошедших программу испытательного срока под вашим кураторством',
+      description: 'Пять и более стажёров под вашим кураторством',
+      unlockHint: 'Закрепите за собой 5 стажёров',
       imageSrc: HR_ACHIEVEMENT_IMAGES.graduation,
-      earned: true,
+      earned: traineeCount >= 5,
     },
     {
       id: 'hr-heart',
       title: 'Главный эмпат',
-      description: 'Выдаётся, если у ваших стажёров средняя оценка настроения выше 4.5',
-      unlockHint: 'Выдаётся, если у ваших стажёров средняя оценка настроения выше 4.5',
+      description: 'Среднее настроение команды выше 4.5',
+      unlockHint: 'Поддерживайте настроение стажёров на высоком уровне',
       imageSrc: HR_ACHIEVEMENT_IMAGES.heart,
-      earned: true,
+      earned: mood != null && mood >= 4.5,
     },
   ]
 }
@@ -148,9 +156,9 @@ function buildHrChampionAchievement(earnedBaseCount: number): AchievementItem {
   }
 }
 
-/** HR и наставник: базовые ачивки + «Чемпион» при сборе всех пяти */
-export function buildHrAchievements(): AchievementItem[] {
-  const base = buildHrBaseAchievements()
+/** HR и наставник: базовые ачивки по показателям команды + «Чемпион» при сборе всех пяти */
+export function buildHrAchievements(stats?: HrAchievementStats): AchievementItem[] {
+  const base = buildHrBaseAchievements(stats)
   const earnedBaseCount = base.filter((item) => item.earned).length
   return [...base, buildHrChampionAchievement(earnedBaseCount)]
 }

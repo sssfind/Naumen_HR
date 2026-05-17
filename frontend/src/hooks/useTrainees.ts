@@ -7,7 +7,7 @@ import type {
   TraineePlanTask,
   TraineePlanTaskRequest,
 } from '@/types/trainee'
-import type { HrTeamStats } from '@/types/hr'
+import type { HrAdaptationDashboard, HrTeamStats } from '@/types/hr'
 import type { Employee, TraineeProfile } from '@/types/user'
 
 export function useHrTeamStats() {
@@ -15,6 +15,16 @@ export function useHrTeamStats() {
     queryKey: ['hr', 'stats'],
     queryFn: async () => {
       const { data } = await api.get<HrTeamStats>('/hr/stats')
+      return data
+    },
+  })
+}
+
+export function useHrAdaptationDashboard() {
+  return useQuery({
+    queryKey: ['hr', 'adaptation-dashboard'],
+    queryFn: async () => {
+      const { data } = await api.get<HrAdaptationDashboard>('/hr/stats/adaptation-dashboard')
       return data
     },
   })
