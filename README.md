@@ -15,7 +15,6 @@
 - [API и документация](#api-и-документация)
 - [Тесты](#тесты)
 - [База данных](#база-данных)
-- [Архитектура](#архитектура)
 
 ---
 
@@ -292,54 +291,6 @@ mvn test
 jdbc:postgresql://localhost:5432/naumen_hr
 username: naumen
 password: naumen
-```
-
----
-
-## Архитектура
-
-```mermaid
-flowchart LR
-  subgraph client [Browser]
-    FE[React SPA]
-  end
-
-  subgraph docker [Docker Compose]
-    NG[Nginx :3000]
-    BE[Spring Boot :8080]
-    PG[(PostgreSQL)]
-    SD[Go Seeder]
-  end
-
-  OR[OpenRouter API]
-
-  FE -->|/api| NG
-  NG --> BE
-  FE -->|dev proxy| BE
-  BE --> PG
-  SD --> PG
-  BE --> OR
-```
-
-Поток отправки еженедельного опроса:
-
-```mermaid
-sequenceDiagram
-  participant T as Стажёр
-  participant API as Backend
-  participant DB as PostgreSQL
-  participant LLM as OpenRouter
-
-  T->>API: POST /trainee/feedback
-  API->>API: Structured sentiment
-  alt есть комментарий и API key
-    API->>LLM: анализ тональности
-    LLM-->>API: JSON sentiment / riskFlags
-  else без LLM
-    API->>API: keyword risk analyzer
-  end
-  API->>DB: сохранить feedback + scores
-  API-->>T: ответ
 ```
 
 ---
