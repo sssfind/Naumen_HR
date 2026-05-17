@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Flag, Loader2, MessageSquare } from 'lucide-react'
+import { Check, Flag, Loader2, MessageSquare, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -15,36 +15,58 @@ import type { TraineePlanTask } from '@/types/trainee'
 interface PlanTaskCardProps {
   task: TraineePlanTask
   readOnly?: boolean
+  reviewMode?: boolean
   onStart?: (taskId: number) => Promise<unknown>
   onComplete?: (taskId: number) => Promise<unknown>
   onComment?: (taskId: number, text: string) => Promise<unknown>
+  onApprove?: (taskId: number) => Promise<unknown>
+  onReject?: (taskId: number, comment?: string) => Promise<unknown>
   isStarting?: boolean
   isCompleting?: boolean
   isCommenting?: boolean
+  isApproving?: boolean
+  isRejecting?: boolean
   isHighlighted?: boolean
 }
 
 export function PlanTaskCard({
   task,
   readOnly = false,
+  reviewMode = false,
   onStart,
   onComplete,
   onComment,
+  onApprove,
+  onReject,
   isStarting,
   isCompleting,
   isCommenting,
+  isApproving,
+  isRejecting,
   isHighlighted,
 }: PlanTaskCardProps) {
   const status = task.status ?? 'NOT_STARTED'
   const comments = task.comments ?? []
   const [commentText, setCommentText] = useState('')
   const [showCommentForm, setShowCommentForm] = useState(false)
+  const [rejectComment, setRejectComment] = useState('')
+  const [showRejectForm, setShowRejectForm] = useState(false)
+
+  const needsUserReview = task.acceptanceCheckType === 'USER'
+  const completeLabel = needsUserReview ? 'Отправить на проверку' : 'Завершить задачу'
 
   const handleComment = async () => {
     if (!onComment || !commentText.trim()) return
     await onComment(task.id, commentText.trim())
     setCommentText('')
     setShowCommentForm(false)
+  }
+
+  const handleReject = async () => {
+    if (!onReject) return
+    await onReject(task.id, rejectComment.trim() || undefined)
+    setRejectComment('')
+    setShowRejectForm(false)
   }
 
   return (
@@ -93,13 +115,78 @@ export function PlanTaskCard({
       {task.completedAt && (
         <p className="mt-1 text-xs text-gray-500">Завершена: {formatDateTime(task.completedAt)}</p>
       )}
+      {status === 'PENDING_REVIEW' && !reviewMode && (
+        <p className="mt-2 text-xs text-amber-700">Ожидает проверки наставником</p>
+      )}
+      {status === 'REJECTED' && task.rejectionComment && (
+        <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800">
+          <span className="font-medium">Комментарий наставника:</span> {task.rejectionComment}
+        </p>
+      )}
 
-      {!readOnly && (
+      {reviewMode && status === 'PENDING_REVIEW' && (
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-amber-800">Стажёр отправил задачу на проверку</p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              className="gap-1"
+              disabled={isApproving || isRejecting}
+              onClick={() => onApprove?.(task.id)}
+            >
+              {isApproving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              Принять
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1 text-red-700 hover:text-red-800"
+              disabled={isApproving || isRejecting}
+              onClick={() => setShowRejectForm((v) => !v)}
+            >
+              <X className="h-4 w-4" />
+              Отклонить
+            </Button>
+          </div>
+          {showRejectForm && (
+            <div className="space-y-2 rounded-lg border border-red-100 bg-red-50/50 p-3">
+              <textarea
+                value={rejectComment}
+                onChange={(e) => setRejectComment(e.target.value)}
+                placeholder="Комментарий для стажёра (необязательно)"
+                rows={2}
+                maxLength={2000}
+                className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                disabled={isRejecting}
+                onClick={handleReject}
+              >
+                {isRejecting && <Loader2 className="h-4 w-4 animate-spin" />}
+                Отправить на доработку
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!readOnly && !reviewMode && (
         <div className="mt-4 flex flex-wrap gap-2">
           {status === 'NOT_STARTED' && onStart && (
             <Button type="button" size="sm" disabled={isStarting} onClick={() => onStart(task.id)}>
               {isStarting && <Loader2 className="h-4 w-4 animate-spin" />}
               Взять в работу
+            </Button>
+          )}
+          {status === 'REJECTED' && onStart && (
+            <Button type="button" size="sm" disabled={isStarting} onClick={() => onStart(task.id)}>
+              {isStarting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Вернуть в доработку
             </Button>
           )}
           {status === 'IN_PROGRESS' && onComplete && (
@@ -110,10 +197,10 @@ export function PlanTaskCard({
               onClick={() => onComplete(task.id)}
             >
               {isCompleting && <Loader2 className="h-4 w-4 animate-spin" />}
-              Завершить задачу
+              {completeLabel}
             </Button>
           )}
-          {onComment && (
+          {onComment && status !== 'PENDING_REVIEW' && status !== 'COMPLETED' && (
             <Button
               type="button"
               variant="outline"
@@ -127,7 +214,7 @@ export function PlanTaskCard({
         </div>
       )}
 
-      {showCommentForm && onComment && (
+      {showCommentForm && onComment && !reviewMode && (
         <div className="mt-3 flex w-full gap-2">
           <Input
             className="min-w-0 flex-1"

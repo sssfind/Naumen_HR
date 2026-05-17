@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
@@ -98,6 +100,24 @@ public class AuthExceptionHandler {
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex,
                                                           HttpServletRequest request) {
         return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex,
+                                                            HttpServletRequest request) {
+        log.warn("Access denied: {} {}", request.getMethod(), request.getRequestURI());
+        return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", "Недостаточно прав для этого действия", request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex,
+                                                             HttpServletRequest request) {
+        log.warn("Data integrity violation on {}: {}", request.getRequestURI(), ex.getMostSpecificCause().getMessage());
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "Conflict",
+                "Не удалось сохранить задачу. Обновите страницу или обратитесь к администратору.",
+                request);
     }
 
     @ExceptionHandler(BadRequestException.class)

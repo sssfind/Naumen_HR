@@ -1,7 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import type { PagedTraineeEmployees, TraineeDashboard, TraineePlanTask } from '@/types/trainee'
+
+function apiErrorMessage(error: unknown, fallback: string): string {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message
+    if (typeof message === 'string' && message.trim()) {
+      return message
+    }
+  }
+  return fallback
+}
 
 export function useTraineeDashboard() {
   return useQuery({
@@ -26,7 +37,8 @@ export function useStartTraineeTask() {
       queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       toast.success('Задача взята в работу')
     },
-    onError: () => toast.error('Не удалось взять задачу в работу'),
+    onError: (error) =>
+      toast.error(apiErrorMessage(error, 'Не удалось взять задачу в работу')),
   })
 }
 
@@ -41,9 +53,10 @@ export function useCompleteTraineeTask() {
       queryClient.invalidateQueries({ queryKey: ['trainee', 'dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'trainees'] })
       queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
-      toast.success('Задача завершена')
+      toast.success('Задача отправлена на проверку или завершена')
     },
-    onError: () => toast.error('Не удалось завершить задачу'),
+    onError: (error) =>
+      toast.error(apiErrorMessage(error, 'Не удалось завершить задачу')),
   })
 }
 
@@ -59,7 +72,8 @@ export function useAddTraineeTaskComment() {
       queryClient.invalidateQueries({ queryKey: ['hr', 'stats'] })
       toast.success('Комментарий отправлен')
     },
-    onError: () => toast.error('Не удалось отправить комментарий'),
+    onError: (error) =>
+      toast.error(apiErrorMessage(error, 'Не удалось отправить комментарий')),
   })
 }
 

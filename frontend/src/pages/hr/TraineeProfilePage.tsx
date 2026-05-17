@@ -24,7 +24,12 @@ import { FeedbackResponseCard } from '@/components/feedback/FeedbackResponseCard
 import { Button } from '@/components/ui/button'
 import { useStaffDashboard } from '@/hooks/useStaffDashboard'
 import { useTraineeFeedback } from '@/hooks/useFeedback'
-import { useHrTraineeDashboard, useTraineeProfile } from '@/hooks/useTrainees'
+import {
+  useApproveTraineeTask,
+  useHrTraineeDashboard,
+  useRejectTraineeTask,
+  useTraineeProfile,
+} from '@/hooks/useTrainees'
 import type { TaskProgressBlock, TraineePlanTask } from '@/types/trainee'
 import { cn } from '@/lib/utils'
 
@@ -58,7 +63,35 @@ export function TraineeProfilePage() {
   const { data: feedbackHistory = [], isLoading: feedbackLoading } =
     useTraineeFeedback(numericTraineeId)
   const { data: taskDashboard, isLoading: tasksLoading } = useHrTraineeDashboard(numericTraineeId)
+  const approveTask = useApproveTraineeTask(numericTraineeId)
+  const rejectTask = useRejectTraineeTask(numericTraineeId)
   const [selectedBlock, setSelectedBlock] = useState<TaskProgressBlock | null>(null)
+  const [activeTaskId, setActiveTaskId] = useState<number | null>(null)
+  const [activeAction, setActiveAction] = useState<
+    'approve' | 'reject' | null
+  >(null)
+
+  async function handleApprove(taskId: number) {
+    setActiveTaskId(taskId)
+    setActiveAction('approve')
+    try {
+      await approveTask.mutateAsync(taskId)
+    } finally {
+      setActiveTaskId(null)
+      setActiveAction(null)
+    }
+  }
+
+  async function handleReject(taskId: number, comment?: string) {
+    setActiveTaskId(taskId)
+    setActiveAction('reject')
+    try {
+      await rejectTask.mutateAsync({ taskId, comment })
+    } finally {
+      setActiveTaskId(null)
+      setActiveAction(null)
+    }
+  }
 
   const traineeAchievements = useMemo(() => buildTraineeAchievements(trainee), [trainee])
 
@@ -284,6 +317,9 @@ export function TraineeProfilePage() {
                   const Icon = blockIcons[block.id] ?? Building2
                   const completedCount = block.tasks.filter((t) => t.status === 'COMPLETED').length
                   const inProgressCount = block.tasks.filter((t) => t.status === 'IN_PROGRESS').length
+                  const pendingReviewCount = block.tasks.filter(
+                    (t) => t.status === 'PENDING_REVIEW'
+                  ).length
                   return (
                     <button
                       key={block.id}
@@ -304,7 +340,11 @@ export function TraineeProfilePage() {
                           <p className="mt-1 text-xs text-gray-500">
                             {block.tasks.length === 0
                               ? 'Нет задач'
-                              : `${completedCount} завершено · ${inProgressCount} в работе`}
+                              : `${completedCount} завершено · ${inProgressCount} в работе${
+                                  pendingReviewCount > 0
+                                    ? ` · ${pendingReviewCount} на проверке`
+                                    : ''
+                                }`}
                           </p>
                         </div>
                       </div>
@@ -328,7 +368,11 @@ export function TraineeProfilePage() {
             onOpenChange={(open) => {
               if (!open) setSelectedBlock(null)
             }}
-            readOnly
+            reviewMode
+            onApprove={handleApprove}
+            onReject={handleReject}
+            activeTaskId={activeTaskId}
+            activeAction={activeAction}
           />
 
           <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
