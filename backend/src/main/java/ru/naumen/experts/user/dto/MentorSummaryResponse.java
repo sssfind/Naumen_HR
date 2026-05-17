@@ -6,22 +6,18 @@ import ru.naumen.experts.user.enums.UserRole;
 
 @Data
 @Builder
-public class UserProfileResponse {
+public class MentorSummaryResponse {
 
     private Long userId;
     private String email;
     private String fullName;
     private UserRole role;
     private String department;
+    private String parentDepartmentName;
+    private String divisionName;
+    private String responsibilityZone;
     private String phone;
     private String position;
-    private String team;
     private String photoUrl;
-    private Integer moodLevel;
-    private Integer progressBlockOne;
-    private Integer progressBlockTwo;
-    private Integer progressBlockThree;
-    private Integer totalProgress;
-    private String mentorFullName;
-    private MentorSummaryResponse mentor;
+    private String team;
 }

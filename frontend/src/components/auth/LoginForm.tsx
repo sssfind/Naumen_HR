@@ -1,25 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner'
-import { useAuthLoginFooter } from '@/components/auth/AuthLoginFooterContext'
 import { parseLoginError } from '@/components/auth/authLoginErrors'
 import {
   authFieldClass,
-  authFixedLoginButtonClass,
   authFooterLinkClass,
   authLabelClass,
+  authSubmitClass,
 } from '@/components/auth/authFieldStyles'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useLogin } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
-
-export const AUTH_LOGIN_FORM_ID = 'auth-login-form'
 
 const loginSchema = z.object({
   email: z
@@ -36,7 +33,6 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [loginErrorMessage, setLoginErrorMessage] = useState<string | null>(null)
   const { mutate: login, isPending } = useLogin()
-  const { setFooter } = useAuthLoginFooter()
 
   const {
     register,
@@ -45,27 +41,6 @@ export function LoginForm() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   })
-
-  useEffect(() => {
-    setFooter(
-      <Button
-        type="submit"
-        form={AUTH_LOGIN_FORM_ID}
-        disabled={isPending}
-        className={authFixedLoginButtonClass}
-      >
-        {isPending ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Вход...
-          </>
-        ) : (
-          'Войти'
-        )}
-      </Button>
-    )
-    return () => setFooter(null)
-  }, [isPending, setFooter])
 
   const clearLoginError = () => setLoginErrorMessage(null)
 
@@ -79,7 +54,6 @@ export function LoginForm() {
 
   return (
     <form
-      id={AUTH_LOGIN_FORM_ID}
       onSubmit={handleSubmit((data) => {
         clearLoginError()
         login(data, {
@@ -140,6 +114,17 @@ export function LoginForm() {
         {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
       </div>
 
+      <Button type="submit" disabled={isPending} className={authSubmitClass}>
+        {isPending ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Вход...
+          </>
+        ) : (
+          'Войти'
+        )}
+      </Button>
+
       <p className="text-center text-sm text-[rgba(37,37,37,0.7)]">
         Нет аккаунта?{' '}
         <Link to="/register" className={authFooterLinkClass}>
@@ -149,3 +134,4 @@ export function LoginForm() {
     </form>
   )
 }
+
